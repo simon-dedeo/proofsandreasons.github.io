@@ -116,26 +116,26 @@ text_overlay = build_text_overlay(
   add_backdrop: false              # switch to false if you don’t want the semi-transparent box
 )
 
-text_overlay_2 = build_text_overlay(
-  w: bg.columns, h: bg.rows,
-  text: "Type Theory over the Island of Samos ",
-  font: "DejaVuSansMono",         # pick any installed font
-  pointsize: 16,
-  fill: "white",
-  stroke: "none", stroke_width: 0,
-  gravity: Magick::SouthEastGravity,  # North/South/Center etc.
-  margin_px: 5,
-  add_backdrop: false              # switch to false if you don’t want the semi-transparent box
-)
+# text_overlay_2 = build_text_overlay(
+#   w: bg.columns, h: bg.rows,
+#   text: "Type Theory over the Island of Samos ",
+#   font: "DejaVuSansMono",         # pick any installed font
+#   pointsize: 16,
+#   fill: "white",
+#   stroke: "none", stroke_width: 0,
+#   gravity: Magick::SouthEastGravity,  # North/South/Center etc.
+#   margin_px: 5,
+#   add_backdrop: false              # switch to false if you don’t want the semi-transparent box
+# )
 
 text_overlay_3 = build_text_overlay(
   w: bg.columns, h: bg.rows,
-  text: " supported by the John Templeton Foundation",
+  text: "supported by the John Templeton Foundation",
   font: "DejaVuSansMono",         # pick any installed font
   pointsize: 24,
   fill: "white",
   stroke: "none", stroke_width: 0,
-  gravity: Magick::SouthWestGravity,  # North/South/Center etc.
+  gravity: Magick::SouthGravity,  # North/South/Center etc.
   margin_px: 5,
   add_backdrop: false              # switch to false if you don’t want the semi-transparent box
 )
@@ -161,7 +161,7 @@ Dir.glob(overlays_glob).sort.each_with_index do |ov_path, i|
   frame = bg.copy
   frame.composite!(ov_masked, 0, 0, Magick::OverCompositeOp)
   frame.composite!(text_overlay, 0, 0, Magick::OverCompositeOp) # text on top
-  frame.composite!(text_overlay_2, -5, 0, Magick::OverCompositeOp) # text on top
+  # frame.composite!(text_overlay_2, -5, 0, Magick::OverCompositeOp) # text on top
   frame.composite!(text_overlay_3, 10, 0, Magick::OverCompositeOp) # text on top
   
   frame.delay = cs
