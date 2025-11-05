@@ -260,6 +260,8 @@
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
     font-family: sans-serif;
     line-height: 1.4;
+    max-height: 90vh;                                     /* limit height to 90% of viewport */
+      overflow-y: auto; 
   }
 
   .modal-content ul {
@@ -289,6 +291,33 @@
 </style>
 </head>
 <body>
+    
+    <div id="predoc-modal" class="modal">
+      <div class="modal-content">
+        <a href="#" class="close" aria-label="Close">&times;</a>
+        <h3>Predoctoral Fellows</h3>
+        <p>
+            Job Responsibilities.
+            <ul>
+            <li>Aid in novel scientific, mathematical, and philosophical research into the nature of mathematical understanding, under the supervision of Project Lead Simon DeDeo.
+            <li>Help publish and share this research with the wider academic community, including conducting experiments, gathering, visualizing, and analyzing data, aiding in the writing up of research for publication, and in handling referee reports.
+            <li>Work collaboratively with other members of the project, as consonant with their joint intellectual interests.
+            </ul>
+            <br>
+            
+            For full consideration, applications should be received by February 15th via the CMU Jobs Portal (Link to Follow).<br><br>This predoctoral fellowship is resident, in person, and full-time at Carnegie Mellon University in Pittsburgh, Pennsylvania, USA. The salary is $35,700/year and includes health insurance.
+            <br>
+            <br> Qualifications. Predoctoral fellows should have received, or expect to receive, a Bachelor's or Master's degree before beginning this position but should <strong>not</strong> have yet begun their Ph.D. work. Fellows should have a background, advanced undergraduate classwork, strong interests, and ideally some research experience, in one or more of the following fields: Cognitive science or Psychology, Computer Science, Mathematics, Philosophy.<br> <br>
+            To apply for this position, please submit:
+            <ul>
+            <li>A short research statement (no more than two pages, not including references; 12-point font, 1-inch margins). This statement should cover, (A) a brief summary of your research interests, prior experience, and achievements to date — this need not be tailored to this position; (B) an account of your interests in, ideas about, and potential contributions to, one or more of the themes above — this can be as referenced or as speculative as you like.
+            <li>An academic CV, including a list of between one and three people (name, e-mail, and affiliation) who can serve as academic references -- for example, your undergraduate advisor, or the supervisor for a research project you've been involved with. Your CV should include your date of graduation. 
+            <li>An academic transcript from either your Bachelor's or your Master's program.
+        </ul>
+        </p>
+      </div>
+    </div>
+
     
     <div id="info-modal" class="modal">
       <div class="modal-content">
@@ -322,7 +351,7 @@
       <div><span class="blink">We are hiring!</span></div>
       <ul>
         <li><a href="https://cmu.wd5.myworkdayjobs.com/en-US/CMU/details/Postdoctoral-Fellow---DeDeo-Lab---Dietrich-College_2023842?q=2023842">Three postdoctoral fellows</a> in cognitive science, mathematics, theoretical computer science, and philosophy.</li>
-        <li>Up to three <a href="#">predoctoral fellows</a> in the above fields, for students who have yet to begin PhD studies.</li>
+        <li>Up to three <a href="#predoc-modal">predoctoral fellows</a> in the above fields, for students who have yet to begin PhD studies.</li>
         <li>A <a href="https://www.cmu.edu/dietrich/sds/graduate/application.html">graduate fellow</a> in cognitive decision science.</li>
       </ul>
     </nav>
