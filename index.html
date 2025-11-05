@@ -20,16 +20,65 @@
 
   .container {
     width: 100%;
-    max-width: 1024px;        /* set an upper bound for desktop */
+    max-width: 1024px;        /* hard cap = intrinsic image width */
     text-align: center;
   }
 
-  img {
-    width: 100%;             /* scales down with viewport */
-    height: auto;            /* preserves aspect ratio */
+  /* Wrap just the image so overlay %s are relative to image dims, not the whole container */
+  .figure {
+    position: relative;
+    display: inline-block;
+    width: 100%;              /* scales with container */
+    line-height: 0;           /* removes gap below image */
+  }
+
+  .figure img {
+    width: 100%;              /* responsive scaling */
+    height: auto;             /* keep 1024x768 ratio */
     display: block;
-    margin: 0 auto;
     border-radius: 4px;
+  }
+
+  /* Overlay positioned using percentages from original 1024x768 pixels */
+  .overlay {
+    position: absolute;
+    /* Converted from your pixels: top 545..749, left 100..606 */
+    top: 70.96%;              /* 545 / 768 */
+    left: 9.77%;              /* 100 / 1024 */
+    width: 49.41%;            /* 506 / 1024 */
+    height: 26.56%;           /* 204 / 768 */
+
+    /* Box styling */
+    background: rgba(0,0,0,0.58);
+    backdrop-filter: blur(2px);
+    border: 1px solid rgba(255,255,255,0.18);
+    border-radius: 8px;
+    padding: 0.75em 0.9em;
+    box-sizing: border-box;
+
+    text-align: left;
+    line-height: 1.35;
+    overflow: auto;           /* if lots of links on tiny screens */
+  }
+
+  .overlay h3 {
+    margin: 0 0 0.4em 0;
+    font-size: 0.95rem;
+    color: #eee;
+    letter-spacing: 0.02em;
+  }
+
+  .overlay a {
+    color: #8cf;
+    text-decoration: none;
+  }
+  .overlay a:hover { text-decoration: underline; }
+
+  .announce {
+    margin-top: 0.5em;
+    font-size: 1.4em;
+    line-height: 1.4;
+    text-align: center;
   }
 
   .credit {
@@ -39,33 +88,39 @@
     text-align: center;
   }
 
-  .announce {
-    margin-top: 0.5em;
-    font-size: 1.4em;
-    line-height: 1.4;
-    text-align: center;
-  }
-
   a {
     color: #8cf;
     text-decoration: none;
   }
-
   a:hover {
     text-decoration: underline;
   }
 
-  /* Optional: adjust text size for very small screens */
+  /* Optional: adjust sizes for very small screens */
   @media (max-width: 480px) {
-    .credit {
-      font-size: 0.7em;
-    }
+    .overlay { font-size: 0.9em; }
+    .credit  { font-size: 0.7em; }
   }
 </style>
 
 <div class="container">
-  <img src="out.gif" alt="Type Theory over the Island of Samos">
-  <div class="announce">This project was made possible through the support of Grant 63750 from the John Templeton Foundation. The opinions expressed are those of the authors and do not necessarily reflect the views of the John Templeton Foundation.</div>
+  <div class="figure">
+    <img src="out.gif" alt="Type Theory over the Island of Samos">
+
+    <!-- Overlay links box; add whatever links you like -->
+    <nav class="overlay" aria-label="Quick links">
+      <h3>Explore</h3>
+      <div><a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a></div>
+      <div><a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a></div>
+      <div><a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">Image source</a></div>
+      <!-- More links as needed -->
+    </nav>
+  </div>
+
+  <div class="announce">
+    This project was made possible through the support of Grant 63750 from the John Templeton Foundation. The opinions expressed are those of the authors and do not necessarily reflect the views of the John Templeton Foundation.
+  </div>
+
   <div class="credit">
     Type Theory over the Island of Samos / cc by-sa/4.0 modified from
     <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a><br>
