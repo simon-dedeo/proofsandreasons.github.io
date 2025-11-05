@@ -10,19 +10,29 @@
     --card-border: rgba(255,255,255,0.18);
   }
 
+  
   html, body {
-    height: auto;
+    height: 100%;
     margin: 0;
     background: #000;
     color: #ccc;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     min-height: 100svh;      /* modern viewport unit = visible area */
-    display: block;          /* was: flex */
+    display: flex;          /* was: flex */
     flex-direction: column;
     justify-content: center;
     align-items: center;
     padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem 1rem; /* respect notch */
     box-sizing: border-box;
+  }
+  
+  @media (min-width: 901px) {
+    body {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+    }
   }
 
   .container {
