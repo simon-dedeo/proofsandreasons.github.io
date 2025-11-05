@@ -10,56 +10,59 @@
     --card-border: rgba(255,255,255,0.18);
   }
 
-  
+  /* ------ Base page ------ */
   html, body {
-    height: 100%;
     margin: 0;
     background: #000;
     color: #ccc;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    min-height: 100svh;      /* modern viewport unit = visible area */
-    display: flex;          /* was: flex */
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem 1rem; /* respect notch */
     box-sizing: border-box;
   }
-  
+
+  html { height: auto; }
+
+  body {
+    min-height: 100svh;                                   /* visible viewport height */
+    display: block;                                       /* no global flex -> no clipping */
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem 1rem;
+  }
+
+  /* Desktop-only vertical centering */
   @media (min-width: 901px) {
     body {
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
+      padding: 1rem;                                      /* safe area not needed on desktop */
     }
   }
 
   .container {
     width: 100%;
-    max-width: 1024px;        /* intrinsic image width cap */
+    max-width: 1024px;                                    /* intrinsic image width cap */
     text-align: center;
     margin: 0 auto;
     overflow: visible;
   }
 
-  /* Image wrapper */
+  /* ------ Figure & image ------ */
   .figure {
     position: relative;
     display: inline-block;
     width: 100%;
     line-height: 0;
-    overflow: visible;        /* allow overlays to extend past edges */
+    overflow: visible;                                    /* allow overlays to extend */
   }
 
   .figure img {
     width: 100%;
-    height: auto;             /* keep 1024x768 ratio */
+    height: auto;                                         /* keep 1024x768 ratio */
     display: block;
     border-radius: 4px;
   }
 
-  /* Shared overlay styling */
+  /* ------ Shared overlay cards (desktop default) ------ */
   .overlay {
     position: absolute;
     z-index: 2;
@@ -93,13 +96,12 @@
   }
   .overlay li { margin-bottom: 0.3em; }
 
-  /* === Positions (desktop) === */
+  /* Overlay positions (desktop) */
   .overlay--main {
     /* from your pixel box: top 545..749, left 100..606 */
-    top: 60.96%;             /* 545 / 768 */
+    top: 60.96%;              /* 545 / 768 */
     left: -5.77%;             /* 100 / 1024 */
-    width: 49.41%;           /* 506 / 1024 */
-    /* height auto so it expands with content */
+    width: 49.41%;            /* 506 / 1024 */
   }
 
   .overlay--right {
@@ -108,33 +110,30 @@
     width: 40%;
   }
 
-  /* Title overlay (desktop) */
+  /* ------ Title overlay (desktop) ------ */
   .title-overlay {
     position: absolute;
+    z-index: 3;
     background: var(--card-bg);
     backdrop-filter: blur(2px);
     border: 1px solid var(--card-border);
     border-radius: 8px;
     padding: 0.15em 0.15em;
     box-sizing: border-box;
-    z-index: 3;
-    top: 2%;
+
+    top: clamp(8px, 2.5%, 16px);                          /* breathing room from top */
     left: 50%;
     transform: translateX(-50%);
+
     font-size: clamp(1.4rem, 3.5vw, 3rem);
     color: #fff;
     text-align: center;
-    white-space: nowrap;     /* keep on one line unless you add <br> */
+    white-space: nowrap;                                  /* single line on desktop */
     line-height: 1.2;
-    width: max-content;      /* allow to exceed image width if needed */
+    width: max-content;                                   /* shrink-wrap text */
+    max-width: calc(100% - 16px);                         /* don’t overflow image */
   }
 
-  .title-overlay {
-    top: clamp(8px, 2.5%, 16px);      /* a touch more breathing room than 2% */
-    white-space: nowrap;              /* keep for desktop … */
-    max-width: 95%;                   /* … but don't run off-screen */
-  }
-  
   .title-overlay small {
     display: block;
     font-size: 0.6em;
@@ -142,12 +141,14 @@
     opacity: 0.85;
   }
 
-  .title-overlay a {           /* black links in title */
+  .title-overlay a {
     text-decoration: none;
-    pointer-events: auto;    /* clickable even if parent is non-interactive */
+    pointer-events: auto;
+    color: inherit;
   }
   .title-overlay a:hover { text-decoration: underline; }
 
+  /* ------ Footer bits ------ */
   .announce {
     margin-top: 0.75em;
     font-size: clamp(1rem, 2.2vw, 1.2rem);
@@ -172,54 +173,27 @@
     .blink { animation: none; }
   }
 
-  /* ======= MOBILE REFLOW ======= */
-  @media (max-width: 680px) {
-    /* Put title as a normal block above the image for readability */
-    .title-overlay {
-      position: static;
-      transform: none;
-      margin: 0 0 0.5rem 0;
-      white-space: normal;
-      width: auto;
-      text-wrap: balance;
-    }
-
-    /* Overlays become in-flow cards below the image */
-    .overlay {
-      position: static;
-      width: auto;
-      margin-top: 0.5rem;
-      overflow: visible;
-    }
-
-    /* Reset desktop-specific coordinates */
-    .overlay--main,
-    .overlay--right {
-      top: auto; right: auto; left: auto; bottom: auto;
-      width: auto;
-      transform: none;
-    }
-
-    /* Optional: make lists a tad larger on mobile */
-    .overlay { font-size: 1rem; }
-  }
+  /* ------ Mobile reflow (phones & small tablets) ------ */
   @media (max-width: 900px) {
-    html, body {
+    body {
       padding: max(12px, env(safe-area-inset-top)) 12px 16px 12px;
+      display: block;                                     /* ensure normal flow */
     }
 
-    /* Centered title block on mobile */
+    /* Centered title block as in-flow content */
     .title-overlay {
       position: static;
       transform: none;
-      margin: 0 auto 0.5rem auto;   /* auto margins center horizontally */
-      text-align: center;           /* center text inside */
-      white-space: normal;
-      width: fit-content;           /* shrink-wrap content, stay centered */
-      max-width: 95%;               /* but don’t overflow */
+      display: inline-block;                              /* shrink-wrap + center */
+      margin: 0 auto 0.5rem auto;                         /* centered */
+      text-align: center;
+      white-space: normal;                                 /* allow wrapping */
+      width: auto;
+      max-width: 95%;
       text-wrap: balance;
     }
 
+    /* Overlays become cards below the image */
     .overlay {
       position: static;
       width: auto;
@@ -241,69 +215,29 @@
       height: auto;
     }
   }
-  
-  
+
+  /* ------ Modal (hash-triggered) ------ */
   .modal {
     position: fixed;
     inset: 0;
     background: rgba(0, 0, 0, 0.65);
-    display: none;               /* hidden by default */
+    display: none;                                        /* hidden by default */
     align-items: center;
     justify-content: center;
     z-index: 999;
   }
+  .modal:target { display: flex; }                        /* show when #id matches */
 
-  /* Show when the URL fragment matches this element’s id */
-  .modal:target {
-    display: flex;
-  }
-
-  /* The modal box itself */
   .modal-content {
-    position: relative;          /* allows the close button to be positioned inside */
+    position: relative;                                   /* for the close button */
     background: #111;
     color: #ccc;
     padding: 1.5em 1.8em 1.2em 1.8em;
     border-radius: 10px;
-    width: min(90%, 480px);
+    width: min(90%, 500px);
     box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
     font-family: sans-serif;
     line-height: 1.4;
-  }
-
-  /* Close “×” inside the box */
-  .close {
-    position: absolute;
-    top: 0.4em;
-    right: 0.6em;
-    font-size: 1.5em;
-    color: #8cf;
-    text-decoration: none;
-    line-height: 1;
-  }
-
-  .close:hover {
-    color: #fff;
-  }
-
-  /* Optional: small mobile adjustment */
-  @media (max-width: 480px) {
-    .modal-content {
-      padding: 1em 1.2em;
-      font-size: 0.95em;
-    }
-  }
-  
-  /* when URL fragment matches #info-modal */
-  .modal:target { display: flex; }
-
-  .modal-content {
-    background: #111;
-    color: #ccc;
-    padding: 1.5em;
-    border-radius: 8px;
-    width: min(90%, 500px);
-    box-shadow: 0 0 20px rgba(0,0,0,0.7);
   }
 
   .modal-content ul {
@@ -320,8 +254,16 @@
     font-size: 1.5em;
     color: #8cf;
     text-decoration: none;
+    line-height: 1;
   }
   .close:hover { color: #fff; }
+
+  @media (max-width: 480px) {
+    .modal-content {
+      padding: 1em 1.2em;
+      font-size: 0.95em;
+    }
+  }
 </style>
 </head>
 <body>
@@ -369,8 +311,8 @@
       <div><span class="blink">We are hiring!</span></div>
       <ul>
         <li><a href="#">Three postdoctoral fellows</a> in cognitive science, mathematics, theoretical computer science, and philosophy.</li>
-        <li>Up to three (post-BA, pre-PhD) <a href="#">predoctoral fellows</a> in the above.</li>
-        <li>A <a href="#">graduate fellow</a> in cognitive decision science.</li>
+        <li>Up to three <a href="#">predoctoral fellows</a> in the above fields, for students who have yet to begin PhD studies.</li>
+        <li>A <a href="https://www.cmu.edu/dietrich/sds/graduate/application.html">graduate fellow</a> in cognitive decision science.</li>
       </ul>
     </nav>
 
