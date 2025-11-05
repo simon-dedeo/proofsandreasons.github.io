@@ -74,18 +74,31 @@
   }
   .overlay a:hover { text-decoration: underline; }
 
+
+  .title-overlay {
+    position: absolute;
+    top: 6%;              /* vertical position — 6% down from top of image */
+    left: 50%;            /* centered horizontally */
+    transform: translateX(-50%);
+    font-size: 2em;       /* scales with viewport */
+    font-weight: bold;
+    color: #fff;
+    text-shadow: 0 0 10px rgba(0,0,0,0.8);  /* improves contrast */
+    pointer-events: none; /* lets clicks pass through if needed */
+  }
+  
   .announce {
     margin-top: 0.5em;
     font-size: 1.2em;
     line-height: 1.0;
-    text-align: center;
+    text-align: left;
   }
 
   .credit {
     margin-top: 0.5em;
     font-size: 0.8em;
     line-height: 1.4;
-    text-align: center;
+    text-align: right;
   }
 
   a {
@@ -106,6 +119,7 @@
 <div class="container">
   <div class="figure">
     <img src="out.gif" alt="Type Theory over the Island of Samos">
+<div class="title-overlay">Proofs & Reasons at CMU</div>
 
     <!-- Overlay links box; add whatever links you like -->
     <nav class="overlay" aria-label="Quick links">

@@ -160,7 +160,7 @@ Dir.glob(overlays_glob).sort.each_with_index do |ov_path, i|
   # Compose masked overlay over an untouched COPY of the background
   frame = bg.copy
   frame.composite!(ov_masked, 0, 0, Magick::OverCompositeOp)
-  frame.composite!(text_overlay, 0, 0, Magick::OverCompositeOp) # text on top
+  # frame.composite!(text_overlay, 0, 0, Magick::OverCompositeOp) # text on top
   # frame.composite!(text_overlay_2, -5, 0, Magick::OverCompositeOp) # text on top
   # frame.composite!(text_overlay_3, 10, 0, Magick::OverCompositeOp) # text on top
   
