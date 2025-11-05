@@ -4,7 +4,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Type Theory over the Island of Samos</title>
 <style>
-  html,body {
+  html, body {
     height: 100%;
     margin: 0;
     background: #000;
@@ -14,23 +14,60 @@
     flex-direction: column;
     justify-content: center;
     align-items: center;
+    padding: 1em;
+    box-sizing: border-box;
   }
+
+  .container {
+    width: 100%;
+    max-width: 700px;        /* set an upper bound for desktop */
+    text-align: center;
+  }
+
   img {
-    max-width: 100%;
-    height: auto;
+    width: 100%;             /* scales down with viewport */
+    height: auto;            /* preserves aspect ratio */
+    display: block;
+    margin: 0 auto;
+    border-radius: 4px;
   }
+
   .credit {
     margin-top: 0.5em;
     font-size: 0.8em;
-    text-align: center;
+    line-height: 1.4;
+    text-align: left;
   }
-  a { color: #8cf; text-decoration: none; }
-  a:hover { text-decoration: underline; }
+
+  a {
+    color: #8cf;
+    text-decoration: none;
+  }
+
+  a:hover {
+    text-decoration: underline;
+  }
+
+  /* Optional: adjust text size for very small screens */
+  @media (max-width: 480px) {
+    .credit {
+      font-size: 0.7em;
+    }
+  }
 </style>
 
-<img src="out.gif" alt="Type Theory over the Island of Samos">
-<div class="credit">
-  Type Theory over the Island of Samos / cc by-sa/4.0 modified from <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a><br>
-  The Island of Samos was the birthplace of <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>, the founder of a mystic cult, at the nexus of trade between the Greek Agean and the Near East, in which the logical simplicity of mathematical proof was taken as a basis for making sense of the universe as a whole. <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a>, in its modern form, is the engine beneath modern-day A.I. systems which are rapidly approaching, and even exceeding, humans in their ability to establish mathematical truths.
+<div class="container">
+  <img src="out.gif" alt="Type Theory over the Island of Samos">
+  <div class="credit">
+    Type Theory over the Island of Samos / cc by-sa/4.0 modified from
+    <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a><br>
+    The Island of Samos was the birthplace of
+    <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>,
+    the founder of a mystic cult, at the nexus of trade between the Greek Aegean and the Near East,
+    in which the logical simplicity of mathematical proof was taken as a basis for making sense of the universe as a whole.
+    <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a>,
+    in its modern form, is the engine beneath modern-day A.I. systems which are rapidly approaching,
+    and even exceeding, humans in their ability to establish mathematical truths.
+  </div>
 </div>
 </html>
