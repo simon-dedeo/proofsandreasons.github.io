@@ -1,15 +1,21 @@
 <!doctype html>
 <html lang="en">
+<head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>Type Theory over the Island of Samos</title>
 <style>
+  :root{
+    --card-bg: rgba(0,0,0,0.58);
+    --card-border: rgba(255,255,255,0.18);
+  }
+
   html, body {
     height: 100%;
     margin: 0;
     background: #000;
     color: #ccc;
-    font-family: sans-serif;
+    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
     display: flex;
     flex-direction: column;
     justify-content: center;
@@ -20,134 +26,212 @@
 
   .container {
     width: 100%;
-    max-width: 1024px;        /* hard cap = intrinsic image width */
+    max-width: 1024px;        /* intrinsic image width cap */
     text-align: center;
   }
 
-  /* Wrap just the image so overlay %s are relative to image dims, not the whole container */
+  /* Image wrapper */
   .figure {
     position: relative;
     display: inline-block;
-    width: 100%;              /* scales with container */
-    line-height: 0;           /* removes gap below image */
+    width: 100%;
+    line-height: 0;
+    overflow: visible;        /* allow overlays to extend past edges */
   }
 
   .figure img {
-    width: 100%;              /* responsive scaling */
+    width: 100%;
     height: auto;             /* keep 1024x768 ratio */
     display: block;
     border-radius: 4px;
   }
 
-  /* Overlay positioned using percentages from original 1024x768 pixels */
+  /* Shared overlay styling */
   .overlay {
     position: absolute;
-    /* Converted from your pixels: top 545..749, left 100..606 */
-    top: 70.96%;              /* 545 / 768 */
-    left: 9.77%;              /* 100 / 1024 */
-    width: 49.41%;            /* 506 / 1024 */
-    height: 26.56%;           /* 204 / 768 */
-
-    /* Box styling */
-    background: rgba(0,0,0,0.58);
+    z-index: 2;
+    background: var(--card-bg);
     backdrop-filter: blur(2px);
-    border: 1px solid rgba(255,255,255,0.18);
+    border: 1px solid var(--card-border);
     border-radius: 8px;
     padding: 0.75em 0.9em;
     box-sizing: border-box;
-
     text-align: left;
     line-height: 1.35;
-    overflow: auto;           /* if lots of links on tiny screens */
+    overflow: auto;
+    font-size: clamp(0.9rem, 1.2vw, 1.05rem);
   }
 
   .overlay h3 {
-    margin: 0 0 0.4em 0;
-    font-size: 0.95rem;
+    margin: 0 0 0.5em 0;
+    font-size: 1.1em;
     color: #eee;
     letter-spacing: 0.02em;
   }
 
-  .overlay a {
-    color: #8cf;
-    text-decoration: none;
-  }
+  .overlay a { color: #8cf; text-decoration: none; }
   .overlay a:hover { text-decoration: underline; }
 
+  .overlay ul {
+    margin: 0.4em 0 0.4em 1.2em;
+    padding: 0;
+    list-style-type: disc;
+  }
+  .overlay li { margin-bottom: 0.3em; }
 
+  /* === Positions (desktop) === */
+  .overlay--main {
+    /* from your pixel box: top 545..749, left 100..606 */
+    top: 60.96%;             /* 545 / 768 */
+    left: -5.77%;             /* 100 / 1024 */
+    width: 49.41%;           /* 506 / 1024 */
+    /* height auto so it expands with content */
+  }
+
+  .overlay--right {
+    top: 50%;
+    right: 5%;
+    width: 40%;
+  }
+
+  /* Title overlay (desktop) */
   .title-overlay {
     position: absolute;
-    top: 6%;              /* vertical position — 6% down from top of image */
-    left: 50%;            /* centered horizontally */
+    background: var(--card-bg);
+    backdrop-filter: blur(2px);
+    border: 1px solid var(--card-border);
+    border-radius: 8px;
+    padding: 0.15em 0.15em;
+    box-sizing: border-box;
+    z-index: 3;
+    top: 2%;
+    left: 50%;
     transform: translateX(-50%);
-    font-size: 2em;       /* scales with viewport */
-    font-weight: bold;
+    font-size: clamp(1.4rem, 3.5vw, 3rem);
     color: #fff;
-    text-shadow: 0 0 10px rgba(0,0,0,0.8);  /* improves contrast */
-    pointer-events: none; /* lets clicks pass through if needed */
+    text-align: center;
+    white-space: nowrap;     /* keep on one line unless you add <br> */
+    line-height: 1.2;
+    width: max-content;      /* allow to exceed image width if needed */
   }
-  
+
+  .title-overlay small {
+    display: block;
+    font-size: 0.6em;
+    font-weight: normal;
+    opacity: 0.85;
+  }
+
+  .title-overlay a {           /* black links in title */
+    text-decoration: none;
+    pointer-events: auto;    /* clickable even if parent is non-interactive */
+  }
+  .title-overlay a:hover { text-decoration: underline; }
+
   .announce {
-    margin-top: 0.5em;
-    font-size: 1.2em;
-    line-height: 1.0;
-    text-align: left;
+    margin-top: 0.75em;
+    font-size: clamp(1rem, 2.2vw, 1.2rem);
+    line-height: 1.05;
+    text-align: center;
   }
 
   .credit {
-    margin-top: 0.5em;
-    font-size: 0.8em;
+    margin-top: 0.6em;
+    font-size: clamp(0.75rem, 1.6vw, 0.9rem);
     line-height: 1.4;
-    text-align: right;
+    text-align: center;
   }
 
-  a {
-    color: #8cf;
-    text-decoration: none;
-  }
-  a:hover {
-    text-decoration: underline;
+  a { color: #8cf; text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  /* Blink with motion preference */
+  .blink { animation: blink 2s ease-in-out infinite; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
+  @media (prefers-reduced-motion: reduce){
+    .blink { animation: none; }
   }
 
-  /* Optional: adjust sizes for very small screens */
-  @media (max-width: 480px) {
-    .overlay { font-size: 0.9em; }
-    .credit  { font-size: 0.7em; }
+  /* ======= MOBILE REFLOW ======= */
+  @media (max-width: 680px) {
+    /* Put title as a normal block above the image for readability */
+    .title-overlay {
+      position: static;
+      transform: none;
+      margin: 0 0 0.5rem 0;
+      white-space: normal;
+      width: auto;
+      text-wrap: balance;
+    }
+
+    /* Overlays become in-flow cards below the image */
+    .overlay {
+      position: static;
+      width: auto;
+      margin-top: 0.5rem;
+      overflow: visible;
+    }
+
+    /* Reset desktop-specific coordinates */
+    .overlay--main,
+    .overlay--right {
+      top: auto; right: auto; left: auto; bottom: auto;
+      width: auto;
+      transform: none;
+    }
+
+    /* Optional: make lists a tad larger on mobile */
+    .overlay { font-size: 1rem; }
   }
 </style>
+</head>
+<body>
+  <div class="container">
+    <div class="figure">
+      <!-- Title overlay (desktop) / normal block (mobile via media query) -->
+      <div class="title-overlay">
+        Proofs &amp; Reasons @ CMU<br>
+        <small>Project Leader <a href="https://sites.santafe.edu/~simon/">Simon DeDeo</a></small>
+        <small>Project Start Date: 1 February 2026</small>
+      </div>
 
-<div class="container">
-  <div class="figure">
-    <img src="out.gif" alt="Type Theory over the Island of Samos">
-<div class="title-overlay">Proofs & Reasons at CMU</div>
+      <img src="out.gif" alt="Type Theory over the Island of Samos / StrongBad Says Animated Gifs">
 
-    <!-- Overlay links box; add whatever links you like -->
-    <nav class="overlay" aria-label="Quick links">
-      <h3>Research Themes</h3>
-      Proofs in Practice: the cognitive science of how humans discover and make sense of mathematical proofs, both as individuals and collectives. How do people prove things?<br>
-      Theme Two: Transcendental Structures: the formal study of mathematical proof itself, as a subject in computational complexity, type theory, metamathematics, logic, and beyond. What is the space of mathematical truth, and what proofs are there to be discovered?<br>
-      Theme Three: Cyborg Proofs: the use of artificial intelligence in both discovering and verifying mathematical proofs, with and without human aid. What kinds of tools can we build, and how will they alter the nature of mathematics?<br>
-      <h3>Job Opportunities</h3>
-      <div><a href="https://en.wikipedia.org/wiki/Pythagoras">Three postdoctoral fellows</a><br>, and up to three <a href="https://en.wikipedia.org/wiki/Pythagoras">predoctoral fellows</a>, in cognitive science, mathematics, theoretical computer science, and philosophy.<br>
-      A <a href="https://en.wikipedia.org/wiki/Pythagoras"> graduate fellow</a> in cognitive decision science.<br>
-  </div>
+      <!-- Overlay links box -->
+      <nav class="overlay overlay--main" aria-label="Research Themes">
+        <h3>Research Themes</h3>
+        <ul>
+          <li><strong>Proofs in Practice</strong>: the cognitive science of how humans discover and make sense of mathematical proofs. How do we prove things?</li>
+          <li><strong>Transcendental Structures</strong>: the formal study of mathematical proof itself (complexity, type theory, metamathematics, logic). What is the space of mathematical truth?</li>
+          <li><strong>Cyborg Proofs</strong>: the use of AI to discover and verify proofs, with and without human aid. What tools can we build, and how will they alter mathematics?</li>
+        </ul>
+      </nav>
+    </div>
+
+    <!-- Second overlay: desktop = over image; mobile = card below -->
+    <nav class="overlay overlay--right" aria-label="Job Opportunities">
+      <h3>Job Opportunities at Proofs &amp; Reasons</h3>
+      <div><span class="blink">We are hiring!</span></div>
+      <ul>
+        <li><a href="#">Three postdoctoral fellows</a> in cognitive science, mathematics, theoretical computer science, and philosophy.</li>
+        <li>Up to three <a href="#">predoctoral fellows</a> in the above fields.</li>
+        <li>A <a href="#">graduate fellow</a> in cognitive decision science.</li>
+      </ul>
     </nav>
-  </div>
 
-  <div class="announce">
-    This project was made possible through the support of Grant 63750, "Explaining Universal Truths", from the John Templeton Foundation.
-  </div>
+    <div class="announce">
+      This project is made possible through the support of Grant 63750, “Explaining Universal Truths”, from the John Templeton Foundation.
+    </div>
 
-  <div class="credit">
-    Type Theory over the Island of Samos / cc by-sa/4.0 modified from
-    <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a><br>
-    The Island of Samos was the birthplace of
-    <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>,
-    the founder of a mystic cult, at the nexus of trade between the Greek Aegean and the Near East,
-    in which the logical simplicity of mathematical proof was taken as a basis for making sense of the universe as a whole.
-    <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a>,
-    in its modern form, is the engine beneath modern-day A.I. systems which are rapidly approaching,
-    and even exceeding, humans in their ability to establish mathematical truths.
+    <div class="credit">
+      Image: Type Theory over the Island of Samos / cc by-sa/4.0, modified from
+      <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a>.
+      The Island of Samos was the birthplace of
+      <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a> at the nexus of trade between the Greek Aegean and the Near East,
+      in which the logical simplicity of mathematical proof was taken as a basis for making sense of the universe as a whole.
+      <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a>, in its modern form, is an engine beneath modern A.I. systems.<br>
+      <small>* The opinions expressed in this publication are those of the researchers and do not necessarily reflect the views of the John Templeton Foundation.</small>
+    </div>
   </div>
-</div>
+</body>
 </html>
