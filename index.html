@@ -187,13 +187,54 @@
   .modal {
     position: fixed;
     inset: 0;
-    background: rgba(0,0,0,0.65);
+    background: rgba(0, 0, 0, 0.65);
     display: none;               /* hidden by default */
     align-items: center;
     justify-content: center;
     z-index: 999;
   }
 
+  /* Show when the URL fragment matches this element’s id */
+  .modal:target {
+    display: flex;
+  }
+
+  /* The modal box itself */
+  .modal-content {
+    position: relative;          /* allows the close button to be positioned inside */
+    background: #111;
+    color: #ccc;
+    padding: 1.5em 1.8em 1.2em 1.8em;
+    border-radius: 10px;
+    width: min(90%, 480px);
+    box-shadow: 0 0 25px rgba(0, 0, 0, 0.7);
+    font-family: sans-serif;
+    line-height: 1.4;
+  }
+
+  /* Close “×” inside the box */
+  .close {
+    position: absolute;
+    top: 0.4em;
+    right: 0.6em;
+    font-size: 1.5em;
+    color: #8cf;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  .close:hover {
+    color: #fff;
+  }
+
+  /* Optional: small mobile adjustment */
+  @media (max-width: 480px) {
+    .modal-content {
+      padding: 1em 1.2em;
+      font-size: 0.95em;
+    }
+  }
+  
   /* when URL fragment matches #info-modal */
   .modal:target { display: flex; }
 
@@ -269,7 +310,7 @@
       <div><span class="blink">We are hiring!</span></div>
       <ul>
         <li><a href="#">Three postdoctoral fellows</a> in cognitive science, mathematics, theoretical computer science, and philosophy.</li>
-        <li>Up to three <a href="#">predoctoral fellows</a> in the above fields.</li>
+        <li>Up to three (post-BA, pre-PhD) <a href="#">predoctoral fellows</a> in the above.</li>
         <li>A <a href="#">graduate fellow</a> in cognitive decision science.</li>
       </ul>
     </nav>
