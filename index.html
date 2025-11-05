@@ -204,17 +204,19 @@
     .overlay { font-size: 1rem; }
   }
   @media (max-width: 900px) {
-    /* normal document flow; no vertical centering */
     html, body {
       padding: max(12px, env(safe-area-inset-top)) 12px 16px 12px;
     }
 
+    /* Centered title block on mobile */
     .title-overlay {
       position: static;
       transform: none;
-      margin: 0 0 0.5rem 0;
-      white-space: normal;     /* allow wrap on small screens */
-      width: auto;
+      margin: 0 auto 0.5rem auto;   /* auto margins center horizontally */
+      text-align: center;           /* center text inside */
+      white-space: normal;
+      width: fit-content;           /* shrink-wrap content, stay centered */
+      max-width: 95%;               /* but don’t overflow */
       text-wrap: balance;
     }
 
@@ -233,14 +235,12 @@
       transform: none;
     }
 
-    /* image: make sure it scales cleanly with rounded corners visible */
     .figure img {
       display: block;
       width: 100%;
       height: auto;
     }
   }
-  
   
   
   .modal {
