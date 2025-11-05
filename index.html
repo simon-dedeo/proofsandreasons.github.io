@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>Type Theory over the Island of Samos</title>
+<title>Proofs & Reasons @ CMU</title>
 <style>
   :root{
     --card-bg: rgba(0,0,0,0.58);
@@ -183,15 +183,70 @@
     /* Optional: make lists a tad larger on mobile */
     .overlay { font-size: 1rem; }
   }
+  
+  .modal {
+    position: fixed;
+    inset: 0;
+    background: rgba(0,0,0,0.65);
+    display: none;               /* hidden by default */
+    align-items: center;
+    justify-content: center;
+    z-index: 999;
+  }
+
+  /* when URL fragment matches #info-modal */
+  .modal:target { display: flex; }
+
+  .modal-content {
+    background: #111;
+    color: #ccc;
+    padding: 1.5em;
+    border-radius: 8px;
+    width: min(90%, 500px);
+    box-shadow: 0 0 20px rgba(0,0,0,0.7);
+  }
+
+  .modal-content ul {
+    margin: 0.4em 0 0.4em 1.2em;
+    padding: 0;
+    list-style-type: disc;
+  }
+  .modal-content li { margin-bottom: 0.5em; }
+
+  .close {
+    position: absolute;
+    top: 0.5em;
+    right: 0.75em;
+    font-size: 1.5em;
+    color: #8cf;
+    text-decoration: none;
+  }
+  .close:hover { color: #fff; }
 </style>
 </head>
 <body>
+    
+    <div id="info-modal" class="modal">
+      <div class="modal-content">
+        <a href="#" class="close" aria-label="Close">&times;</a>
+        <h3>Board of Advisors</h3>
+        <p>
+            <ul>
+            <li><strong>Mathematics</strong>: <a href="https://www.ias.edu/math/people/faculty/venkatesh">Akshay Venkatesh</a> (Institute for Advanced Study, Princeton), <a href="https://www.math.columbia.edu/~harris/website/">Michael Harris</a> (Columbia University), <a href="http://simonrs.com">Simon Rubinstein-Salzedo</a> (The Euler Circle)
+            <li><strong>Computer science</strong>: <a href="https://randall.math.gatech.edu">Dana Randall</a> (Georgia Tech), <a href="https://www.scottaaronson.com">Scott Aaronson</a> (UT Austin)
+            <li><strong>Cognitive Science</strong>: <a href="http://www.wheatlab.com/people">Thalia Wheatley</a> (Dartmouth College), <a href="https://www.tylermarghetis.com">Tyler Marghetis</a> (UC Merced), <a href="https://ccurto.github.io">Carina Curto</a> (Brown University)
+            <li><strong>Philosophy</strong>: <a href="https://www.edouardmachery.com">Edouard Machery</a> (University of Pittsburgh), <a href="https://philosophy.utoronto.ca/directory/nick-stang/">Nick Stang</a> (University of Toronto), <a href="https://philosophy.jhu.edu/directory/sean-carroll/">Sean Carroll</a> (Johns Hopkins University)
+        </ul>
+        </p>
+      </div>
+    </div>
+    
   <div class="container">
     <div class="figure">
       <!-- Title overlay (desktop) / normal block (mobile via media query) -->
       <div class="title-overlay">
         Proofs &amp; Reasons @ CMU<br>
-        <small>Project Leader <a href="https://sites.santafe.edu/~simon/">Simon DeDeo</a></small>
+        <small>Project Leader <a href="https://sites.santafe.edu/~simon/">Simon DeDeo</a> / <a href="#info-modal">Board of Advisors</a></small>
         <small>Project Start Date: 1 February 2026</small>
       </div>
 
