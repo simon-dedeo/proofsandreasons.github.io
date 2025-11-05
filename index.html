@@ -11,16 +11,17 @@
   }
 
   html, body {
-    height: 100%;
+    height: auto;
     margin: 0;
     background: #000;
     color: #ccc;
     font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    display: flex;
+    min-height: 100svh;      /* modern viewport unit = visible area */
+    display: block;          /* was: flex */
     flex-direction: column;
     justify-content: center;
     align-items: center;
-    padding: 1em;
+    padding: max(1rem, env(safe-area-inset-top)) 1rem 1rem 1rem; /* respect notch */
     box-sizing: border-box;
   }
 
@@ -28,6 +29,8 @@
     width: 100%;
     max-width: 1024px;        /* intrinsic image width cap */
     text-align: center;
+    margin: 0 auto;
+    overflow: visible;
   }
 
   /* Image wrapper */
@@ -67,6 +70,7 @@
     font-size: 1.1em;
     color: #eee;
     letter-spacing: 0.02em;
+    overflow: visible;
   }
 
   .overlay a { color: #8cf; text-decoration: none; }
@@ -115,6 +119,12 @@
     width: max-content;      /* allow to exceed image width if needed */
   }
 
+  .title-overlay {
+    top: clamp(8px, 2.5%, 16px);      /* a touch more breathing room than 2% */
+    white-space: nowrap;              /* keep for desktop … */
+    max-width: 95%;                   /* … but don't run off-screen */
+  }
+  
   .title-overlay small {
     display: block;
     font-size: 0.6em;
@@ -183,6 +193,45 @@
     /* Optional: make lists a tad larger on mobile */
     .overlay { font-size: 1rem; }
   }
+  @media (max-width: 900px) {
+    /* normal document flow; no vertical centering */
+    html, body {
+      padding: max(12px, env(safe-area-inset-top)) 12px 16px 12px;
+    }
+
+    .title-overlay {
+      position: static;
+      transform: none;
+      margin: 0 0 0.5rem 0;
+      white-space: normal;     /* allow wrap on small screens */
+      width: auto;
+      text-wrap: balance;
+    }
+
+    .overlay {
+      position: static;
+      width: auto;
+      margin-top: 0.5rem;
+      overflow: visible;
+      font-size: 1rem;
+    }
+
+    .overlay--main,
+    .overlay--right {
+      top: auto; right: auto; left: auto; bottom: auto;
+      width: auto;
+      transform: none;
+    }
+
+    /* image: make sure it scales cleanly with rounded corners visible */
+    .figure img {
+      display: block;
+      width: 100%;
+      height: auto;
+    }
+  }
+  
+  
   
   .modal {
     position: fixed;
@@ -323,7 +372,7 @@
       Image: Type Theory over the Island of Samos / cc by-sa/4.0, modified from
       <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a>.
       The Island of Samos, a nexus of trade between the Greek Aegean and the Near East, was the birthplace of the philosopher
-      <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>, for whom the logical simplicity of mathematical proof was the sense-making principle of universe as a whole.
+      <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>, for whom the logical simplicity of mathematical proof was the sense-making principle of universe.
       <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a> is the engine beneath modern A.I. systems that can frame, and prove, theorems of human mathematics.<br>
       <small>* The opinions expressed in this publication are those of the researchers and do not necessarily reflect the views of the John Templeton Foundation.</small>
     </div>
