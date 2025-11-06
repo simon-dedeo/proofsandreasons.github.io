@@ -12,7 +12,7 @@ bg_path         = '/Users/simon/Desktop/PROOFS/Samos_town.png'
 overlays_glob   = 'rain_loop_frames/frame_*.png'
 mask_path       = 'rain_loop_mask_frames/overlay_001_mask.png'  # or compute per-frame
 output_gif_path = 'out.gif'
-frame_delay_ms  = 100
+frame_delay_ms  = 200
 invert_mask     = false   # <- set to TRUE if your exported mask is white-over-background / black-over-rain
 
 def read1(p) = Magick::Image.read(p).first
