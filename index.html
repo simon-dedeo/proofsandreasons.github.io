@@ -397,11 +397,17 @@
     </div>
 
   <figure style="max-width: 600px; margin: 2rem auto; text-align: center;">
-    <img
+    <img id="proofs-img"
       src="https://sites.santafe.edu/~simon/proofs.jpg"
       alt="Image Livestream"
       style="max-width: 100%; height: auto; border: 3px solid white; box-shadow: 0 2px 8px rgba(0,0,0,0.15);"
     />
+    <script>
+      setInterval(() => {
+        const img = document.getElementById('proofs-img');
+        img.src = 'https://sites.santafe.edu/~simon/proofs.jpg?' + Date.now();
+      }, 5 * 60 * 1000);
+    </script>
     <figcaption>
       <div class="credit">Current view from Proofs and Reasons, Pittsburgh / updated every five minutes</div>
     </figcaption>
