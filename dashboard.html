@@ -1,0 +1,183 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>CMU Courtyard Monitor · Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="CMU Courtyard Monitor">
+<meta property="og:description" content="A live view over the CMU courtyard with Pittsburgh weather, from the Laboratory for Social Minds.">
+<meta property="og:url" content="https://proofsandreasons.io/dashboard.html">
+<meta property="og:image" content="https://sites.santafe.edu/~simon/courtyard.jpg">
+<meta name="twitter:card" content="summary_large_image">
+<link rel="canonical" href="https://proofsandreasons.io/dashboard.html">
+<meta name="theme-color" content="#0b0d12">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577; --amber:#ffb64a; --sky:#66cdff; --good:#63d68f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html,body{height:100%}
+  body{background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh}
+  .frame{min-height:100vh;display:grid;grid-template-columns:1.55fr 1fr;grid-template-rows:auto 1fr auto;gap:18px;padding:22px}
+  header{grid-column:1/3;display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap}
+  .clock{font-weight:700;font-size:5.4vw;line-height:.92;letter-spacing:-.025em;font-variant-numeric:tabular-nums}
+  .clock .sec{color:var(--amber);font-size:.4em;vertical-align:.3em;margin-left:.12em}
+  .rt{text-align:right}
+  .rt .d{font-size:1.5vw;font-weight:600}
+  .rt .loc{color:var(--dim);font-size:1.02vw;margin-top:3px}
+  .rt .proj{color:var(--amber);font-size:.82vw;margin-top:7px;letter-spacing:.16em;font-family:var(--mono)}
+  .hero{grid-column:1;grid-row:2;position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);min-height:40vh}
+  .hero>img{width:100%;height:100%;object-fit:cover;display:block}
+  .hero .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 20px;font-size:.92vw;
+    background:linear-gradient(to top,rgba(0,0,0,.78),transparent);display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono)}
+  .hero .cap .age{color:var(--sky)}
+  .sky{position:absolute;top:16px;right:16px;width:30%;aspect-ratio:16/9;border-radius:13px;overflow:hidden;border:2px solid rgba(255,255,255,.22);box-shadow:var(--shadow)}
+  .sky img{width:100%;height:100%;object-fit:cover}
+  .sky .tag{position:absolute;bottom:0;left:0;right:0;font-size:.64vw;text-align:center;padding:3px;background:rgba(0,0,0,.6);color:var(--dim);letter-spacing:.14em;font-family:var(--mono)}
+  aside{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:16px;min-height:0}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
+  .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.68vw;margin-bottom:11px;font-weight:700;font-family:var(--mono)}
+  .now{display:flex;align-items:center;gap:18px}
+  .now .temp{font-size:4.6vw;font-weight:700;line-height:.86;font-variant-numeric:tabular-nums;letter-spacing:-.03em}
+  .now .desc{font-size:1.3vw;font-weight:600}
+  .now .sub{color:var(--dim);font-size:.9vw;margin-top:7px;line-height:1.6}
+  .now .sub b{color:var(--ink);font-weight:600}
+  .hourly{display:flex}
+  .hourly .h{flex:1;text-align:center;border-right:1px solid var(--line)}
+  .hourly .h:last-child{border-right:0}
+  .hourly .t{color:var(--dim);font-size:.68vw;font-family:var(--mono)}
+  .hourly .tp{font-weight:700;font-size:1.1vw;margin:4px 0;font-variant-numeric:tabular-nums}
+  .hourly .p{color:var(--sky);font-size:.62vw;height:.9em;font-family:var(--mono)}
+  .sun{display:grid;grid-template-columns:1fr 1fr;gap:9px 20px}
+  .sun .row{display:flex;justify-content:space-between;font-size:.92vw}
+  .sun .row .k{color:var(--dim)} .sun .row .v{font-weight:600;font-variant-numeric:tabular-nums;font-family:var(--mono)}
+  .arc{grid-column:1/3;height:6px;border-radius:3px;background:var(--line);position:relative;margin-top:4px}
+  .arc .fill{position:absolute;inset:0 auto 0 0;background:linear-gradient(90deg,var(--amber),var(--sky));border-radius:3px}
+  .arc .dot{position:absolute;top:50%;width:13px;height:13px;border-radius:50%;background:#fff;transform:translate(-50%,-50%);box-shadow:0 0 12px var(--amber)}
+  .fc .row{font-size:.9vw;line-height:1.75} .fc .row b{color:var(--ink)} .fc .row .m{color:var(--dimmer);font-family:var(--mono);font-size:.8vw}
+  footer{grid-column:1/3;grid-row:3;display:flex;justify-content:space-between;align-items:center;color:var(--dimmer);font-size:.76vw;border-top:1px solid var(--line);padding-top:11px;font-family:var(--mono);flex-wrap:wrap;gap:8px}
+  footer a{color:var(--sky);text-decoration:none} footer b{color:var(--dim)}
+  .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:7px;box-shadow:0 0 9px var(--good);animation:pulse 2.4s ease-in-out infinite}
+  .stale{background:var(--amber)!important;box-shadow:0 0 9px var(--amber)!important}
+  @keyframes pulse{50%{opacity:.35}} @media (prefers-reduced-motion:reduce){.live{animation:none}}
+  @media (max-width:820px){
+    .frame{grid-template-columns:1fr;grid-template-rows:auto auto auto auto}
+    .hero{grid-column:1;grid-row:2} aside{grid-column:1;grid-row:3} footer{grid-column:1;grid-row:4}
+    .clock{font-size:16vw} .rt .d{font-size:5vw} .rt .loc{font-size:3.4vw} .rt .proj{font-size:3vw}
+    .now .temp{font-size:15vw} .now .desc{font-size:4.4vw} .now .sub{font-size:3vw}
+    .h5{font-size:2.6vw} .hourly .t,.hourly .p{font-size:2.4vw} .hourly .tp{font-size:4vw}
+    .sun .row{font-size:3.2vw} .fc .row{font-size:3.2vw} footer{font-size:2.8vw}
+    .hero .cap{font-size:3vw} .sky .tag{font-size:2.2vw}
+  }
+</style>
+</head>
+<body>
+<div class="frame">
+  <header>
+    <div class="clock" id="clock">--:--<span class="sec" id="sec">00</span></div>
+    <div class="rt">
+      <div class="d" id="date">—</div>
+      <div class="loc" id="loc">Carnegie Mellon University · Pittsburgh, PA</div>
+      <div class="proj" id="proj"></div>
+    </div>
+  </header>
+  <div class="hero">
+    <img id="heroImg" alt="CMU courtyard">
+    <div class="sky"><img id="skyImg" alt="Pittsburgh sky"><div class="tag">SKYLINE CAM</div></div>
+    <div class="cap"><span id="heroCap">Courtyard</span><span class="age" id="heroAge"></span></div>
+  </div>
+  <aside>
+    <div class="card"><div class="now">
+      <div class="temp" id="nowTemp">--°</div>
+      <div><div class="desc" id="nowDesc">—</div><div class="sub" id="nowSub"></div></div>
+    </div></div>
+    <div class="card"><div class="h5">Next hours</div><div class="hourly" id="hourly"></div></div>
+    <div class="card"><div class="h5">Sun &amp; golden hour · today</div><div class="sun" id="sun"></div></div>
+    <div class="card fc" style="flex:1"><div class="h5">Forecast</div><div id="fc"></div></div>
+  </aside>
+  <footer>
+    <div><span class="live" id="live"></span><span id="fresh">connecting…</span></div>
+    <div id="sys"></div>
+    <div><a href="https://sites.santafe.edu/~simon/gallery.html">recent frames ↗</a> · <a href="https://proofsandreasons.io/">proofsandreasons.io</a></div>
+  </footer>
+</div>
+<script>
+const SANTAFE = "https://sites.santafe.edu/~simon/";
+const $=s=>document.querySelector(s), pad=n=>String(n).padStart(2,'0');
+
+function tick(){
+  const d=new Date();
+  $('#clock').firstChild.nodeValue=`${pad(d.getHours())}:${pad(d.getMinutes())}`;
+  $('#sec').textContent=pad(d.getSeconds());
+  $('#date').textContent=d.toLocaleDateString([],{weekday:'long',month:'long',day:'numeric'});
+}
+setInterval(tick,1000);tick();
+
+const fmtT=iso=>iso?new Date(iso).toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'—';
+function ago(iso){ if(!iso)return ''; const s=(Date.now()-new Date(iso))/1000;
+  if(s<90)return 'just now'; if(s<3600)return Math.round(s/60)+' min ago'; return Math.round(s/3600)+' h ago'; }
+
+// Load window.MONITOR_DATA cross-origin via <script> (santafe sends no CORS header,
+// so fetch() is blocked; a script tag is not CORS-restricted).
+function loadData(){
+  const s=document.createElement('script');
+  s.src=SANTAFE+'data.js?_='+Date.now();
+  s.onload=()=>{ if(window.MONITOR_DATA) render(window.MONITOR_DATA); s.remove(); };
+  s.onerror=()=>{ $('#fresh').textContent='cannot reach monitor'; s.remove(); };
+  document.head.appendChild(s);
+}
+function refreshImages(){
+  const b='?_='+Date.now();
+  $('#heroImg').src=SANTAFE+'courtyard.jpg'+b;
+  $('#skyImg').src=SANTAFE+'sky.jpg'+b;
+}
+
+function render(d){
+  const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};
+  if(d.location)$('#loc').textContent=d.location;
+  if(sys.project_day!=null)$('#proj').textContent='TIMELAPSE · DAY '+sys.project_day;
+  $('#nowTemp').textContent=(c.tempF!=null?c.tempF:'--')+'°';
+  $('#nowDesc').textContent=c.text||'—';
+  const b=[];
+  if(c.feelsF!=null)b.push(`Feels <b>${c.feelsF}°</b>`);
+  if(c.humidity!=null)b.push(`Humidity <b>${c.humidity}%</b>`);
+  if(c.windMph!=null)b.push(`Wind <b>${c.windMph} mph${c.windDir?' '+c.windDir:''}</b>`);
+  if(c.dewF!=null)b.push(`Dew <b>${c.dewF}°</b>`);
+  if(c.cloud!=null)b.push(`Cloud <b>${c.cloud}%</b>`);
+  $('#nowSub').innerHTML=b.join(' &nbsp;·&nbsp; ');
+  $('#hourly').innerHTML=(w.hourly||[]).slice(0,9).map(h=>{
+    const t=new Date(h.time).toLocaleTimeString([],{hour:'numeric'});
+    return `<div class="h"><div class="t">${t}</div><div class="tp">${h.temp}°</div><div class="p">${h.pop?h.pop+'%':''}</div></div>`;}).join('');
+  const rows=[['Sunrise',s.sunrise],['Sunset',s.sunset],['Golden AM',s.golden_morning_mid],['Golden PM',s.golden_evening_mid]];
+  let html=rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${fmtT(v)}</span></div>`).join('');
+  if(s.sunrise&&s.sunset){const sr=+new Date(s.sunrise),ss=+new Date(s.sunset);let f=Math.max(0,Math.min(1,(Date.now()-sr)/(ss-sr)))*100;
+    html+=`<div class="arc"><div class="fill" style="width:${f.toFixed(1)}%"></div><div class="dot" style="left:${f.toFixed(1)}%"></div></div>`;}
+  $('#sun').innerHTML=html;
+  $('#fc').innerHTML=(w.forecast||[]).slice(0,5).map(p=>
+    `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
+  if(d.cameras&&d.cameras.courtyard)$('#heroCap').textContent=d.cameras.courtyard.label||'Courtyard';
+  $('#heroAge').textContent=d.generated_local?('local '+d.generated_local):'';
+  const age=d.generated?(Date.now()-new Date(d.generated))/1000:1e9;
+  $('#live').classList.toggle('stale',age>1500);
+  $('#fresh').textContent='updated '+ago(d.generated);
+  if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>LOAD</b> ${sys.load?sys.load[0]:'?'}`;
+}
+
+refreshImages(); loadData();
+setInterval(()=>{ loadData(); refreshImages(); }, 60000);
+</script>
+</body>
+</html>
