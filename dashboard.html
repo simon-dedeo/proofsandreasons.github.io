@@ -39,12 +39,14 @@
   .rt .d{font-size:1.5vw;font-weight:600}
   .rt .loc{color:var(--dim);font-size:1.02vw;margin-top:3px}
   .rt .proj{color:var(--amber);font-size:.82vw;margin-top:7px;letter-spacing:.16em;font-family:var(--mono)}
-  /* panel takes the skyline cam's 16:10 shape so it fills with no black bars */
-  .hero{grid-column:1;grid-row:2;position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/10;width:100%;height:auto;max-height:100%;place-self:center}
+  /* viewer sits flush with the top of the row (level with the weather column);
+     the caption is a normal block BELOW the frame, not an overlay. */
+  .viewer{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column;gap:11px;min-height:0}
+  /* frame takes the skyline cam's 16:10 shape so it fills with no black bars */
+  .hero{position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/10;width:100%}
   .hero>img{width:100%;height:100%;object-fit:cover;display:block}
-  .hero .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 20px;font-size:.92vw;
-    background:linear-gradient(to top,rgba(0,0,0,.78),transparent);display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono)}
-  .hero .cap .age{color:var(--sky)}
+  .cap{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px;font-size:.92vw;font-family:var(--mono);color:var(--dim)}
+  .cap .age{color:var(--sky)}
   aside{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:16px;min-height:0}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
   .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.68vw;margin-bottom:11px;font-weight:700;font-family:var(--mono)}
@@ -73,12 +75,12 @@
   @keyframes pulse{50%{opacity:.35}} @media (prefers-reduced-motion:reduce){.live{animation:none}}
   @media (max-width:820px){
     .frame{grid-template-columns:1fr;grid-template-rows:auto auto auto auto}
-    .hero{grid-column:1;grid-row:2} aside{grid-column:1;grid-row:3} footer{grid-column:1;grid-row:4}
+    .viewer{grid-column:1;grid-row:2} aside{grid-column:1;grid-row:3} footer{grid-column:1;grid-row:4}
     .clock{font-size:16vw} .rt .d{font-size:5vw} .rt .loc{font-size:3.4vw} .rt .proj{font-size:3vw}
     .now .temp{font-size:15vw} .now .desc{font-size:4.4vw} .now .sub{font-size:3vw}
     .h5{font-size:2.6vw} .hourly .t,.hourly .p{font-size:2.4vw} .hourly .tp{font-size:4vw}
     .sun .row{font-size:3.2vw} .fc .row{font-size:3.2vw} footer{font-size:2.8vw}
-    .hero .cap{font-size:3vw} .sky .tag{font-size:2.2vw}
+    .cap{font-size:3vw}
   }
 </style>
 </head>
@@ -92,8 +94,8 @@
       <div class="proj" id="proj"></div>
     </div>
   </header>
-  <div class="hero">
-    <img id="heroImg" alt="Pittsburgh skyline">
+  <div class="viewer">
+    <div class="hero"><img id="heroImg" alt="Pittsburgh skyline"></div>
     <div class="cap"><span id="heroCap">Pittsburgh Skyline</span><span class="age" id="heroAge"></span></div>
   </div>
   <aside>
