@@ -1,0 +1,170 @@
+<title>Readings | Proofs &amp; Reasons</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: #ffffff;
+    color: #111111;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+    line-height: 1.6;
+  }
+
+  nav {
+    background: #000000;
+    padding: 7px 20px;
+    width: 100%;
+  }
+
+  nav a {
+    color: #ffffff;
+    text-decoration: none;
+    font-family: "Times New Roman", Times, serif;
+    font-size: 16px;
+  }
+
+  nav a:hover,
+  nav a:focus {
+    text-decoration: underline;
+    outline: none;
+  }
+
+  .content {
+    padding: 24px 20px 48px 20px;
+    max-width: 820px;
+  }
+
+  h1 {
+    font-size: 1.4em;
+    font-weight: bold;
+    margin-bottom: 0.15em;
+  }
+
+  .subtitle {
+    margin-bottom: 1em;
+    font-size: 1em;
+  }
+
+  .tag-filters {
+    margin-bottom: 1.4em;
+    display: grid;
+    grid-template-columns: repeat(5, max-content);
+    gap: 6px 16px;
+  }
+
+  .tag-filters a {
+    color: #666666;
+    border: 1px solid #aaaaaa;
+    padding: 2px 8px;
+    text-decoration: none;
+    font-size: 0.9em;
+    display: inline-block;
+    transition: background 0.1s, color 0.1s, border-color 0.1s;
+  }
+
+  .tag-filters a:hover,
+  .tag-filters a:focus {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+    outline: none;
+    text-decoration: none;
+  }
+
+  .tag-filters a.active {
+    background: #000000;
+    color: #ffffff;
+    border-color: #000000;
+    font-weight: normal;
+  }
+
+  .paper {
+    margin-bottom: 1em;
+  }
+
+  .paper.hidden {
+    display: none;
+  }
+
+  .paper a {
+    color: #0000cc;
+    text-decoration: none;
+  }
+
+  .paper a:hover,
+  .paper a:focus {
+    text-decoration: underline;
+  }
+
+  .paper-tags {
+    margin: 2px 0 0 0;
+    font-size: 0.88em;
+    color: #888888;
+  }
+
+</style>
+
+<nav>
+  <a href="https://proofsandreasons.io">Home</a>
+</nav>
+
+<div class="content">
+
+  <h1>Readings</h1>
+  <p class="subtitle">Click on a keyword to see all papers on that topic.</p>
+
+  <div class="tag-filters">
+    <a href="#" data-filter="all" class="active">All</a>
+    <a href="#" data-filter="artificial-intelligence">artificial intelligence</a>
+    <a href="#" data-filter="cognition">cognition</a>
+    <a href="#" data-filter="reasoning">reasoning</a>
+    <a href="#" data-filter="language">language</a>
+    <a href="#" data-filter="cultural-evolution">cultural evolution</a>
+    <a href="#" data-filter="embodiment">embodiment</a>
+    <a href="#" data-filter="perception">perception</a>
+  </div>
+
+  <div class="paper" data-tags="language cultural-evolution cognition">
+    <p>Christiansen, M. H., &amp; Chater, N. (2016). <a href="readings_files/Christiansen%20and%20Chater%20(2016)%20The%20now-or-never%20bottleneck.pdf">The now-or-never bottleneck: A fundamental constraint on language</a>. <em>Behavioral and Brain Sciences</em>, <em>39</em>, e62. doi:10.1017/S0140525X1500031X</p>
+    <p class="paper-tags">language / cultural evolution / cognition</p>
+  </div>
+
+  <div class="paper" data-tags="cognition embodiment perception">
+    <p>Firestone, C., &amp; Scholl, B. J. (2016). <a href="readings_files/Firestone%20and%20Scholl%20(2016)%20Cognition%20does%20not%20affect%20perception.pdf">Cognition does not affect perception: Evaluating the evidence for &ldquo;top-down&rdquo; effects</a>. <em>Behavioral and Brain Sciences</em>, <em>39</em>, e229. doi:10.1017/S0140525X15000965</p>
+    <p class="paper-tags">cognition / embodiment / perception</p>
+  </div>
+
+  <div class="paper" data-tags="language cognition">
+    <p>Chomsky, N. (1959). <a href="readings_files/Chomsky%20(1959)%20Verbal%20behavior%20by%20Skinner.pdf">A review of B. F. Skinner&rsquo;s <em>Verbal Behavior</em></a>. <em>Language</em>, <em>35</em>(1), 26&ndash;58. doi:10.2307/411334</p>
+    <p class="paper-tags">language / cognition</p>
+  </div>
+
+  <div class="paper" data-tags="artificial-intelligence cognition reasoning">
+    <p>Turing, A. M. (1950). <a href="readings_files/Turing%20(1950)%20Computing%20Machinery%20and%20Intelligence.pdf">Computing machinery and intelligence</a>. <em>Mind</em>, <em>59</em>(236), 433&ndash;460. doi:10.1093/mind/LIX.236.433</p>
+    <p class="paper-tags">artificial intelligence / cognition / reasoning</p>
+  </div>
+
+</div>
+
+<script>
+  document.querySelectorAll('.tag-filters a').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      var filter = this.getAttribute('data-filter');
+
+      document.querySelectorAll('.tag-filters a').forEach(function(l) {
+        l.classList.remove('active');
+      });
+      this.classList.add('active');
+
+      document.querySelectorAll('.paper').forEach(function(paper) {
+        var tags = paper.getAttribute('data-tags').split(' ');
+        if (filter === 'all' || tags.indexOf(filter) !== -1) {
+          paper.classList.remove('hidden');
+        } else {
+          paper.classList.add('hidden');
+        }
+      });
+    });
+  });
+</script>
