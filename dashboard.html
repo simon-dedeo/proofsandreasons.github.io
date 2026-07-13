@@ -10,12 +10,12 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<title>CMU Courtyard Monitor · Proofs &amp; Reasons</title>
+<title>CMU Skyline Monitor · Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="CMU Courtyard Monitor">
-<meta property="og:description" content="A live view over the CMU courtyard with Pittsburgh weather, from the Laboratory for Social Minds.">
+<meta property="og:title" content="CMU Skyline Monitor">
+<meta property="og:description" content="A live view of the Pittsburgh skyline with local weather, from the Laboratory for Social Minds at CMU.">
 <meta property="og:url" content="https://proofsandreasons.io/dashboard.html">
-<meta property="og:image" content="https://sites.santafe.edu/~simon/courtyard.jpg">
+<meta property="og:image" content="https://sites.santafe.edu/~simon/sky.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://proofsandreasons.io/dashboard.html">
 <meta name="theme-color" content="#0b0d12">
@@ -39,15 +39,12 @@
   .rt .d{font-size:1.5vw;font-weight:600}
   .rt .loc{color:var(--dim);font-size:1.02vw;margin-top:3px}
   .rt .proj{color:var(--amber);font-size:.82vw;margin-top:7px;letter-spacing:.16em;font-family:var(--mono)}
-  /* panel takes the courtyard cam's 16:9 shape so it fills with no black bars */
-  .hero{grid-column:1;grid-row:2;position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/9;width:100%;height:auto;max-height:100%;place-self:center}
+  /* panel takes the skyline cam's 16:10 shape so it fills with no black bars */
+  .hero{grid-column:1;grid-row:2;position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/10;width:100%;height:auto;max-height:100%;place-self:center}
   .hero>img{width:100%;height:100%;object-fit:cover;display:block}
   .hero .cap{position:absolute;left:0;right:0;bottom:0;padding:16px 20px;font-size:.92vw;
     background:linear-gradient(to top,rgba(0,0,0,.78),transparent);display:flex;justify-content:space-between;align-items:flex-end;font-family:var(--mono)}
   .hero .cap .age{color:var(--sky)}
-  .sky{position:absolute;top:16px;right:16px;width:30%;aspect-ratio:16/10;border-radius:13px;overflow:hidden;border:2px solid rgba(255,255,255,.22);box-shadow:var(--shadow)}
-  .sky img{width:100%;height:100%;object-fit:cover;background:#000}
-  .sky .tag{position:absolute;bottom:0;left:0;right:0;font-size:.64vw;text-align:center;padding:3px;background:rgba(0,0,0,.6);color:var(--dim);letter-spacing:.14em;font-family:var(--mono)}
   aside{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:16px;min-height:0}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
   .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.68vw;margin-bottom:11px;font-weight:700;font-family:var(--mono)}
@@ -96,9 +93,8 @@
     </div>
   </header>
   <div class="hero">
-    <img id="heroImg" alt="CMU courtyard">
-    <div class="sky"><img id="skyImg" alt="Pittsburgh sky"><div class="tag">SKYLINE CAM</div></div>
-    <div class="cap"><span id="heroCap">Courtyard</span><span class="age" id="heroAge"></span></div>
+    <img id="heroImg" alt="Pittsburgh skyline">
+    <div class="cap"><span id="heroCap">Pittsburgh Skyline</span><span class="age" id="heroAge"></span></div>
   </div>
   <aside>
     <div class="card"><div class="now">
@@ -142,8 +138,7 @@ function loadData(){
 }
 function refreshImages(){
   const b='?_='+Date.now();
-  $('#heroImg').src=SANTAFE+'courtyard.jpg'+b;
-  $('#skyImg').src=SANTAFE+'sky.jpg'+b;
+  $('#heroImg').src=SANTAFE+'sky.jpg'+b;
 }
 
 function render(d){
@@ -169,7 +164,7 @@ function render(d){
   $('#sun').innerHTML=html;
   $('#fc').innerHTML=(w.forecast||[]).slice(0,5).map(p=>
     `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
-  if(d.cameras&&d.cameras.courtyard)$('#heroCap').textContent=d.cameras.courtyard.label||'Courtyard';
+  if(d.cameras&&d.cameras.sky)$('#heroCap').textContent=d.cameras.sky.label||'Pittsburgh Skyline';
   $('#heroAge').textContent=d.generated_local?('local '+d.generated_local):'';
   const age=d.generated?(Date.now()-new Date(d.generated))/1000:1e9;
   $('#live').classList.toggle('stale',age>1500);
