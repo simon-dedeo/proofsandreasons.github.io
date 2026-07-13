@@ -45,8 +45,10 @@
   /* frame takes the skyline cam's 16:10 shape so it fills with no black bars */
   .hero{position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/10;width:100%}
   .hero>img{width:100%;height:100%;object-fit:cover;display:block}
-  .cap{display:flex;justify-content:space-between;align-items:baseline;gap:12px;padding:0 6px;font-size:.92vw;font-family:var(--mono);color:var(--dim)}
-  .cap .age{color:var(--sky)}
+  .cap{display:flex;flex-direction:column;gap:5px;padding:0 6px;font-family:var(--mono)}
+  .cap .capmain{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:.95vw;color:var(--ink);font-weight:600}
+  .cap .age{color:var(--sky);font-weight:400}
+  .cap .capstats{font-size:.72vw;color:var(--dimmer);letter-spacing:.02em}
   aside{grid-column:2;grid-row:2;display:flex;flex-direction:column;gap:16px;min-height:0}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;padding:18px 20px;box-shadow:var(--shadow)}
   .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.68vw;margin-bottom:11px;font-weight:700;font-family:var(--mono)}
@@ -80,7 +82,7 @@
     .now .temp{font-size:15vw} .now .desc{font-size:4.4vw} .now .sub{font-size:3vw}
     .h5{font-size:2.6vw} .hourly .t,.hourly .p{font-size:2.4vw} .hourly .tp{font-size:4vw}
     .sun .row{font-size:3.2vw} .fc .row{font-size:3.2vw} footer{font-size:2.8vw}
-    .cap{font-size:3vw}
+    .cap .capmain{font-size:3.2vw} .cap .capstats{font-size:2.4vw}
   }
 </style>
 </head>
@@ -96,7 +98,10 @@
   </header>
   <div class="viewer">
     <div class="hero"><img id="heroImg" alt="Pittsburgh skyline"></div>
-    <div class="cap"><span id="heroCap">Pittsburgh Skyline</span><span class="age" id="heroAge"></span></div>
+    <div class="cap">
+      <div class="capmain"><span id="heroCap">Pittsburgh Skyline</span><span class="age" id="heroAge"></span></div>
+      <div class="capstats" id="heroStats"></div>
+    </div>
   </div>
   <aside>
     <div class="card"><div class="now">
@@ -143,6 +148,45 @@ function refreshImages(){
   $('#heroImg').src=SANTAFE+'sky.jpg'+b;
 }
 
+// The featured photo is the most recent inferred peak-golden-hour frame. golden.js
+// (window.GOLDEN) is written by the monitor when it picks a new peak; we label it
+// and, for fun, show the criteria stats that won it. "today/yesterday" is computed
+// from the capture date against the VIEWER's local clock.
+function dayWord(dateStr){
+  if(!dateStr) return '';
+  const now=new Date();
+  const fmt=d=>`${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+  const y=new Date(now); y.setDate(now.getDate()-1);
+  if(dateStr===fmt(now)) return 'today';
+  if(dateStr===fmt(y))   return 'yesterday';
+  try{ return new Date(dateStr+'T12:00').toLocaleDateString([],{month:'short',day:'numeric'}); }
+  catch(e){ return dateStr; }
+}
+function renderGolden(g){
+  if(!g){ return; }
+  const which = g.which==='morning' ? 'morning' : 'evening';
+  const when = dayWord(g.date);
+  $('#heroCap').textContent = 'Most recent inferred peak golden hour';
+  $('#heroAge').textContent = `— ${which} · ${g.time}${when?' · '+when:''}`;
+  // fun annotated criteria line
+  const bits=[];
+  if(g.blend!=null) bits.push(`golden-blend score <b>${g.blend}</b>`);
+  if(g.gfrac!=null) bits.push(`${g.gfrac}% of the sky glowing gold${g.glow!=null?` (${g.glow}% along the horizon)`:''}`);
+  const tail=[];
+  if(g.warm!=null) tail.push(`warmth ${g.warm>0?'+':''}${g.warm}`);
+  if(g.sat!=null)  tail.push(`saturation ${g.sat}`);
+  if(g.bright!=null) tail.push(`brightness ${g.bright}`);
+  if(tail.length) bits.push(tail.join(', '));
+  $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
+}
+function loadGolden(){
+  const s=document.createElement('script');
+  s.src=SANTAFE+'golden.js?_='+Date.now();
+  s.onload=()=>{ if(window.GOLDEN) renderGolden(window.GOLDEN); s.remove(); };
+  s.onerror=()=>{ s.remove(); };
+  document.head.appendChild(s);
+}
+
 function render(d){
   const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};
   if(d.location)$('#loc').textContent=d.location;
@@ -166,16 +210,15 @@ function render(d){
   $('#sun').innerHTML=html;
   $('#fc').innerHTML=(w.forecast||[]).slice(0,5).map(p=>
     `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
-  if(d.cameras&&d.cameras.sky)$('#heroCap').textContent=d.cameras.sky.label||'Pittsburgh Skyline';
-  $('#heroAge').textContent=d.generated_local?('local '+d.generated_local):'';
+  // (camera caption is driven by golden.js — see renderGolden)
   const age=d.generated?(Date.now()-new Date(d.generated))/1000:1e9;
   $('#live').classList.toggle('stale',age>1500);
   $('#fresh').textContent='updated '+ago(d.generated);
   if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>LOAD</b> ${sys.load?sys.load[0]:'?'}`;
 }
 
-refreshImages(); loadData();
-setInterval(()=>{ loadData(); refreshImages(); }, 60000);
+refreshImages(); loadData(); loadGolden();
+setInterval(()=>{ loadData(); loadGolden(); refreshImages(); }, 60000);
 </script>
 </body>
 </html>
