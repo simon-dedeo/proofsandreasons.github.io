@@ -168,15 +168,14 @@ function renderGolden(g){
   const when = dayWord(g.date);
   $('#heroCap').textContent = 'Most recent inferred peak golden hour';
   $('#heroAge').textContent = `— ${which} · ${g.time}${when?' · '+when:''}`;
-  // fun annotated criteria line
+  // data line: sun position relative to horizon, avg sky hue (top 10%), camera stats
   const bits=[];
-  if(g.blend!=null) bits.push(`golden-blend score <b>${g.blend}</b>`);
-  if(g.gfrac!=null) bits.push(`${g.gfrac}% of the sky glowing gold${g.glow!=null?` (${g.glow}% along the horizon)`:''}`);
-  const tail=[];
-  if(g.warm!=null) tail.push(`warmth ${g.warm>0?'+':''}${g.warm}`);
-  if(g.sat!=null)  tail.push(`saturation ${g.sat}`);
-  if(g.bright!=null) tail.push(`brightness ${g.bright}`);
-  if(tail.length) bits.push(tail.join(', '));
+  if(g.sun_elev!=null) bits.push(`sun <b>${g.sun_elev}°</b> ${g.sun_elev>=0?'above':'below'} the horizon`);
+  if(g.sky_hue!=null) bits.push(`avg sky hue <b>${g.sky_hue}°</b>${g.sky_hue_name&&g.sky_hue_name!=='—'?` (${g.sky_hue_name})`:''}`);
+  const cam=[];
+  if(g.exp_ms!=null) cam.push(`exposure ${g.exp_ms} ms`);
+  if(g.gain!=null) cam.push(`gain ${g.gain}`);
+  if(cam.length) bits.push(cam.join(', '));
   $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
 }
 function loadGolden(){
