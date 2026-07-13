@@ -115,8 +115,10 @@
     <div class="card"><div class="h5">Sun &amp; golden hour · today</div><div class="sun" id="sun"></div>
       <div class="skybarwrap">
         <canvas id="skybar" class="skybar"></canvas>
+        <div class="skybarcap">average sky colour</div>
+        <canvas id="imgbar" class="skybar" style="margin-top:9px"></canvas>
         <div class="skybarax"><span>12a</span><span>6a</span><span>noon</span><span>6p</span><span>12a</span></div>
-        <div class="skybarcap">average sky colour · midnight → midnight</div>
+        <div class="skybarcap">average image colour · midnight → midnight</div>
       </div>
     </div>
     <div class="card fc" style="flex:1"><div class="h5">Forecast</div><div id="fc"></div></div>
@@ -175,16 +177,14 @@ function renderGolden(g){
   if(!g){ return; }
   const which = g.which==='morning' ? 'morning' : 'evening';
   const when = dayWord(g.date);
-  $('#heroCap').textContent = 'Most recent inferred peak golden hour';
-  $('#heroAge').textContent = `— ${which} · ${g.time}${when?' · '+when:''}`;
-  // data line: sun position relative to horizon, avg sky hue (top 10%), camera stats
-  const bits=[];
-  if(g.sun_elev!=null) bits.push(`sun <b>${g.sun_elev}°</b> ${g.sun_elev>=0?'above':'below'} the horizon`);
+  // Line 1: morning/evening · time · today/yesterday · latest golden hour
+  $('#heroCap').textContent = `${which} · ${g.time}${when?' · '+when:''} · latest golden hour`;
+  $('#heroAge').textContent = '';
+  // Line 2: inferred peak · sun position · avg sky hue · avg total image hue
+  const bits=['inferred peak'];
+  if(g.sun_elev!=null) bits.push(`sun <b>${g.sun_elev}°</b> ${g.sun_elev>=0?'above':'below'} horizon`);
   if(g.sky_hue!=null) bits.push(`avg sky hue <b>${g.sky_hue}°</b>${g.sky_hue_name&&g.sky_hue_name!=='—'?` (${g.sky_hue_name})`:''}`);
-  const cam=[];
-  if(g.exp_ms!=null) cam.push(`exposure ${g.exp_ms} ms`);
-  if(g.gain!=null) cam.push(`gain ${g.gain}`);
-  if(cam.length) bits.push(cam.join(', '));
+  if(g.img_hue!=null) bits.push(`avg total image hue <b>${g.img_hue}°</b>${g.img_hue_name&&g.img_hue_name!=='—'?` (${g.img_hue_name})`:''}`);
   $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
   // "system up" light: green if the featured image was captured < 20 h ago
   if(g.ts){ const h=(Date.now()-new Date(g.ts))/3.6e6;
@@ -202,16 +202,16 @@ function loadGolden(){
 // Colour-of-the-day bar: today's 5-min average-sky-colour samples (skycolor.js),
 // laid out midnight (left) -> midnight (right). Marker = the current sample.
 let _sky=null;
-function renderSkyBar(sc){
-  const cv=$('#skybar'); if(!cv) return;
+function renderBar(cv, samples){
+  if(!cv) return;
   const W=Math.max(1,Math.round(cv.clientWidth)), H=16;
   cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#0a0d14'; ctx.fillRect(0,0,W,H);
   ctx.fillStyle='rgba(255,255,255,.09)';                     // 6-hour gridlines
   for(let hh=6;hh<24;hh+=6){ ctx.fillRect(Math.round(hh/24*W),0,1,H); }
-  if(!sc||!sc.samples||!sc.samples.length) return;
-  const s=sc.samples;
+  if(!samples||!samples.length) return;
+  const s=samples;
   for(let i=0;i<s.length;i++){
     const x0=s[i][0]/1440*W, x1=(i+1<s.length?s[i+1][0]:s[i][0]+5)/1440*W;
     ctx.fillStyle=s[i][1];
@@ -222,14 +222,15 @@ function renderSkyBar(sc){
   ctx.fillStyle=last[1]; ctx.fill();
   ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
 }
+function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#imgbar'), sc&&sc.isamples); }
 function loadSky(){
   const s=document.createElement('script');
   s.src=SANTAFE+'skycolor.js?_='+Date.now();
-  s.onload=()=>{ if(window.SKYCOLOR){ _sky=window.SKYCOLOR; renderSkyBar(_sky); } s.remove(); };
+  s.onload=()=>{ if(window.SKYCOLOR) renderBars(window.SKYCOLOR); s.remove(); };
   s.onerror=()=>{ s.remove(); };
   document.head.appendChild(s);
 }
-window.addEventListener('resize',()=>{ if(_sky) renderSkyBar(_sky); });
+window.addEventListener('resize',()=>{ if(_sky) renderBars(_sky); });
 
 function render(d){
   const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};

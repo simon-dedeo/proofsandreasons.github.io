@@ -441,9 +441,55 @@
   </div>
   
   <br><br>
-  <iframe src="https://sites.santafe.edu/~simon/usage.html" 
+  <iframe src="https://sites.santafe.edu/~simon/usage.html"
           style="width:620px; max-width:100%; height:500px; border:none;">
   </iframe>
-  
+
+  <br><br>
+  <!-- Latest inferred peak golden-hour frame from the CMU skyline monitor
+       (same feed + data as the dashboard; reads golden.js from santafe). -->
+  <figure id="golden-figure" style="width:620px; max-width:100%; margin:0 auto 2rem; text-align:left;">
+    <img id="g-img" src="https://sites.santafe.edu/~simon/sky.jpg"
+         alt="Latest inferred peak golden-hour view of the CMU skyline"
+         style="display:block; width:100%; height:auto; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+    <figcaption style="margin-top:8px; font-family:'SF Mono',ui-monospace,Menlo,monospace; color:#fff;">
+      <div id="g-cap1" style="font-size:0.9rem; font-weight:600;"></div>
+      <div id="g-cap2" style="font-size:0.72rem; color:#c7d0e0; margin-top:3px;"></div>
+    </figcaption>
+  </figure>
+  <script>
+  (function(){
+    var SF = "https://sites.santafe.edu/~simon/";
+    function pad(n){ return String(n).padStart(2,'0'); }
+    function dayWord(d){
+      if(!d) return '';
+      var now=new Date(), f=function(x){return x.getFullYear()+'-'+pad(x.getMonth()+1)+'-'+pad(x.getDate());};
+      var y=new Date(now); y.setDate(now.getDate()-1);
+      if(d===f(now)) return 'today';
+      if(d===f(y)) return 'yesterday';
+      try { return new Date(d+'T12:00').toLocaleDateString([],{month:'short',day:'numeric'}); } catch(e){ return d; }
+    }
+    function huebit(label,h,name){ return (h==null)?'':label+' '+h+'°'+((name&&name!=='—')?' ('+name+')':''); }
+    function render(g){
+      if(!g) return;
+      var which = g.which==='morning' ? 'morning':'evening', when=dayWord(g.date);
+      document.getElementById('g-cap1').textContent = which+' · '+g.time+(when?' · '+when:'')+' · latest golden hour';
+      var b=['inferred peak'];
+      if(g.sun_elev!=null) b.push('sun '+g.sun_elev+'° '+(g.sun_elev>=0?'above':'below')+' horizon');
+      var s=huebit('avg sky hue',g.sky_hue,g.sky_hue_name); if(s) b.push(s);
+      var i=huebit('avg total image hue',g.img_hue,g.img_hue_name); if(i) b.push(i);
+      document.getElementById('g-cap2').textContent = b.join('  ·  ');
+    }
+    function load(){
+      document.getElementById('g-img').src = SF+'sky.jpg?_='+Date.now();
+      var s=document.createElement('script'); s.src=SF+'golden.js?_='+Date.now();
+      s.onload=function(){ if(window.GOLDEN) render(window.GOLDEN); s.remove(); };
+      s.onerror=function(){ s.remove(); };
+      document.head.appendChild(s);
+    }
+    load(); setInterval(load, 15*60*1000);
+  })();
+  </script>
+
 </body>
 </html>
