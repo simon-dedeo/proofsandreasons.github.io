@@ -97,7 +97,6 @@
     <div class="rt">
       <div class="d" id="date">—</div>
       <div class="loc" id="loc">Carnegie Mellon University · Pittsburgh, PA</div>
-      <div class="proj" id="proj"></div>
     </div>
   </header>
   <div class="viewer">
@@ -125,7 +124,7 @@
   <footer>
     <div><span class="live" id="live"></span><span id="fresh">connecting…</span></div>
     <div id="sys"></div>
-    <div><a href="https://sites.santafe.edu/~simon/gallery.html">recent frames ↗</a> · <a href="https://proofsandreasons.io/">proofsandreasons.io</a></div>
+    <div><a href="https://sites.santafe.edu/~simon/hours.html">recent hours ↗</a> · <a href="https://proofsandreasons.io/">proofsandreasons.io</a></div>
   </footer>
 </div>
 <script>
@@ -187,6 +186,10 @@ function renderGolden(g){
   if(g.gain!=null) cam.push(`gain ${g.gain}`);
   if(cam.length) bits.push(cam.join(', '));
   $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
+  // "system up" light: green if the featured image was captured < 20 h ago
+  if(g.ts){ const h=(Date.now()-new Date(g.ts))/3.6e6;
+    $('#live').classList.toggle('stale', !(h<20));
+    $('#fresh').textContent = h<20 ? 'system up' : `last image ${Math.round(h)}h ago`; }
 }
 function loadGolden(){
   const s=document.createElement('script');
@@ -231,7 +234,6 @@ window.addEventListener('resize',()=>{ if(_sky) renderSkyBar(_sky); });
 function render(d){
   const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};
   if(d.location)$('#loc').textContent=d.location;
-  if(sys.project_day!=null)$('#proj').textContent='TIMELAPSE · DAY '+sys.project_day;
   $('#nowTemp').textContent=(c.tempF!=null?c.tempF:'--')+'°';
   $('#nowDesc').textContent=c.text||'—';
   const b=[];
@@ -249,10 +251,7 @@ function render(d){
   $('#fc').innerHTML=(w.forecast||[]).slice(0,5).map(p=>
     `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
   // (camera caption is driven by golden.js — see renderGolden)
-  const age=d.generated?(Date.now()-new Date(d.generated))/1000:1e9;
-  $('#live').classList.toggle('stale',age>1500);
-  $('#fresh').textContent='updated '+ago(d.generated);
-  if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>LOAD</b> ${sys.load?sys.load[0]:'?'}`;
+  if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>CPU</b> ${sys.load&&sys.cpus?Math.round(sys.load[0]/sys.cpus*100)+'%':'?'}`;
 }
 
 refreshImages(); loadData(); loadGolden(); loadSky();
