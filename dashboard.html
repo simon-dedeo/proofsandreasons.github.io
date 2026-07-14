@@ -180,11 +180,15 @@ function renderGolden(g){
   // Line 1: morning/evening · time · today/yesterday · latest golden hour
   $('#heroCap').textContent = `${which} · ${g.time}${when?' · '+when:''} · latest golden hour`;
   $('#heroAge').textContent = '';
-  // Line 2: inferred peak · sun position · avg sky hue · avg total image hue
+  // Line 2: inferred peak · sun position · avg sky hue · avg campus hue
+  // (campus_hue = below-the-skyline; falls back to whole-image img_hue for
+  // golden.js files written before 2026-07-14)
   const bits=['inferred peak'];
   if(g.sun_elev!=null) bits.push(`sun <b>${g.sun_elev}°</b> ${g.sun_elev>=0?'above':'below'} horizon`);
   if(g.sky_hue!=null) bits.push(`avg sky hue <b>${g.sky_hue}°</b>${g.sky_hue_name&&g.sky_hue_name!=='—'?` (${g.sky_hue_name})`:''}`);
-  if(g.img_hue!=null) bits.push(`avg total image hue <b>${g.img_hue}°</b>${g.img_hue_name&&g.img_hue_name!=='—'?` (${g.img_hue_name})`:''}`);
+  const ch=g.campus_hue!=null?g.campus_hue:g.img_hue, chn=g.campus_hue!=null?g.campus_hue_name:g.img_hue_name,
+        chl=g.campus_hue!=null?'avg campus hue':'avg total image hue';
+  if(ch!=null) bits.push(`${chl} <b>${ch}°</b>${chn&&chn!=='—'?` (${chn})`:''}`);
   $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
   // "system up" light: green if the featured image was captured < 20 h ago
   if(g.ts){ const h=(Date.now()-new Date(g.ts))/3.6e6;

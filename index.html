@@ -477,7 +477,9 @@
       var b=['inferred peak'];
       if(g.sun_elev!=null) b.push('sun '+g.sun_elev+'° '+(g.sun_elev>=0?'above':'below')+' horizon');
       var s=huebit('avg sky hue',g.sky_hue,g.sky_hue_name); if(s) b.push(s);
-      var i=huebit('avg total image hue',g.img_hue,g.img_hue_name); if(i) b.push(i);
+      var i = g.campus_hue!=null ? huebit('avg campus hue',g.campus_hue,g.campus_hue_name)
+                                 : huebit('avg total image hue',g.img_hue,g.img_hue_name);
+      if(i) b.push(i);
       document.getElementById('g-cap2').textContent = b.join('  ·  ');
     }
     function load(){
