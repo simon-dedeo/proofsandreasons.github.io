@@ -78,6 +78,7 @@
   footer a{color:var(--sky);text-decoration:none} footer b{color:var(--dim)}
   .live{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--good);margin-right:7px;box-shadow:0 0 9px var(--good);animation:pulse 2.4s ease-in-out infinite}
   .stale{background:var(--amber)!important;box-shadow:0 0 9px var(--amber)!important}
+  .down{background:#ff6b6b!important;box-shadow:0 0 9px #ff6b6b!important}
   @keyframes pulse{50%{opacity:.35}} @media (prefers-reduced-motion:reduce){.live{animation:none}}
   @media (max-width:820px){
     .frame{grid-template-columns:1fr;grid-template-rows:auto auto auto auto}
@@ -190,10 +191,7 @@ function renderGolden(g){
         chl=g.campus_hue!=null?'avg campus hue':'avg total image hue';
   if(ch!=null) bits.push(`${chl} <b>${ch}°</b>${chn&&chn!=='—'?` (${chn})`:''}`);
   $('#heroStats').innerHTML = bits.join(' &nbsp;·&nbsp; ');
-  // "system up" light: green if the featured image was captured < 20 h ago
-  if(g.ts){ const h=(Date.now()-new Date(g.ts))/3.6e6;
-    $('#live').classList.toggle('stale', !(h<20));
-    $('#fresh').textContent = h<20 ? 'system up' : `last image ${Math.round(h)}h ago`; }
+  // (status light is driven by the camera's last_capture in data.js — see render)
 }
 function loadGolden(){
   const s=document.createElement('script');
@@ -257,6 +255,20 @@ function render(d){
     `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
   // (camera caption is driven by golden.js — see renderGolden)
   if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>CPU</b> ${sys.load&&sys.cpus?Math.round(sys.load[0]/sys.cpus*100)+'%':'?'}`;
+  // Status light = is the camera actually taking pictures? The monitor captures
+  // every 5 min and uploads data.js every ~15 min, so a healthy chain shows a
+  // last_capture under ~25 min; 45 min = something is broken. Green: camera live.
+  // Red: monitor reachable but camera not delivering. Amber: data.js itself stale
+  // (monitor offline). last_capture missing = pre-2026-07-16 data.js; fall back
+  // to plain generated-freshness.
+  const cam=(d.cameras&&d.cameras.sky)||{};
+  const genM=d.generated?(Date.now()-new Date(d.generated))/6e4:Infinity;
+  const camM=cam.last_capture?(Date.now()-new Date(cam.last_capture))/6e4:null;
+  const L=$('#live'); L.classList.remove('stale','down');
+  if(genM>45){ L.classList.add('stale'); $('#fresh').textContent=`monitor offline · last contact ${ago(d.generated)}`; }
+  else if(camM==null){ $('#fresh').textContent='system up'; }
+  else if(camM>45){ L.classList.add('down'); $('#fresh').textContent=`camera down · last picture ${ago(cam.last_capture)}`; }
+  else { $('#fresh').textContent=`camera live · last picture ${ago(cam.last_capture)}`; }
 }
 
 refreshImages(); loadData(); loadGolden(); loadSky();
