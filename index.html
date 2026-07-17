@@ -446,10 +446,15 @@
   </iframe>
 
   <br><br>
+  <iframe src="https://sites.santafe.edu/~simon/ganesha_usage.html"
+          style="width:620px; max-width:100%; height:500px; border:none;">
+  </iframe>
+
+  <br><br>
   <!-- Latest inferred peak golden-hour frame from the CMU skyline monitor
-       (same feed + data as the dashboard; reads golden.js from santafe). -->
+       (golden peak + golden.js now hosted on ganesha: photos.proofsandreasons.io). -->
   <figure id="golden-figure" style="width:620px; max-width:100%; margin:0 auto 2rem; text-align:left;">
-    <img id="g-img" src="https://sites.santafe.edu/~simon/sky.jpg"
+    <img id="g-img" src="https://photos.proofsandreasons.io/golden.jpg"
          alt="Latest inferred peak golden-hour view of the CMU skyline"
          style="display:block; width:100%; height:auto; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
     <figcaption style="margin-top:8px; font-family:'SF Mono',ui-monospace,Menlo,monospace; color:#fff;">
@@ -459,7 +464,7 @@
   </figure>
   <script>
   (function(){
-    var SF = "https://sites.santafe.edu/~simon/";
+    var SF = "https://photos.proofsandreasons.io/";  // golden peak + golden.js now on ganesha
     function pad(n){ return String(n).padStart(2,'0'); }
     function dayWord(d){
       if(!d) return '';
@@ -483,7 +488,7 @@
       document.getElementById('g-cap2').textContent = b.join('  ·  ');
     }
     function load(){
-      document.getElementById('g-img').src = SF+'sky.jpg?_='+Date.now();
+      document.getElementById('g-img').src = SF+'golden.jpg?_='+Date.now();
       var s=document.createElement('script'); s.src=SF+'golden.js?_='+Date.now();
       s.onload=function(){ if(window.GOLDEN) render(window.GOLDEN); s.remove(); };
       s.onerror=function(){ s.remove(); };
