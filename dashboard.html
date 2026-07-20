@@ -73,6 +73,10 @@
   .skybar{display:block;width:100%;height:16px;border-radius:5px;border:1px solid var(--line);background:#0a0d14}
   .skybarax{display:flex;justify-content:space-between;color:var(--dimmer);font-family:var(--mono);font-size:.62vw;margin-top:3px}
   .skybarcap{color:var(--dimmer);font-family:var(--mono);font-size:.64vw;margin-top:3px;letter-spacing:.04em}
+  .histpop{position:absolute;z-index:40;display:none;background:rgba(10,13,20,.96);border:1px solid var(--line);border-radius:9px;padding:9px 11px;box-shadow:var(--shadow)}
+  .histrow{display:flex;align-items:center;gap:8px;margin:4px 0}
+  .histrow canvas{flex:1;min-width:0;height:10px;border-radius:3px;border:1px solid var(--line);background:#0a0d14;display:block}
+  .histrow .hd{color:var(--dimmer);font-family:var(--mono);font-size:.6vw;width:3.4em;text-align:right;font-variant-numeric:tabular-nums}
   .fc .row{font-size:.9vw;line-height:1.75} .fc .row b{color:var(--ink)} .fc .row .m{color:var(--dimmer);font-family:var(--mono);font-size:.8vw}
   footer{grid-column:1/3;grid-row:3;display:flex;justify-content:space-between;align-items:center;color:var(--dimmer);font-size:.76vw;border-top:1px solid var(--line);padding-top:11px;font-family:var(--mono);flex-wrap:wrap;gap:8px}
   footer a{color:var(--sky);text-decoration:none} footer b{color:var(--dim)}
@@ -118,8 +122,10 @@
         <canvas id="skybar" class="skybar"></canvas>
         <div class="skybarcap">average sky colour</div>
         <canvas id="imgbar" class="skybar" style="margin-top:9px"></canvas>
+        <div class="skybarcap">average campus colour (below the sky)</div>
+        <canvas id="grassbar" class="skybar" style="margin-top:9px"></canvas>
         <div class="skybarax"><span>12a</span><span>6a</span><span>noon</span><span>6p</span><span>12a</span></div>
-        <div class="skybarcap">average campus colour (below the sky) · midnight → midnight</div>
+        <div class="skybarcap">average grass colour (lawn patch) · midnight → midnight · hover a bar for the last 7 days</div>
       </div>
     </div>
     <div class="card fc" style="flex:1"><div class="h5">Forecast</div><div id="fc"></div></div>
@@ -225,7 +231,7 @@ function renderBar(cv, samples){
   ctx.fillStyle=last[1]; ctx.fill();
   ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
 }
-function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#imgbar'), sc&&sc.isamples); }
+function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#imgbar'), sc&&sc.isamples); renderBar($('#grassbar'), sc&&sc.gsamples); }
 function loadSky(){
   const s=document.createElement('script');
   s.src=GANESHA+'skycolor.js?_='+Date.now();
@@ -234,6 +240,28 @@ function loadSky(){
   document.head.appendChild(s);
 }
 window.addEventListener('resize',()=>{ if(_sky) renderBars(_sky); });
+
+// 7-day colour history on hover: one mini-bar per day, today first (accumulates as days pass).
+const HKEYS={skybar:'samples', imgbar:'isamples', grassbar:'gsamples'};
+const _hp=document.createElement('div'); _hp.className='histpop'; document.body.appendChild(_hp);
+function showHist(cv,key){
+  if(!_sky) return;
+  const days=[{date:'today',S:_sky[key]||[]}]
+    .concat((_sky.days||[]).slice().reverse().map(d=>({date:(d.date||'').slice(5),S:d[key]||[]})))
+    .slice(0,8);
+  _hp.innerHTML=days.map(d=>`<div class="histrow"><span class="hd">${d.date}</span><canvas></canvas></div>`).join('');
+  const r=cv.getBoundingClientRect();
+  _hp.style.left=Math.max(8,r.left+window.scrollX)+'px';
+  _hp.style.top=(r.bottom+window.scrollY+6)+'px';
+  _hp.style.width=r.width+'px';
+  _hp.style.display='block';
+  _hp.querySelectorAll('canvas').forEach((c,i)=>renderBar(c,days[i].S));
+}
+Object.keys(HKEYS).forEach(id=>{
+  const cv=document.getElementById(id); if(!cv) return;
+  cv.addEventListener('mouseenter',()=>showHist(cv,HKEYS[id]));
+  cv.addEventListener('mouseleave',()=>{ _hp.style.display='none'; });
+});
 
 function render(d){
   const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};
