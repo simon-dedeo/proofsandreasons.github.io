@@ -121,8 +121,6 @@
       <div class="skybarwrap">
         <canvas id="skybar" class="skybar"></canvas>
         <div class="skybarcap">average sky colour</div>
-        <canvas id="imgbar" class="skybar" style="margin-top:9px"></canvas>
-        <div class="skybarcap">average campus colour (below the sky)</div>
         <canvas id="grassbar" class="skybar" style="margin-top:9px"></canvas>
         <div class="skybarax"><span>12a</span><span>6a</span><span>noon</span><span>6p</span><span>12a</span></div>
         <div class="skybarcap">average grass colour (lawn patch) · midnight → midnight · hover a bar for the last 7 days</div>
@@ -213,7 +211,7 @@ function loadGolden(){
 let _sky=null;
 function renderBar(cv, samples){
   if(!cv) return;
-  const W=Math.max(1,Math.round(cv.clientWidth)), H=16;
+  const W=Math.max(1,Math.round(cv.clientWidth)), H=Math.max(8,Math.round(cv.clientHeight)||16);
   cv.width=W; cv.height=H;
   const ctx=cv.getContext('2d');
   ctx.fillStyle='#0a0d14'; ctx.fillRect(0,0,W,H);
@@ -227,11 +225,12 @@ function renderBar(cv, samples){
     ctx.fillRect(Math.floor(x0),0,Math.max(1,Math.ceil(x1-x0)),H);
   }
   const last=s[s.length-1], mx=last[0]/1440*W;               // current-colour blob
-  ctx.beginPath(); ctx.arc(Math.min(W-7,Math.max(7,mx)),H/2,6.5,0,Math.PI*2);
+  const mr=Math.max(3,H*0.4);   // marker radius scales with bar height (keeps the circle round in the mini history bars)
+  ctx.beginPath(); ctx.arc(Math.min(W-mr-1,Math.max(mr+1,mx)),H/2,mr,0,Math.PI*2);
   ctx.fillStyle=last[1]; ctx.fill();
   ctx.lineWidth=2; ctx.strokeStyle='#fff'; ctx.stroke();
 }
-function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#imgbar'), sc&&sc.isamples); renderBar($('#grassbar'), sc&&sc.gsamples); }
+function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#grassbar'), sc&&sc.gsamples); }
 function loadSky(){
   const s=document.createElement('script');
   s.src=GANESHA+'skycolor.js?_='+Date.now();
@@ -242,7 +241,7 @@ function loadSky(){
 window.addEventListener('resize',()=>{ if(_sky) renderBars(_sky); });
 
 // 7-day colour history on hover: one mini-bar per day, today first (accumulates as days pass).
-const HKEYS={skybar:'samples', imgbar:'isamples', grassbar:'gsamples'};
+const HKEYS={skybar:'samples', grassbar:'gsamples'};
 const _hp=document.createElement('div'); _hp.className='histpop'; document.body.appendChild(_hp);
 function showHist(cv,key){
   if(!_sky) return;
