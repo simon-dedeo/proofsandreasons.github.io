@@ -15,7 +15,7 @@
 <meta property="og:title" content="CMU Skyline Monitor">
 <meta property="og:description" content="A live view of the Pittsburgh skyline with local weather, from the Laboratory for Social Minds at CMU.">
 <meta property="og:url" content="https://proofsandreasons.io/dashboard.html">
-<meta property="og:image" content="https://sites.santafe.edu/~simon/sky.jpg">
+<meta property="og:image" content="https://photos.proofsandreasons.io/golden.jpg">
 <meta name="twitter:card" content="summary_large_image">
 <link rel="canonical" href="https://proofsandreasons.io/dashboard.html">
 <meta name="theme-color" content="#0b0d12">
@@ -42,9 +42,9 @@
   /* viewer sits flush with the top of the row (level with the weather column);
      the caption is a normal block BELOW the frame, not an overlay. */
   .viewer{grid-column:1;grid-row:2;align-self:start;display:flex;flex-direction:column;gap:11px;min-height:0}
-  /* frame takes the skyline cam's 16:10 shape so it fills with no black bars */
-  .hero{position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/10;width:100%}
-  .hero>img{width:100%;height:100%;object-fit:cover;display:block}
+  /* frame takes the Elgato Facecam's 16:9 shape; contain = show the FULL uncropped frame */
+  .hero{position:relative;border-radius:20px;overflow:hidden;background:#000;box-shadow:var(--shadow);border:1px solid var(--line);aspect-ratio:16/9;width:100%}
+  .hero>img{width:100%;height:100%;object-fit:contain;display:block}
   .cap{display:flex;flex-direction:column;gap:5px;padding:0 6px;font-family:var(--mono)}
   .cap .capmain{display:flex;gap:10px;align-items:baseline;flex-wrap:wrap;font-size:.95vw;color:var(--ink);font-weight:600}
   .cap .age{color:var(--sky);font-weight:400}
@@ -132,6 +132,7 @@
 </div>
 <script>
 const SANTAFE = "https://sites.santafe.edu/~simon/";
+const GANESHA = "https://photos.proofsandreasons.io/";   // big image assets: live sky + golden peak
 const $=s=>document.querySelector(s), pad=n=>String(n).padStart(2,'0');
 
 function tick(){
@@ -150,14 +151,14 @@ function ago(iso){ if(!iso)return ''; const s=(Date.now()-new Date(iso))/1000;
 // so fetch() is blocked; a script tag is not CORS-restricted).
 function loadData(){
   const s=document.createElement('script');
-  s.src=SANTAFE+'data.js?_='+Date.now();
+  s.src=GANESHA+'data.js?_='+Date.now();     // data now on ganesha, refreshed every tick (~5 min)
   s.onload=()=>{ if(window.MONITOR_DATA) render(window.MONITOR_DATA); s.remove(); };
   s.onerror=()=>{ $('#fresh').textContent='cannot reach monitor'; s.remove(); };
   document.head.appendChild(s);
 }
 function refreshImages(){
   const b='?_='+Date.now();
-  $('#heroImg').src=SANTAFE+'sky.jpg'+b;
+  $('#heroImg').src=GANESHA+'golden.jpg'+b;   // golden peak, hosted on ganesha (was stale santafe sky.jpg)
 }
 
 // The featured photo is the most recent inferred peak-golden-hour frame. golden.js
@@ -195,7 +196,7 @@ function renderGolden(g){
 }
 function loadGolden(){
   const s=document.createElement('script');
-  s.src=SANTAFE+'golden.js?_='+Date.now();
+  s.src=GANESHA+'golden.js?_='+Date.now();
   s.onload=()=>{ if(window.GOLDEN) renderGolden(window.GOLDEN); s.remove(); };
   s.onerror=()=>{ s.remove(); };
   document.head.appendChild(s);
@@ -227,7 +228,7 @@ function renderBar(cv, samples){
 function renderBars(sc){ _sky=sc; renderBar($('#skybar'), sc&&sc.samples); renderBar($('#imgbar'), sc&&sc.isamples); }
 function loadSky(){
   const s=document.createElement('script');
-  s.src=SANTAFE+'skycolor.js?_='+Date.now();
+  s.src=GANESHA+'skycolor.js?_='+Date.now();
   s.onload=()=>{ if(window.SKYCOLOR) renderBars(window.SKYCOLOR); s.remove(); };
   s.onerror=()=>{ s.remove(); };
   document.head.appendChild(s);
@@ -256,7 +257,7 @@ function render(d){
   // (camera caption is driven by golden.js — see renderGolden)
   if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>CPU</b> ${sys.load&&sys.cpus?Math.round(sys.load[0]/sys.cpus*100)+'%':'?'}`;
   // Status light = is the camera actually taking pictures? The monitor captures
-  // every 5 min and uploads data.js every ~15 min, so a healthy chain shows a
+  // every 5 min and now uploads data.js to ganesha every tick, so a healthy chain shows a
   // last_capture under ~25 min; 45 min = something is broken. Green: camera live.
   // Red: monitor reachable but camera not delivering. Amber: data.js itself stale
   // (monitor offline). last_capture missing = pre-2026-07-16 data.js; fall back
