@@ -158,7 +158,7 @@ function loadData(){
 }
 function refreshImages(){
   const b='?_='+Date.now();
-  $('#heroImg').src=GANESHA+'golden.jpg'+b;   // golden peak, hosted on ganesha (was stale santafe sky.jpg)
+  $('#heroImg').src=GANESHA+'sky.jpg'+b;   // LIVE HDR frame from ganesha, refreshed every tick (golden peak lives on the main page)
 }
 
 // The featured photo is the most recent inferred peak-golden-hour frame. golden.js
@@ -254,7 +254,7 @@ function render(d){
   $('#sun').innerHTML=rows.map(([k,v])=>`<div class="row"><span class="k">${k}</span><span class="v">${fmtT(v)}</span></div>`).join('');
   $('#fc').innerHTML=(w.forecast||[]).slice(0,5).map(p=>
     `<div class="row"><b>${p.name}:</b> ${p.short}, ${p.temp}°${p.unit} <span class="m">· ${p.windDir} ${p.wind}</span></div>`).join('');
-  // (camera caption is driven by golden.js — see renderGolden)
+  // (hero caption is set below from live-frame freshness + current conditions)
   if(sys.disk)$('#sys').innerHTML=`<b>DISK</b> ${sys.disk.used}/${sys.disk.size} &nbsp; <b>CPU</b> ${sys.load&&sys.cpus?Math.round(sys.load[0]/sys.cpus*100)+'%':'?'}`;
   // Status light = is the camera actually taking pictures? The monitor captures
   // every 5 min and now uploads data.js to ganesha every tick, so a healthy chain shows a
@@ -270,10 +270,14 @@ function render(d){
   else if(camM==null){ $('#fresh').textContent='system up'; }
   else if(camM>45){ L.classList.add('down'); $('#fresh').textContent=`camera down · last picture ${ago(cam.last_capture)}`; }
   else { $('#fresh').textContent=`camera live · last picture ${ago(cam.last_capture)}`; }
+  // Hero = the LIVE HDR frame; caption = current conditions + how fresh the picture is.
+  $('#heroCap').textContent='CMU skyline · live HDR';
+  $('#heroAge').textContent=(camM!=null)?' · '+ago(cam.last_capture):'';
+  $('#heroStats').innerHTML=[c.text,(c.tempF!=null?c.tempF+'°':null),(c.cloud!=null?'cloud '+c.cloud+'%':null)].filter(Boolean).join(' &nbsp;·&nbsp; ');
 }
 
-refreshImages(); loadData(); loadGolden(); loadSky();
-setInterval(()=>{ loadData(); loadGolden(); loadSky(); refreshImages(); }, 60000);
+refreshImages(); loadData(); loadSky();
+setInterval(()=>{ loadData(); loadSky(); refreshImages(); }, 60000);
 </script>
 </body>
 </html>
