@@ -1,0 +1,575 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>akdeniz · Host Monitor · Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="akdeniz · Host Monitor">
+<meta property="og:description" content="Live telemetry from akdeniz, the GPU workstation of the Laboratory for Social Minds at CMU.">
+<meta property="og:url" content="https://proofsandreasons.io/akdeniz.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/akdeniz.html">
+<style>
+  :root{
+    /* Surfaces + ink: shared with dashboard.html so the two pages read as one site. */
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    /* UI accents (text, rules, highlights) -- the site's existing tokens. */
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --warn:#ffc46b; --bad:#ff6b6b;
+    /* Chart series. Snapped into the dark-mode OKLCH lightness band (0.48-0.67)
+       from the accents above, holding hue, and validated for CVD separation
+       against the --panel surface. Do not swap these for the UI accents:
+       those sit at L~0.80 and fail the band. */
+    --s1:#c58200;  /* amber  -- CPU / primary */
+    --s2:#108bbb;  /* sky    -- network in */
+    --s3:#24a25f;  /* green  -- network out */
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;padding:22px}
+  .wrap{max-width:1500px;margin:0 auto}
+
+  /* ---------- header ---------- */
+  header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+  .host{font-weight:700;font-size:clamp(30px,3.6vw,52px);line-height:1;letter-spacing:-.025em}
+  .host .dot{display:inline-block;width:.42em;height:.42em;border-radius:50%;background:var(--good);
+    margin-right:.3em;vertical-align:.06em;box-shadow:0 0 14px var(--good)}
+  .host .dot.stale{background:var(--warn);box-shadow:0 0 14px var(--warn)}
+  .host .dot.dead{background:var(--bad);box-shadow:0 0 14px var(--bad)}
+  .sub{color:var(--dim);font-size:.92rem;margin-top:8px;font-family:var(--mono)}
+  .hright{text-align:right;font-family:var(--mono)}
+  .hright .age{font-size:1.02rem;font-weight:600;color:var(--sky)}
+  .hright .proj{color:var(--amber);font-size:.68rem;margin-top:7px;letter-spacing:.16em}
+
+  /* ---------- layout ---------- */
+  /* min() keeps the track from exceeding the viewport on narrow phones,
+     where a bare 330px minimum would force a horizontal scroll. */
+  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr));gap:16px;align-items:start}
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:18px;padding:17px 19px;box-shadow:var(--shadow);min-width:0}
+  .card.wide{grid-column:span 2}
+  @media(max-width:760px){.card.wide{grid-column:span 1}}
+  .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.63rem;
+    margin-bottom:13px;font-weight:700;font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .h5 .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
+
+  /* ---------- hero numbers + tiles ---------- */
+  .big{font-size:2.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+  .big .u{font-size:.4em;color:var(--dim);font-weight:600;margin-left:.15em;letter-spacing:0}
+  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(96px,100%),1fr));gap:11px}
+  @media(max-width:420px){ body{padding:13px} }
+  .tile{background:#0d1119;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+  .tile .k{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .tile .v{font-size:1.18rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;font-family:var(--mono)}
+  .tile .v small{font-size:.62em;color:var(--dim);font-weight:600}
+
+  /* ---------- meters ---------- */
+  .meter{margin:9px 0}
+  .meter .lab{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.72rem;margin-bottom:5px}
+  .meter .lab .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .meter .lab .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+  .track{height:8px;border-radius:4px;background:#0a0d14;border:1px solid var(--line);overflow:hidden}
+  /* 4px rounded data-end, anchored to the baseline (left edge) */
+  .track .fill{height:100%;border-radius:0 4px 4px 0;transition:width .45s ease}
+
+  /* per-core strip: 2px surface gap between adjacent bars */
+  .cores{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin-top:4px}
+  @media(max-width:520px){.cores{grid-template-columns:repeat(8,1fr)}}
+  .core{height:26px;background:#0a0d14;border-radius:3px;position:relative;overflow:hidden}
+  .core i{position:absolute;left:0;right:0;bottom:0;background:var(--s1);border-radius:3px 3px 0 0;transition:height .45s ease}
+
+  /* ---------- charts ---------- */
+  .chart{position:relative;margin-top:6px}
+  .chart svg{display:block;width:100%;height:96px;overflow:visible}
+  .chart .grid line{stroke:var(--line);stroke-width:1;opacity:.55}
+  .chart .ax{fill:var(--dimmer);font-family:var(--mono);font-size:9px}
+  .series{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+  .cross{stroke:var(--dimmer);stroke-width:1;stroke-dasharray:3 3;display:none}
+  .mk{display:none}
+  /* 2px surface ring so overlapping markers stay separable */
+  .mk circle{r:4;stroke:var(--panel);stroke-width:2}
+  .tip{position:absolute;pointer-events:none;display:none;z-index:20;background:rgba(10,13,20,.97);
+    border:1px solid var(--line);border-radius:9px;padding:8px 10px;box-shadow:var(--shadow);
+    font-family:var(--mono);font-size:.68rem;white-space:nowrap}
+  .tip .tt{color:var(--dimmer);margin-bottom:4px}
+  .tip .tr{display:flex;align-items:center;gap:7px;margin-top:3px}
+  .tip .sw{width:9px;height:9px;border-radius:2px;flex:none}
+  .tip .tv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+  /* legend: identity is never colour-alone -- swatch + text label, always present for >=2 series */
+  .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.66rem;color:var(--dim);margin-top:9px}
+  .legend span{display:flex;align-items:center;gap:6px}
+  .legend i{width:11px;height:3px;border-radius:2px;display:inline-block}
+
+  /* ---------- lists ---------- */
+  .rows{font-family:var(--mono);font-size:.74rem}
+  .row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+  .row:last-child{border-bottom:0}
+  .row .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+  .row .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  .pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.62rem;font-family:var(--mono);
+    border:1px solid var(--line);color:var(--dim)}
+  .pill.ok{color:var(--good);border-color:rgba(99,214,143,.35)}
+  .pill.warn{color:var(--warn);border-color:rgba(255,196,107,.35)}
+  .pill.bad{color:var(--bad);border-color:rgba(255,107,107,.35)}
+  /* wrap between addresses, never inside one */
+  .peers{color:var(--dimmer);font-family:var(--mono);font-size:.64rem;margin-top:8px;line-height:1.7;
+    overflow-wrap:break-word;word-break:normal}
+  .peers b{font-weight:400;color:var(--dim)}
+  .peers code{white-space:nowrap;font-family:inherit;margin-right:.6em;display:inline-block}
+
+  /* ---------- table view (accessibility fallback) ---------- */
+  details.tbl{margin-top:14px}
+  details.tbl summary{cursor:pointer;color:var(--dimmer);font-family:var(--mono);font-size:.64rem;
+    letter-spacing:.08em;text-transform:uppercase}
+  details.tbl table{width:100%;border-collapse:collapse;margin-top:9px;font-family:var(--mono);font-size:.66rem}
+  details.tbl th,details.tbl td{text-align:right;padding:3px 6px;border-bottom:1px solid var(--line);color:var(--dim)}
+  details.tbl th:first-child,details.tbl td:first-child{text-align:left}
+  details.tbl th{color:var(--dimmer);font-weight:700}
+  details.tbl td{color:var(--ink);font-variant-numeric:tabular-nums}
+
+  footer{margin-top:22px;color:var(--dimmer);font-family:var(--mono);font-size:.66rem;line-height:1.9}
+  footer a{color:var(--dim)}
+  .err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);color:var(--bad);
+    border-radius:12px;padding:11px 14px;font-family:var(--mono);font-size:.72rem;margin-bottom:16px;display:none}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="err" id="err"></div>
+
+  <header>
+    <div>
+      <div class="host"><span class="dot" id="dot"></span>akdeniz</div>
+      <div class="sub" id="subline">connecting&hellip;</div>
+    </div>
+    <div class="hright">
+      <div class="age" id="age">&mdash;</div>
+      <div class="proj">LABORATORY FOR SOCIAL MINDS &middot; CMU</div>
+    </div>
+  </header>
+
+  <div class="grid">
+
+    <!-- CPU -->
+    <div class="card wide">
+      <div class="h5"><span>Processor</span><span class="note" id="cpumeta"></span></div>
+      <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
+        <div class="big"><span id="cpupct">&mdash;</span><span class="u">%</span></div>
+        <div class="tiles" style="flex:1;min-width:230px">
+          <div class="tile"><div class="k">Load 1m</div><div class="v" id="load1">&mdash;</div></div>
+          <div class="tile"><div class="k">Load 5m</div><div class="v" id="load5">&mdash;</div></div>
+          <div class="tile"><div class="k">Load 15m</div><div class="v" id="load15">&mdash;</div></div>
+          <div class="tile"><div class="k">Runnable</div><div class="v" id="runq">&mdash;</div></div>
+        </div>
+      </div>
+      <div class="cores" id="cores"></div>
+      <div class="chart" id="cpuchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU utilisation, last hour"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend"><span><i style="background:var(--s1)"></i>CPU utilisation &mdash; last hour</span></div>
+    </div>
+
+    <!-- GPU -->
+    <div class="card">
+      <div class="h5"><span>Graphics</span><span class="note" id="gpuname"></span></div>
+      <div class="big"><span id="gpupct">&mdash;</span><span class="u">%</span></div>
+      <div class="meter">
+        <div class="lab"><span class="k">VRAM</span><span class="v" id="gpumemv">&mdash;</span></div>
+        <div class="track"><div class="fill" id="gpumembar" style="width:0;background:var(--s1)"></div></div>
+      </div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile"><div class="k">Temp</div><div class="v" id="gputemp">&mdash;</div></div>
+        <div class="tile"><div class="k">Power</div><div class="v" id="gpupower">&mdash;</div></div>
+        <div class="tile"><div class="k">Fan</div><div class="v" id="gpufan">&mdash;</div></div>
+        <div class="tile"><div class="k">Clock</div><div class="v" id="gpuclk">&mdash;</div></div>
+      </div>
+      <div class="rows" id="gpuprocs" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Memory -->
+    <div class="card">
+      <div class="h5"><span>Memory</span><span class="note" id="memmeta"></span></div>
+      <div class="big"><span id="mempct">&mdash;</span><span class="u">%</span></div>
+      <div class="meter">
+        <div class="lab"><span class="k">RAM</span><span class="v" id="memv">&mdash;</span></div>
+        <div class="track"><div class="fill" id="membar" style="width:0;background:var(--s1)"></div></div>
+      </div>
+      <div class="meter">
+        <div class="lab"><span class="k">Swap</span><span class="v" id="swapv">&mdash;</span></div>
+        <div class="track"><div class="fill" id="swapbar" style="width:0;background:var(--s3)"></div></div>
+      </div>
+      <div class="rows" style="margin-top:10px">
+        <div class="row"><span class="k">Cached</span><span class="v" id="memcached">&mdash;</span></div>
+        <div class="row"><span class="k">Buffers</span><span class="v" id="membuf">&mdash;</span></div>
+        <div class="row"><span class="k">Free</span><span class="v" id="memfree">&mdash;</span></div>
+      </div>
+    </div>
+
+    <!-- Network -->
+    <div class="card wide">
+      <div class="h5"><span>Network</span><span class="note" id="netmeta"></span></div>
+      <div class="tiles">
+        <div class="tile"><div class="k">In &middot; now</div><div class="v" id="rxnow">&mdash;</div></div>
+        <div class="tile"><div class="k">Out &middot; now</div><div class="v" id="txnow">&mdash;</div></div>
+        <div class="tile"><div class="k">In &middot; 5m avg</div><div class="v" id="rx5">&mdash;</div></div>
+        <div class="tile"><div class="k">Out &middot; 5m avg</div><div class="v" id="tx5">&mdash;</div></div>
+        <div class="tile"><div class="k">Link use</div><div class="v" id="linkuse">&mdash;</div></div>
+      </div>
+      <div class="chart" id="netchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Network throughput, last hour"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend">
+        <span><i style="background:var(--s2)"></i>Inbound</span>
+        <span><i style="background:var(--s3)"></i>Outbound</span>
+      </div>
+      <div class="rows" style="margin-top:11px">
+        <div class="row"><span class="k">Total since boot</span><span class="v" id="nettotal">&mdash;</span></div>
+        <div class="row"><span class="k">Errors (rx / tx)</span><span class="v" id="neterr">&mdash;</span></div>
+        <div class="row"><span class="k">Dropped (rx)</span><span class="v" id="netdrop">&mdash;</span></div>
+      </div>
+      <details class="tbl">
+        <summary>Table view &mdash; network, last hour</summary>
+        <table><thead><tr><th>Time</th><th>Inbound</th><th>Outbound</th></tr></thead>
+        <tbody id="nettbl"></tbody></table>
+      </details>
+    </div>
+
+    <!-- SSH -->
+    <div class="card">
+      <div class="h5"><span>SSH</span><span class="note">last hour</span></div>
+      <div class="tiles">
+        <div class="tile"><div class="k">Inbound</div><div class="v" id="sshin">&mdash;</div></div>
+        <div class="tile"><div class="k">Outbound</div><div class="v" id="sshout">&mdash;</div></div>
+      </div>
+      <div class="rows" style="margin-top:12px">
+        <div class="row"><span class="k">Accepted</span><span class="v" id="sshacc">&mdash;</span></div>
+        <div class="row"><span class="k">Failed password</span><span class="v" id="sshfail">&mdash;</span></div>
+        <div class="row"><span class="k">Invalid user</span><span class="v" id="sshinv">&mdash;</span></div>
+        <div class="row"><span class="k">Sessions / users</span><span class="v" id="sshwho">&mdash;</span></div>
+      </div>
+      <div class="peers" id="sshpeers"></div>
+    </div>
+
+    <!-- Storage -->
+    <div class="card">
+      <div class="h5"><span>Storage</span><span class="note" id="iometa"></span></div>
+      <div id="disks"></div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
+        <div class="tile"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
+      </div>
+    </div>
+
+    <!-- Temperatures -->
+    <div class="card">
+      <div class="h5"><span>Temperatures</span><span class="note">&deg;C</span></div>
+      <div class="rows" id="temps"></div>
+    </div>
+
+    <!-- Containers -->
+    <div class="card">
+      <div class="h5"><span>Containers</span><span class="note" id="ctmeta"></span></div>
+      <div class="rows" id="containers"></div>
+    </div>
+
+  </div>
+
+  <footer>
+    Collected on akdeniz every 30s and pushed to
+    <a href="https://photos.proofsandreasons.io/akdeniz/metrics.json">photos.proofsandreasons.io</a>;
+    this page is static and reads that file. &nbsp;&middot;&nbsp;
+    <span id="foot"></span>
+  </footer>
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
+  var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
+  var last = null;
+
+  // ---------- formatting ----------
+  function fmtBytes(b){
+    if(b===null||b===undefined||isNaN(b)) return "—";
+    var u=["B","KB","MB","GB","TB","PB"], i=0; b=Math.abs(b);
+    while(b>=1024 && i<u.length-1){ b/=1024; i++; }
+    return (b>=100?b.toFixed(0):b>=10?b.toFixed(1):b.toFixed(2))+" "+u[i];
+  }
+  function fmtBps(b){
+    if(b===null||b===undefined||isNaN(b)) return "—";
+    var bits=b*8, u=["bit","Kb","Mb","Gb"], i=0;
+    while(bits>=1000 && i<u.length-1){ bits/=1000; i++; }
+    return (bits>=100?bits.toFixed(0):bits>=10?bits.toFixed(1):bits.toFixed(2))+" "+u[i]+"/s";
+  }
+  function fmtDur(s){
+    if(s===null||s===undefined) return "—";
+    var d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60);
+    return d>0 ? d+"d "+h+"h" : h>0 ? h+"h "+m+"m" : m+"m";
+  }
+  function clock(ts){
+    var d=new Date(ts*1000);
+    return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
+
+  // ---------- charts ----------
+  // One shared line-chart renderer. Series share a single y-axis by
+  // construction -- there is deliberately no second scale.
+  function lineChart(wrapId, series, fmt, axisMax){
+    var wrap=document.getElementById(wrapId);
+    var svg=wrap.querySelector("svg"), tip=wrap.querySelector(".tip");
+    var W=600,H=96,PL=4,PR=4,PT=8,PB=14;
+    while(svg.firstChild) svg.removeChild(svg.firstChild);
+
+    var pts=series[0].data.length;
+    if(pts<2){ return; }
+    var all=[]; series.forEach(function(s){ s.data.forEach(function(v){ if(v!==null&&!isNaN(v)) all.push(v); }); });
+    if(!all.length) return;
+    var max=Math.max.apply(null,all), min=0;
+    if(max<=0) max=1;
+    // axisMax pins the scale for bounded quantities (a percentage tops out at
+    // 100); otherwise leave a little headroom above the observed peak.
+    max = axisMax ? axisMax : max*1.12;
+
+    var X=function(i){ return PL+(W-PL-PR)*(i/(pts-1)); };
+    var Y=function(v){ return PT+(H-PT-PB)*(1-(v-min)/(max-min)); };
+    var NS="http://www.w3.org/2000/svg";
+    function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
+
+    // recessive gridlines
+    var g=el("g",{"class":"grid"});
+    [0,.5,1].forEach(function(f){
+      var y=PT+(H-PT-PB)*f;
+      g.appendChild(el("line",{x1:PL,x2:W-PR,y1:y,y2:y}));
+    });
+    svg.appendChild(g);
+    var lab=el("text",{x:PL+2,y:PT+8,"class":"ax"}); lab.textContent=fmt(max); svg.appendChild(lab);
+
+    series.forEach(function(s){
+      var d="",open=false;
+      s.data.forEach(function(v,i){
+        if(v===null||isNaN(v)){ open=false; return; }
+        d += (open?" L":" M")+X(i).toFixed(1)+" "+Y(v).toFixed(1); open=true;
+      });
+      svg.appendChild(el("path",{d:d.trim(),"class":"series",stroke:s.color}));
+    });
+
+    // time axis ends
+    var t0=el("text",{x:PL,y:H-2,"class":"ax"}); t0.textContent=series[0].labels[0];
+    var t1=el("text",{x:W-PR,y:H-2,"class":"ax","text-anchor":"end"});
+    t1.textContent=series[0].labels[series[0].labels.length-1];
+    svg.appendChild(t0); svg.appendChild(t1);
+
+    // hover layer: crosshair + per-series markers + tooltip
+    var cross=el("line",{"class":"cross",y1:PT,y2:H-PB}); svg.appendChild(cross);
+    var marks=el("g",{"class":"mk"});
+    series.forEach(function(s){ marks.appendChild(el("circle",{fill:s.color,cx:0,cy:0})); });
+    svg.appendChild(marks);
+
+    var hit=el("rect",{x:0,y:0,width:W,height:H,fill:"transparent",style:"cursor:crosshair"});
+    svg.appendChild(hit);
+
+    function move(ev){
+      var r=svg.getBoundingClientRect();
+      var cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
+      var i=Math.round((cx/r.width*W-PL)/((W-PL-PR)/(pts-1)));
+      i=Math.max(0,Math.min(pts-1,i));
+      cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i));
+      cross.style.display="block"; marks.style.display="block";
+      var rows="<div class='tt'>"+series[0].labels[i]+"</div>";
+      series.forEach(function(s,k){
+        var v=s.data[i], c=marks.childNodes[k];
+        if(v===null||isNaN(v)){ c.setAttribute("cy",-99); }
+        else { c.setAttribute("cx",X(i)); c.setAttribute("cy",Y(v)); }
+        rows+="<div class='tr'><span class='sw' style='background:"+s.color+"'></span>"+
+              s.name+"<span class='tv'>"+(v===null||isNaN(v)?"—":fmt(v))+"</span></div>";
+      });
+      tip.innerHTML=rows; tip.style.display="block";
+      var tw=tip.offsetWidth, px=cx-tw/2;
+      px=Math.max(0,Math.min(r.width-tw,px));
+      tip.style.left=px+"px"; tip.style.top="0px";
+    }
+    function leave(){ cross.style.display="none"; marks.style.display="none"; tip.style.display="none"; }
+    hit.addEventListener("mousemove",move);
+    hit.addEventListener("mouseleave",leave);
+    hit.addEventListener("touchmove",function(e){ move(e); e.preventDefault(); },{passive:false});
+    hit.addEventListener("touchend",leave);
+  }
+
+  // ---------- render ----------
+  function render(d){
+    last=d;
+    var age=Math.max(0,Math.round(Date.now()/1000-d.ts));
+    var dot=document.getElementById("dot");
+    dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
+    txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
+    txt("subline","up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" cores  ·  "+
+        (d.gpu&&d.gpu[0]?d.gpu[0].name.replace("NVIDIA ",""):"no GPU")+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
+    txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+d.history.length+" points retained");
+
+    // CPU
+    txt("cpupct", d.cpu.pct===null?"—":d.cpu.pct.toFixed(0));
+    txt("cpumeta", d.ncpu+" cores · "+(d.load.procs||"?")+" procs");
+    txt("load1", d.load["1"]!==undefined?d.load["1"].toFixed(2):"—");
+    txt("load5", d.load["5"]!==undefined?d.load["5"].toFixed(2):"—");
+    txt("load15",d.load["15"]!==undefined?d.load["15"].toFixed(2):"—");
+    txt("runq", (d.load.running||0)+" / "+(d.load.procs||0));
+
+    var cw=document.getElementById("cores");
+    if(cw.childNodes.length!==d.cpu.cores.length){
+      cw.innerHTML="";
+      d.cpu.cores.forEach(function(){ var e=document.createElement("div"); e.className="core";
+        e.appendChild(document.createElement("i")); cw.appendChild(e); });
+    }
+    d.cpu.cores.forEach(function(v,i){
+      var bar=cw.childNodes[i].firstChild, p=(v===null?0:v);
+      bar.style.height=p+"%"; bar.style.background=heat(p);
+      cw.childNodes[i].title="core "+i+": "+(v===null?"—":p.toFixed(0)+"%");
+    });
+
+    var hist=d.history||[];
+    var labels=hist.map(function(h){ return clock(h.t); });
+    lineChart("cpuchart",[{name:"CPU",color:"#c58200",data:hist.map(function(h){return h.cpu;}),labels:labels}],
+              function(v){ return v.toFixed(0)+"%"; }, 100);
+
+    // GPU
+    var g=d.gpu&&d.gpu[0];
+    if(g){
+      txt("gpuname", g.pstate||"");
+      txt("gpupct", g.util===null?"—":g.util.toFixed(0));
+      var mp=g.mem_total_mb?100*g.mem_used_mb/g.mem_total_mb:0;
+      txt("gpumemv",(g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB");
+      var gb=document.getElementById("gpumembar"); gb.style.width=mp+"%"; gb.style.background=heat(mp);
+      txt("gputemp",(g.temp||"—")+"°");
+      txt("gpupower",(g.power===null?"—":g.power.toFixed(0))+" W");
+      txt("gpufan",(g.fan===null?"—":g.fan.toFixed(0))+"%");
+      txt("gpuclk",(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+" MHz");
+      var gp=document.getElementById("gpuprocs");
+      gp.innerHTML=(g.procs&&g.procs.length)
+        ? g.procs.map(function(p){ return "<div class='row'><span class='k'>"+p.name+" ("+p.pid+")</span>"+
+            "<span class='v'>"+(p.mem_mb/1024).toFixed(1)+" GB</span></div>"; }).join("")
+        : "<div class='row'><span class='k'>no compute processes</span><span class='v'>&mdash;</span></div>";
+    }
+
+    // Memory
+    txt("mempct", d.mem.pct===null?"—":d.mem.pct.toFixed(0));
+    txt("memmeta", fmtBytes(d.mem.total)+" total");
+    txt("memv", fmtBytes(d.mem.used)+" / "+fmtBytes(d.mem.total));
+    var mb=document.getElementById("membar"); mb.style.width=(d.mem.pct||0)+"%"; mb.style.background=heat(d.mem.pct||0);
+    txt("swapv", fmtBytes(d.mem.swap_used)+" / "+fmtBytes(d.mem.swap_total));
+    var sb=document.getElementById("swapbar"); sb.style.width=(d.mem.swap_pct||0)+"%";
+    txt("memcached",fmtBytes(d.mem.cached));
+    txt("membuf",fmtBytes(d.mem.buffers));
+    txt("memfree",fmtBytes(d.mem.free));
+
+    // Network
+    var n=d.net;
+    txt("netmeta", n.iface+(n.link_mbit?" · "+n.link_mbit+" Mb/s link":""));
+    txt("rxnow",fmtBps(n.rx_bps)); txt("txnow",fmtBps(n.tx_bps));
+    txt("rx5",fmtBps(n.rx_bps_5m)); txt("tx5",fmtBps(n.tx_bps_5m));
+    var use=(n.link_mbit&&n.rx_bps!==null)?(((n.rx_bps+ (n.tx_bps||0))*8/1e6)/n.link_mbit*100):null;
+    txt("linkuse", use===null?"—":use.toFixed(1)+"%");
+    txt("nettotal", fmtBytes(n.rx_total)+" in / "+fmtBytes(n.tx_total)+" out");
+    txt("neterr", n.rx_errors+" / "+n.tx_errors);
+    txt("netdrop", n.rx_dropped.toLocaleString());
+    lineChart("netchart",[
+      {name:"Inbound", color:"#108bbb", data:hist.map(function(h){return h.rx;}), labels:labels},
+      {name:"Outbound",color:"#24a25f", data:hist.map(function(h){return h.tx;}), labels:labels}
+    ], fmtBps);
+    var tb=document.getElementById("nettbl");
+    tb.innerHTML=hist.slice().reverse().slice(0,40).map(function(h){
+      return "<tr><td>"+clock(h.t)+"</td><td>"+fmtBps(h.rx)+"</td><td>"+fmtBps(h.tx)+"</td></tr>"; }).join("");
+
+    // SSH
+    var s=d.ssh;
+    txt("sshin",s.inbound); txt("sshout",s.outbound);
+    txt("sshacc",s.accepted_1h===null?"—":s.accepted_1h);
+    txt("sshfail",s.failed_1h===null?"—":s.failed_1h);
+    txt("sshinv",s.invalid_1h===null?"—":s.invalid_1h);
+    txt("sshwho",(d.who.sessions||0)+" / "+(d.who.users||[]).join(", "));
+    function peerList(label, arr){
+      if(!arr.length) return "";
+      return "<b>"+label+"</b> "+arr.map(function(p){ return "<code>"+p+"</code>"; }).join("")+" ";
+    }
+    document.getElementById("sshpeers").innerHTML =
+      peerList("in",s.inbound_peers) + peerList("out",s.outbound_peers);
+
+    // Storage
+    document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
+      return "<div class='meter'><div class='lab'><span class='k'>"+k.mount+"</span>"+
+        "<span class='v'>"+fmtBytes(k.used)+" / "+fmtBytes(k.total)+" · "+k.pct+"%</span></div>"+
+        "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
+    }).join("");
+    txt("ioread",fmtBps(d.diskio.read_bps)); txt("iowrite",fmtBps(d.diskio.write_bps));
+    txt("iometa","I/O now");
+
+    // Temperatures
+    document.getElementById("temps").innerHTML=(d.temps||[]).map(function(t){
+      var cls=t.temp>=85?"bad":t.temp>=70?"warn":"ok";
+      return "<div class='row'><span class='k'>"+t.chip+" · "+t.label+"</span>"+
+        "<span class='v'><span class='pill "+cls+"'>"+t.temp.toFixed(1)+"°</span></span></div>";
+    }).join("");
+
+    // Containers
+    var c=d.containers||{};
+    txt("ctmeta",(c.running===null?"unavailable":c.running+" running"));
+    // Container names share a long run prefix; strip the longest common one so
+    // the part that actually distinguishes them survives truncation.
+    var names=(c.names||[]).map(function(x){ return x.name; }), pre="";
+    if(names.length>1){
+      pre=names[0];
+      names.forEach(function(n){ while(pre && n.indexOf(pre)!==0) pre=pre.slice(0,-1); });
+      if(pre.length<4) pre="";
+    }
+    document.getElementById("containers").innerHTML=(c.names&&c.names.length)
+      ? c.names.map(function(x){
+          var short=pre?x.name.slice(pre.length):x.name;
+          return "<div class='row' title='"+x.name+"'><span class='k'>"+(short||x.name)+"</span>"+
+            "<span class='v'><span class='pill "+(x.healthy?"ok":"warn")+"'>"+x.status+"</span></span></div>"; }).join("")
+      : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
+    if(pre) txt("ctmeta", c.running+" running · "+pre+"*");
+  }
+
+  // ---------- polling ----------
+  function tick(){
+    fetch(SRC,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){ document.getElementById("err").style.display="none"; render(d); })
+      .catch(function(e){
+        var el=document.getElementById("err");
+        el.style.display="block";
+        el.textContent="Cannot reach telemetry endpoint ("+e.message+"). "+
+          (last? "Showing the last good sample." : "No data yet.");
+        document.getElementById("dot").className="dot dead";
+      });
+  }
+  tick();
+  setInterval(tick, POLL_MS);
+  // keep the "age" counter honest between polls
+  setInterval(function(){
+    if(!last) return;
+    var age=Math.max(0,Math.round(Date.now()/1000-last.ts));
+    txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
+    var dot=document.getElementById("dot");
+    dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
+  }, 1000);
+})();
+</script>
+</body>
+</html>
