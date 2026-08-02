@@ -573,6 +573,20 @@
             rx:rx,tx:tx,span:times[times.length-1]-times[0]};
   }
 
+  // Memory started being recorded after CPU and network did, so the shared
+  // window opens with a stretch it has no data for. Drop that lead-in; gaps
+  // *inside* the series are left alone, since those are real outages.
+  function trimLead(w, key, step){
+    var f=0;
+    while(f<w[key].length && w[key][f]===null) f++;
+    if(!f) return w;
+    var out={kind:w.kind, times:w.times.slice(f), labels:w.labels.slice(f)};
+    out[key]=w[key].slice(f);
+    out[key+"Max"]=w[key+"Max"] ? w[key+"Max"].slice(f) : null;
+    out.span=out.times.length ? out.times[out.times.length-1]-out.times[0]+step : 0;
+    return out;
+  }
+
   function spanText(s){
     if(s>=82800) return "last 24 hours";
     if(s>=3400 && s<=3700) return "last hour";
@@ -633,7 +647,8 @@
     // Always the day view: the card itself already shows the live number, so
     // the history is only interesting at 24h.
     var m=windowFor(d, has24?"24h":"1h"), mkeys="", mstat="";
-    if(m && m.mem){
+    if(m && m.mem) m=trimLead(m, "mem", m.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30));
+    if(m && m.mem && m.mem.length>1){
       var mseries=[{name:"Used",color:"#c58200",data:m.mem,labels:m.labels}];
       mkeys="<span><i style='background:var(--s1)'></i>RAM used &mdash; "+spanText(m.span)+"</span>";
       if(m.memMax){
