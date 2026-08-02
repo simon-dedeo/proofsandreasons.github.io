@@ -58,6 +58,7 @@
   .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr));gap:16px;align-items:start}
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
     border-radius:18px;padding:17px 19px;box-shadow:var(--shadow);min-width:0}
+  .card{position:relative}
   .card.wide{grid-column:span 2}
   @media(max-width:760px){.card.wide{grid-column:span 1}}
   .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.63rem;
@@ -74,6 +75,27 @@
   .seg button:hover{color:var(--ink)}
   .seg button[aria-pressed="true"]{background:var(--line);color:var(--ink);font-weight:700}
   .seg button:focus-visible{outline:2px solid var(--sky);outline-offset:-2px}
+
+  /* ---------- hover-revealed chart ---------- */
+  /* The memory card deliberately carries no standing chart: the history is a
+     glance-when-you-want-it thing, so it lives in a popover on the header
+     control (hover, or focus/click to pin) with the table as the fallback. */
+  .peek{background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--dim);
+    cursor:pointer;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;
+    line-height:1.5;flex:none;display:inline-flex;align-items:center;gap:5px}
+  .peek:hover,.peek[aria-expanded="true"]{color:var(--ink);border-color:var(--dimmer)}
+  .peek:focus-visible{outline:2px solid var(--sky);outline-offset:1px}
+  .peek .caret{font-size:.85em;opacity:.7}
+  /* Fully opaque, not near-opaque: the card's 2.5rem hero number sits directly
+     behind this, and even a couple of percent of white ghosts through. */
+  .pop{position:absolute;z-index:30;top:44px;right:17px;left:17px;
+    background:#0d1119;border:1px solid var(--line);border-radius:14px;
+    padding:13px 15px 11px;box-shadow:var(--shadow)}
+  .pop[hidden]{display:none}
+  .pop .poph{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+    text-transform:uppercase;font-weight:700;margin-bottom:4px}
+  .pop .legend{margin-top:7px}
+  @media(hover:none){ .peek .caret{display:none} }
 
   /* ---------- hero numbers + tiles ---------- */
   .big{font-size:2.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
@@ -245,7 +267,21 @@
 
     <!-- Memory -->
     <div class="card">
-      <div class="h5"><span>Memory</span><span class="note" id="memmeta"></span></div>
+      <div class="h5"><span>Memory</span>
+        <span class="right">
+          <span class="note" id="memmeta"></span>
+          <button type="button" class="peek" id="mempeek" aria-expanded="false"
+                  aria-controls="mempop">24H <span class="caret">&#9662;</span></button>
+        </span>
+      </div>
+      <div class="pop" id="mempop" hidden>
+        <div class="poph" id="mempoph">Memory used</div>
+        <div class="chart" id="memchart">
+          <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Memory used over time"></svg>
+          <div class="tip"></div>
+        </div>
+        <div class="legend"><span class="keys" id="memkeys"></span><span class="stat" id="memstat"></span></div>
+      </div>
       <div class="big"><span id="mempct">&mdash;</span><span class="u">%</span></div>
       <div class="meter">
         <div class="lab"><span class="k">RAM</span><span class="v" id="memv">&mdash;</span></div>
@@ -260,6 +296,10 @@
         <div class="row"><span class="k">Buffers</span><span class="v" id="membuf">&mdash;</span></div>
         <div class="row"><span class="k">Free</span><span class="v" id="memfree">&mdash;</span></div>
       </div>
+      <details class="tbl">
+        <summary id="memtblcap">Table view &mdash; memory</summary>
+        <table id="memtable"></table>
+      </details>
     </div>
 
     <!-- Network -->
@@ -495,7 +535,7 @@
   // the last hour, `history_24h` is 5-minute means for the last day. Both are
   // flattened here into the same {times, cpu, cpuMax, rx, tx} form.
   function windowFor(d, r){
-    var times=[], cpu=[], cpuMax=[], rx=[], tx=[], t, x;
+    var times=[], cpu=[], cpuMax=[], mem=[], memMax=[], rx=[], tx=[], t, x;
     if(r==="24h"){
       var rows=d.history_24h||[];
       if(rows.length<2) return null;
@@ -511,16 +551,26 @@
         x=byT[t]||null;
         times.push(t);
         cpu.push(x?x.cpu:null); cpuMax.push(x?x.cpu_max:null);
+        mem.push(x?x.mem:null); memMax.push(x?x.mem_max:null);
         rx.push(x?x.rx:null);   tx.push(x?x.tx:null);
       }
+      // Buckets recorded before memory was tracked carry mem:null. Report the
+      // series as absent rather than drawing a line that is mostly holes.
+      var haveMem=mem.filter(function(v){ return v!==null; }).length;
       return {kind:"24h",times:times,labels:times.map(dayclock),
-              cpu:cpu,cpuMax:cpuMax,rx:rx,tx:tx,span:end-start+step};
+              cpu:cpu,cpuMax:cpuMax,
+              mem:haveMem>1?mem:null, memMax:haveMem>1?memMax:null,
+              rx:rx,tx:tx,span:end-start+step};
     }
     var hist=d.history||[];
     if(hist.length<2) return null;
-    hist.forEach(function(h){ times.push(h.t); cpu.push(h.cpu); rx.push(h.rx); tx.push(h.tx); });
+    hist.forEach(function(h){
+      times.push(h.t); cpu.push(h.cpu); rx.push(h.rx); tx.push(h.tx);
+      mem.push(h.mem===undefined?null:h.mem);
+    });
     return {kind:"1h",times:times,labels:times.map(clock),
-            cpu:cpu,cpuMax:null,rx:rx,tx:tx,span:times[times.length-1]-times[0]};
+            cpu:cpu,cpuMax:null,mem:mem,memMax:null,
+            rx:rx,tx:tx,span:times[times.length-1]-times[0]};
   }
 
   function spanText(s){
@@ -579,6 +629,39 @@
     document.getElementById("cpukeys").innerHTML=keys;
     txt("cpustat", stat);
 
+    // --- Memory (popover chart + table; no standing chart on the card) ---
+    // Always the day view: the card itself already shows the live number, so
+    // the history is only interesting at 24h.
+    var m=windowFor(d, has24?"24h":"1h"), mkeys="", mstat="";
+    if(m && m.mem){
+      var mseries=[{name:"Used",color:"#c58200",data:m.mem,labels:m.labels}];
+      mkeys="<span><i style='background:var(--s1)'></i>RAM used &mdash; "+spanText(m.span)+"</span>";
+      if(m.memMax){
+        mseries.push({name:"Peak",color:"#c58200",dash:true,data:m.memMax,labels:m.labels});
+        mkeys+="<span><i class='dash' style='color:var(--s1)'></i>5-min peak</span>";
+      }
+      lineChart("memchart", mseries, pct, 100);
+      document.querySelector("#memchart svg")
+        .setAttribute("aria-label","Memory used, "+spanText(m.span));
+      var ms=stats(m.mem), mp=stats(m.memMax||m.mem);
+      if(ms) mstat="avg "+ms.avg.toFixed(1)+"% · peak "+mp.max.toFixed(1)+"%";
+      txt("mempoph","Memory used · "+spanText(m.span));
+      document.getElementById("memtblcap").innerHTML="Table view &mdash; memory, "+spanText(m.span);
+      document.getElementById("memtable").innerHTML=
+        "<thead><tr><th>Time</th><th>Used</th>"+(m.memMax?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
+        m.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
+          .filter(function(r){ return m.mem[r.i]!==null; }).slice(0,40).map(function(r){
+            return "<tr><td>"+(m.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
+              m.mem[r.i].toFixed(1)+"%</td>"+
+              (m.memMax?"<td>"+(m.memMax[r.i]===null?"—":m.memMax[r.i].toFixed(1)+"%")+"</td>":"")+"</tr>";
+          }).join("")+"</tbody>";
+    } else {
+      document.getElementById("memtable").innerHTML=
+        "<tbody><tr><td>No memory history yet.</td></tr></tbody>";
+    }
+    document.getElementById("memkeys").innerHTML=mkeys;
+    txt("memstat", mstat);
+
     // --- Network ---
     var n=windowFor(d, range.net), nstat="";
     if(n){
@@ -599,6 +682,30 @@
     }
     txt("netstat", nstat);
   }
+
+  // Hover to peek, click (or focus) to pin. The short close delay is what
+  // lets the pointer travel from the button into the popover to use the
+  // chart's own crosshair without the panel vanishing on the way.
+  (function(){
+    var btn=document.getElementById("mempeek"), pop=document.getElementById("mempop");
+    var pinned=false, timer=null;
+    function open(){ clearTimeout(timer); pop.hidden=false; btn.setAttribute("aria-expanded","true"); }
+    function close(){ clearTimeout(timer); pop.hidden=true; btn.setAttribute("aria-expanded","false"); }
+    function closeSoon(){ if(pinned) return; clearTimeout(timer); timer=setTimeout(close,180); }
+    btn.addEventListener("mouseenter",open);
+    btn.addEventListener("mouseleave",closeSoon);
+    btn.addEventListener("focus",open);
+    btn.addEventListener("blur",closeSoon);
+    pop.addEventListener("mouseenter",function(){ clearTimeout(timer); });
+    pop.addEventListener("mouseleave",closeSoon);
+    btn.addEventListener("click",function(){ pinned=!pinned; if(pinned) open(); else close(); });
+    document.addEventListener("keydown",function(e){
+      if(e.key==="Escape" && !pop.hidden){ pinned=false; close(); }
+    });
+    document.addEventListener("click",function(e){
+      if(pinned && !pop.contains(e.target) && !btn.contains(e.target)){ pinned=false; close(); }
+    });
+  })();
 
   [["cpurange","cpu"],["netrange","net"]].forEach(function(p){
     document.getElementById(p[0]).addEventListener("click", function(ev){
