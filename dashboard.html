@@ -297,6 +297,17 @@ function render(d){
   else if(camM==null){ $('#fresh').textContent='system up'; }
   else if(camM>45){ L.classList.add('down'); $('#fresh').textContent=`camera down · last picture ${ago(cam.last_capture)}`; }
   else { $('#fresh').textContent=`camera live · last picture ${ago(cam.last_capture)}`; }
+  // Window-spot corrector health. The nightly map publish is the one link in the chain
+  // that rots SILENTLY — publish_live fails soft ("live keeps last good"), so a broken
+  // transport, a refused fit and a dead cron all look identical from the outside while
+  // the blemish keeps migrating away from the map. Added 2026-08-02 after that went
+  // unnoticed for five days. Silent when fresh: nothing new appears in the normal case.
+  const co=d.corrector;
+  if(co&&co.apply&&co.state&&co.state!=='fresh'){
+    L.classList.add('stale');
+    $('#fresh').textContent+=(co.state==='missing')?' · corrector bundle missing'
+      :` · corrector map ${co.age_days}d stale${co.state==='expired'?' (fallback)':''}`;
+  }
   // Hero = the LIVE HDR frame; caption = current conditions + how fresh the picture is.
   $('#heroCap').textContent='CMU skyline · live HDR';
   $('#heroAge').textContent=(camM!=null)?' · '+ago(cam.last_capture):'';
