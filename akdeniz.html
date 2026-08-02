@@ -63,6 +63,17 @@
   .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.63rem;
     margin-bottom:13px;font-weight:700;font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;gap:8px}
   .h5 .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
+  .h5 .right{display:flex;align-items:center;gap:10px;min-width:0}
+
+  /* ---------- range toggle ---------- */
+  /* Segmented control: the selected state is carried by aria-pressed, which
+     both the styling and a screen reader read from -- never colour alone. */
+  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+  .seg button{background:transparent;border:0;color:var(--dim);cursor:pointer;
+    font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;line-height:1.5}
+  .seg button:hover{color:var(--ink)}
+  .seg button[aria-pressed="true"]{background:var(--line);color:var(--ink);font-weight:700}
+  .seg button:focus-visible{outline:2px solid var(--sky);outline-offset:-2px}
 
   /* ---------- hero numbers + tiles ---------- */
   .big{font-size:2.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
@@ -108,8 +119,13 @@
   .tip .tv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
   /* legend: identity is never colour-alone -- swatch + text label, always present for >=2 series */
   .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.66rem;color:var(--dim);margin-top:9px}
+  .legend{justify-content:space-between}
+  .legend .keys{display:flex;gap:14px;flex-wrap:wrap}
   .legend span{display:flex;align-items:center;gap:6px}
   .legend i{width:11px;height:3px;border-radius:2px;display:inline-block}
+  /* dashed swatch mirrors the dashed stroke of the peak series */
+  .legend i.dash{height:0;border-top:3px dashed currentColor;border-radius:0;background:none!important}
+  .legend .stat{color:var(--dimmer);font-variant-numeric:tabular-nums;white-space:nowrap}
 
   /* ---------- lists ---------- */
   .rows{font-family:var(--mono);font-size:.74rem}
@@ -164,7 +180,15 @@
 
     <!-- CPU -->
     <div class="card wide">
-      <div class="h5"><span>Processor</span><span class="note" id="cpumeta"></span></div>
+      <div class="h5"><span>Processor</span>
+        <span class="right">
+          <span class="note" id="cpumeta"></span>
+          <span class="seg" role="group" aria-label="CPU chart time range" id="cpurange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
       <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
         <div class="big"><span id="cpupct">&mdash;</span><span class="u">%</span></div>
         <div class="tiles" style="flex:1;min-width:230px">
@@ -176,10 +200,14 @@
       </div>
       <div class="cores" id="cores"></div>
       <div class="chart" id="cpuchart">
-        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU utilisation, last hour"></svg>
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU utilisation over time"></svg>
         <div class="tip"></div>
       </div>
-      <div class="legend"><span><i style="background:var(--s1)"></i>CPU utilisation &mdash; last hour</span></div>
+      <div class="legend"><span class="keys" id="cpukeys"></span><span class="stat" id="cpustat"></span></div>
+      <details class="tbl">
+        <summary id="cputblcap">Table view &mdash; CPU</summary>
+        <table id="cputable"></table>
+      </details>
     </div>
 
     <!-- GPU -->
@@ -220,21 +248,34 @@
 
     <!-- Network -->
     <div class="card wide">
-      <div class="h5"><span>Network</span><span class="note" id="netmeta"></span></div>
+      <div class="h5"><span>Network</span>
+        <span class="right">
+          <span class="note" id="netmeta"></span>
+          <span class="seg" role="group" aria-label="Network chart time range" id="netrange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
       <div class="tiles">
         <div class="tile"><div class="k">In &middot; now</div><div class="v" id="rxnow">&mdash;</div></div>
         <div class="tile"><div class="k">Out &middot; now</div><div class="v" id="txnow">&mdash;</div></div>
-        <div class="tile"><div class="k">In &middot; 5m avg</div><div class="v" id="rx5">&mdash;</div></div>
-        <div class="tile"><div class="k">Out &middot; 5m avg</div><div class="v" id="tx5">&mdash;</div></div>
+        <div class="tile" title="Mean inbound rate over the last 5 minutes"><div class="k">In &middot; 5m</div><div class="v" id="rx5">&mdash;</div></div>
+        <div class="tile" title="Mean outbound rate over the last 5 minutes"><div class="k">Out &middot; 5m</div><div class="v" id="tx5">&mdash;</div></div>
+        <div class="tile" title="Mean inbound rate over the last 24 hours"><div class="k">In &middot; 24h</div><div class="v" id="rx24">&mdash;</div></div>
+        <div class="tile" title="Mean outbound rate over the last 24 hours"><div class="k">Out &middot; 24h</div><div class="v" id="tx24">&mdash;</div></div>
         <div class="tile"><div class="k">Link use</div><div class="v" id="linkuse">&mdash;</div></div>
       </div>
       <div class="chart" id="netchart">
-        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Network throughput, last hour"></svg>
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Network throughput over time"></svg>
         <div class="tip"></div>
       </div>
       <div class="legend">
-        <span><i style="background:var(--s2)"></i>Inbound</span>
-        <span><i style="background:var(--s3)"></i>Outbound</span>
+        <span class="keys">
+          <span><i style="background:var(--s2)"></i>Inbound</span>
+          <span><i style="background:var(--s3)"></i>Outbound</span>
+        </span>
+        <span class="stat" id="netstat"></span>
       </div>
       <div class="rows" style="margin-top:11px">
         <div class="row"><span class="k">Total since boot</span><span class="v" id="nettotal">&mdash;</span></div>
@@ -242,7 +283,7 @@
         <div class="row"><span class="k">Dropped (rx)</span><span class="v" id="netdrop">&mdash;</span></div>
       </div>
       <details class="tbl">
-        <summary>Table view &mdash; network, last hour</summary>
+        <summary id="nettblcap">Table view &mdash; network</summary>
         <table><thead><tr><th>Time</th><th>Inbound</th><th>Outbound</th></tr></thead>
         <tbody id="nettbl"></tbody></table>
       </details>
@@ -302,6 +343,9 @@
   var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
   var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
+  // Chart window per card. The collector ships two histories: every sample for
+  // the last hour, and 5-minute means for the last 24. Default to the day view.
+  var range = {cpu:"24h", net:"24h"};
 
   // ---------- formatting ----------
   function fmtBytes(b){
@@ -325,6 +369,9 @@
     var d=new Date(ts*1000);
     return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   }
+  // A day-long axis crosses midnight, so bare HH:MM is ambiguous there.
+  var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  function dayclock(ts){ return DAYS[new Date(ts*1000).getDay()]+" "+clock(ts); }
   function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
 
@@ -367,7 +414,9 @@
         if(v===null||isNaN(v)){ open=false; return; }
         d += (open?" L":" M")+X(i).toFixed(1)+" "+Y(v).toFixed(1); open=true;
       });
-      svg.appendChild(el("path",{d:d.trim(),"class":"series",stroke:s.color}));
+      var attrs={d:d.trim(),"class":"series",stroke:s.color};
+      if(s.dash){ attrs["stroke-dasharray"]="4 3"; attrs["stroke-opacity"]=".55"; }
+      svg.appendChild(el("path",attrs));
     });
 
     // time axis ends
@@ -412,6 +461,125 @@
     hit.addEventListener("touchend",leave);
   }
 
+  // ---------- chart windows ----------
+  // Two shapes of history arrive in one payload: `history` is every sample of
+  // the last hour, `history_24h` is 5-minute means for the last day. Both are
+  // flattened here into the same {times, cpu, cpuMax, rx, tx} form.
+  function windowFor(d, r){
+    var times=[], cpu=[], cpuMax=[], rx=[], tx=[], t, x;
+    if(r==="24h"){
+      var rows=d.history_24h||[];
+      if(rows.length<2) return null;
+      var step=d.bucket_s||300, byT={};
+      rows.forEach(function(b){ byT[b.t]=b; });
+      var end=rows[rows.length-1].t;
+      // Clamp the left edge to the oldest bucket we actually have, so a
+      // monitor that has been up for two hours draws two hours rather than
+      // 22 hours of emptiness. Gaps *inside* the window stay null: those are
+      // real collection outages and should read as breaks in the line.
+      var start=Math.max(rows[0].t, end-86400+step);
+      for(t=start;t<=end;t+=step){
+        x=byT[t]||null;
+        times.push(t);
+        cpu.push(x?x.cpu:null); cpuMax.push(x?x.cpu_max:null);
+        rx.push(x?x.rx:null);   tx.push(x?x.tx:null);
+      }
+      return {kind:"24h",times:times,labels:times.map(dayclock),
+              cpu:cpu,cpuMax:cpuMax,rx:rx,tx:tx,span:end-start+step};
+    }
+    var hist=d.history||[];
+    if(hist.length<2) return null;
+    hist.forEach(function(h){ times.push(h.t); cpu.push(h.cpu); rx.push(h.rx); tx.push(h.tx); });
+    return {kind:"1h",times:times,labels:times.map(clock),
+            cpu:cpu,cpuMax:null,rx:rx,tx:tx,span:times[times.length-1]-times[0]};
+  }
+
+  function spanText(s){
+    if(s>=82800) return "last 24 hours";
+    if(s>=3400 && s<=3700) return "last hour";
+    return "last "+fmtDur(s);
+  }
+  function stats(vals){
+    var v=vals.filter(function(x){ return x!==null && !isNaN(x); });
+    if(!v.length) return null;
+    return {avg:v.reduce(function(a,b){return a+b;},0)/v.length, max:Math.max.apply(null,v)};
+  }
+  function setRangeUI(id, cur, has24){
+    var g=document.getElementById(id);
+    [].forEach.call(g.querySelectorAll("button"), function(b){
+      b.setAttribute("aria-pressed", b.dataset.range===cur ? "true" : "false");
+      if(b.dataset.range==="24h"){
+        b.disabled=!has24;
+        b.title=has24?"":"24-hour history not published yet";
+        b.style.opacity=has24?"":".4";
+      }
+    });
+  }
+
+  function drawCharts(d){
+    var has24=(d.history_24h||[]).length>=2;
+    if(!has24){ if(range.cpu==="24h") range.cpu="1h"; if(range.net==="24h") range.net="1h"; }
+    setRangeUI("cpurange", range.cpu, has24);
+    setRangeUI("netrange", range.net, has24);
+    var pct=function(v){ return v.toFixed(0)+"%"; };
+
+    // --- CPU ---
+    var w=windowFor(d, range.cpu), keys="", stat="";
+    if(w){
+      var series=[{name:"CPU",color:"#c58200",data:w.cpu,labels:w.labels}];
+      keys="<span><i style='background:var(--s1)'></i>CPU utilisation &mdash; "+spanText(w.span)+"</span>";
+      if(w.cpuMax){
+        series.push({name:"Peak",color:"#c58200",dash:true,data:w.cpuMax,labels:w.labels});
+        keys+="<span><i class='dash' style='color:var(--s1)'></i>peak within each 5 min</span>";
+      }
+      lineChart("cpuchart", series, pct, 100);
+      document.querySelector("#cpuchart svg")
+        .setAttribute("aria-label","CPU utilisation, "+spanText(w.span));
+      var cs=stats(w.cpu), pk=stats(w.cpuMax||w.cpu);
+      if(cs) stat="avg "+cs.avg.toFixed(1)+"% · peak "+pk.max.toFixed(0)+"%";
+      var pkcol=w.cpuMax?"<th>Peak</th>":"";
+      document.getElementById("cputblcap").innerHTML="Table view &mdash; CPU, "+spanText(w.span);
+      document.getElementById("cputable").innerHTML=
+        "<thead><tr><th>Time</th><th>CPU</th>"+pkcol+"</tr></thead><tbody>"+
+        w.times.map(function(t,i){ return {t:t,i:i}; }).reverse().slice(0,40).map(function(r){
+          return "<tr><td>"+(w.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
+            (w.cpu[r.i]===null?"—":w.cpu[r.i].toFixed(1)+"%")+"</td>"+
+            (w.cpuMax?"<td>"+(w.cpuMax[r.i]===null?"—":w.cpuMax[r.i].toFixed(1)+"%")+"</td>":"")+"</tr>";
+        }).join("")+"</tbody>";
+    }
+    document.getElementById("cpukeys").innerHTML=keys;
+    txt("cpustat", stat);
+
+    // --- Network ---
+    var n=windowFor(d, range.net), nstat="";
+    if(n){
+      lineChart("netchart",[
+        {name:"Inbound", color:"#108bbb", data:n.rx, labels:n.labels},
+        {name:"Outbound",color:"#24a25f", data:n.tx, labels:n.labels}
+      ], fmtBps);
+      document.querySelector("#netchart svg")
+        .setAttribute("aria-label","Network throughput, "+spanText(n.span));
+      var rs=stats(n.rx), ts=stats(n.tx);
+      nstat=spanText(n.span)+(rs&&ts ? " · avg "+fmtBps(rs.avg)+" in / "+fmtBps(ts.avg)+" out" : "");
+      document.getElementById("nettblcap").innerHTML="Table view &mdash; network, "+spanText(n.span);
+      document.getElementById("nettbl").innerHTML=
+        n.times.map(function(t,i){ return {t:t,i:i}; }).reverse().slice(0,40).map(function(r){
+          return "<tr><td>"+(n.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
+            fmtBps(n.rx[r.i])+"</td><td>"+fmtBps(n.tx[r.i])+"</td></tr>";
+        }).join("");
+    }
+    txt("netstat", nstat);
+  }
+
+  [["cpurange","cpu"],["netrange","net"]].forEach(function(p){
+    document.getElementById(p[0]).addEventListener("click", function(ev){
+      var b=ev.target.closest("button");
+      if(!b || b.disabled) return;
+      range[p[1]]=b.dataset.range;
+      if(last) drawCharts(last);
+    });
+  });
+
   // ---------- render ----------
   function render(d){
     last=d;
@@ -421,7 +589,9 @@
     txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
     txt("subline","up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" cores  ·  "+
         (d.gpu&&d.gpu[0]?d.gpu[0].name.replace("NVIDIA ",""):"no GPU")+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
-    txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+d.history.length+" points retained");
+    txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+
+        d.history.length+" fine points · "+((d.history_24h||[]).length)+" × "+
+        ((d.bucket_s||300)/60)+"-min buckets");
 
     // CPU
     txt("cpupct", d.cpu.pct===null?"—":d.cpu.pct.toFixed(0));
@@ -442,11 +612,6 @@
       bar.style.height=p+"%"; bar.style.background=heat(p);
       cw.childNodes[i].title="core "+i+": "+(v===null?"—":p.toFixed(0)+"%");
     });
-
-    var hist=d.history||[];
-    var labels=hist.map(function(h){ return clock(h.t); });
-    lineChart("cpuchart",[{name:"CPU",color:"#c58200",data:hist.map(function(h){return h.cpu;}),labels:labels}],
-              function(v){ return v.toFixed(0)+"%"; }, 100);
 
     // GPU
     var g=d.gpu&&d.gpu[0];
@@ -483,18 +648,12 @@
     txt("netmeta", n.iface+(n.link_mbit?" · "+n.link_mbit+" Mb/s link":""));
     txt("rxnow",fmtBps(n.rx_bps)); txt("txnow",fmtBps(n.tx_bps));
     txt("rx5",fmtBps(n.rx_bps_5m)); txt("tx5",fmtBps(n.tx_bps_5m));
+    txt("rx24",fmtBps(n.rx_bps_24h)); txt("tx24",fmtBps(n.tx_bps_24h));
     var use=(n.link_mbit&&n.rx_bps!==null)?(((n.rx_bps+ (n.tx_bps||0))*8/1e6)/n.link_mbit*100):null;
     txt("linkuse", use===null?"—":use.toFixed(1)+"%");
     txt("nettotal", fmtBytes(n.rx_total)+" in / "+fmtBytes(n.tx_total)+" out");
     txt("neterr", n.rx_errors+" / "+n.tx_errors);
     txt("netdrop", n.rx_dropped.toLocaleString());
-    lineChart("netchart",[
-      {name:"Inbound", color:"#108bbb", data:hist.map(function(h){return h.rx;}), labels:labels},
-      {name:"Outbound",color:"#24a25f", data:hist.map(function(h){return h.tx;}), labels:labels}
-    ], fmtBps);
-    var tb=document.getElementById("nettbl");
-    tb.innerHTML=hist.slice().reverse().slice(0,40).map(function(h){
-      return "<tr><td>"+clock(h.t)+"</td><td>"+fmtBps(h.rx)+"</td><td>"+fmtBps(h.tx)+"</td></tr>"; }).join("");
 
     // SSH
     var s=d.ssh;
@@ -544,6 +703,8 @@
             "<span class='v'><span class='pill "+(x.healthy?"ok":"warn")+"'>"+x.status+"</span></span></div>"; }).join("")
       : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
     if(pre) txt("ctmeta", c.running+" running · "+pre+"*");
+
+    drawCharts(d);
   }
 
   // ---------- polling ----------
