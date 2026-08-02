@@ -144,6 +144,22 @@
   .peers b{font-weight:400;color:var(--dim)}
   .peers code{white-space:nowrap;font-family:inherit;margin-right:.6em;display:inline-block}
 
+  /* ---------- top attacker ---------- */
+  .atk{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono)}
+  .atk .cap{color:var(--dimmer);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;margin-bottom:8px}
+  .atk .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+  /* Colour emoji ignore the mono stack; give the flag its own line box so it
+     doesn't drag the baseline of the address next to it. */
+  .atk .flag{font-size:1.3rem;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif}
+  .atk .ip{font-size:.94rem;font-weight:700;color:var(--ink);word-break:break-all}
+  .atk .n{color:var(--bad);font-size:.72rem;white-space:nowrap;margin-left:auto}
+  .atk .where{color:var(--dim);font-size:.68rem;margin-top:5px}
+  .atk .rest{color:var(--dimmer);font-size:.64rem;margin-top:9px;line-height:1.9;
+    overflow-wrap:break-word;word-break:normal}
+  .atk .rest span{white-space:nowrap;margin-right:.85em;display:inline-block}
+  .atk .tot{color:var(--dimmer);font-size:.63rem;margin-top:8px}
+
   /* ---------- table view (accessibility fallback) ---------- */
   details.tbl{margin-top:14px}
   details.tbl summary{cursor:pointer;color:var(--dimmer);font-family:var(--mono);font-size:.64rem;
@@ -303,6 +319,7 @@
         <div class="row"><span class="k">Sessions / users</span><span class="v" id="sshwho">&mdash;</span></div>
       </div>
       <div class="peers" id="sshpeers"></div>
+      <div class="atk" id="sshatk" hidden></div>
     </div>
 
     <!-- Storage -->
@@ -373,6 +390,18 @@
   var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   function dayclock(ts){ return DAYS[new Date(ts*1000).getDay()]+" "+clock(ts); }
   function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  // City/region/country come from a third-party geolocation API, so they are
+  // the one thing on this page that is not host-controlled -- escape them.
+  function esc(s){
+    return String(s).replace(/[&<>"]/g, function(c){
+      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; });
+  }
+  // ISO 3166-1 alpha-2 -> regional indicator pair, which renders as a flag.
+  function flag(cc){
+    if(!cc || !/^[A-Za-z]{2}$/.test(cc)) return "";
+    var a=cc.toUpperCase();
+    return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
+  }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
 
   // ---------- charts ----------
@@ -668,6 +697,33 @@
     }
     document.getElementById("sshpeers").innerHTML =
       peerList("in",s.inbound_peers) + peerList("out",s.outbound_peers);
+
+    // Top failed-auth source over 24h. Geo fills in a run or two behind the
+    // ranking (one lookup per collector run), so treat it as optional.
+    var atk=document.getElementById("sshatk"), top=s.top_attackers||[];
+    if(top.length){
+      var a=top[0], parts=[];
+      [a.city,a.region,a.country].forEach(function(p){
+        if(p && parts.indexOf(p)<0) parts.push(p);   // "Ho Chi Minh City" twice, otherwise
+      });
+      var fl=flag(a.cc);
+      var html="<div class='cap'>Most persistent attacker &middot; 24h</div>"+
+        "<div class='who'>"+(fl?"<span class='flag'>"+fl+"</span>":"")+
+        "<span class='ip'>"+esc(a.ip)+"</span>"+
+        "<span class='n'>"+a.n.toLocaleString()+" failed logins</span></div>"+
+        "<div class='where'>"+(parts.length?esc(parts.join(", ")):"locating&hellip;")+"</div>";
+      var rest=top.slice(1);
+      if(rest.length){
+        html+="<div class='rest'>then "+rest.map(function(r){
+          return "<span>"+(flag(r.cc)||"&middot;")+" "+esc(r.ip)+" ("+r.n+")</span>";
+        }).join("")+"</div>";
+      }
+      if(s.failed_24h!==null&&s.failed_24h!==undefined){
+        html+="<div class='tot'>"+s.failed_24h.toLocaleString()+" failed attempts from "+
+              s.attackers_24h+" addresses in 24h</div>";
+      }
+      atk.innerHTML=html; atk.hidden=false;
+    } else { atk.hidden=true; }
 
     // Storage
     document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
