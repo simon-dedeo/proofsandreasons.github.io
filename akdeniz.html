@@ -429,11 +429,13 @@
 (function(){
   "use strict";
   var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
-  // Queue depth on ORCHARD and PSC. Written by a poller on the laptop, not by
-  // the akdeniz collector, so it updates on its own slower cadence and goes
-  // stale whenever that machine is asleep -- hence the per-cluster ages.
+  // Queue depth on ORCHARD and PSC, written by akdeniz-jobs.timer every five
+  // minutes rather than by the 30s telemetry collector -- each poll costs two
+  // remote logins. Separate file, separate cadence, separate failure: either
+  // cluster can lapse (ORCHARD's OAuth token expires on Google's reauth
+  // policy) while the other stays live, so ages are tracked per cluster.
   var JOBS_SRC = "https://photos.proofsandreasons.io/akdeniz/jobs.json";
-  var JOBS_STALE_S = 1200;
+  var JOBS_STALE_S = 1200;   // four missed polls
   var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
   // Chart window per card. The collector ships two histories: every sample for
