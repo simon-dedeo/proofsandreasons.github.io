@@ -166,6 +166,31 @@
   .peers b{font-weight:400;color:var(--dim)}
   .peers code{white-space:nowrap;font-family:inherit;margin-right:.6em;display:inline-block}
 
+  /* ---------- cluster jobs ---------- */
+  .clusters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px}
+  .cl{background:#0d1119;border:1px solid var(--line);border-radius:13px;padding:12px 14px;min-width:0}
+  .cl.stale{opacity:.62}
+  .clh{display:flex;align-items:baseline;gap:9px;font-family:var(--mono);margin-bottom:10px}
+  .clh .nm{font-size:.8rem;font-weight:700;letter-spacing:.06em}
+  .clh .tot{color:var(--dim);font-size:.68rem}
+  .clh .ago{margin-left:auto;color:var(--dimmer);font-size:.62rem;white-space:nowrap}
+  .clh .ago.old{color:var(--warn)}
+  .mx{width:100%;border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .mx th{color:var(--dimmer);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+    text-align:right;padding:0 0 5px}
+  .mx th:first-child{text-align:left}
+  .mx tbody th{color:var(--dim);font-size:.66rem;letter-spacing:.08em;padding:4px 0;border-top:1px solid var(--line)}
+  .mx td{text-align:right;font-size:1.05rem;font-weight:700;padding:4px 0;border-top:1px solid var(--line);
+    width:34%}
+  /* Zero is the common case and should recede; a nonzero count is the signal. */
+  .mx td.z{color:var(--dimmer);font-weight:400}
+  .mx td.wait{color:var(--warn)}
+  .mx td.run{color:var(--good)}
+  .clsub{color:var(--dimmer);font-family:var(--mono);font-size:.62rem;margin-top:9px;line-height:1.7}
+  .clsub b{font-weight:400;color:var(--dim)}
+  .clerr{color:var(--bad);font-family:var(--mono);font-size:.63rem;margin-top:8px;
+    overflow-wrap:break-word}
+
   /* ---------- top attacker ---------- */
   .atk{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono)}
   .atk .cap{color:var(--dimmer);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
@@ -345,6 +370,12 @@
       </details>
     </div>
 
+    <!-- Cluster jobs -->
+    <div class="card wide">
+      <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
+      <div class="clusters" id="clusters"></div>
+    </div>
+
     <!-- SSH -->
     <div class="card">
       <div class="h5"><span>SSH</span><span class="note">last hour</span></div>
@@ -398,6 +429,11 @@
 (function(){
   "use strict";
   var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
+  // Queue depth on ORCHARD and PSC. Written by a poller on the laptop, not by
+  // the akdeniz collector, so it updates on its own slower cadence and goes
+  // stale whenever that machine is asleep -- hence the per-cluster ages.
+  var JOBS_SRC = "https://photos.proofsandreasons.io/akdeniz/jobs.json";
+  var JOBS_STALE_S = 1200;
   var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
   // Chart window per card. The collector ships two histories: every sample for
@@ -731,6 +767,56 @@
     });
   });
 
+  // ---------- cluster jobs ----------
+  function jobCell(n, cls){
+    if(n===null||n===undefined) return "<td class='z'>&mdash;</td>";
+    return "<td class='"+(n?cls:"z")+"'>"+n+"</td>";
+  }
+  function renderJobs(j){
+    var wrap=document.getElementById("clusters");
+    var cls=(j&&j.clusters)||[];
+    if(!cls.length){
+      wrap.innerHTML="<div class='clsub'>No cluster data yet.</div>";
+      txt("jobsmeta",""); return;
+    }
+    var now=Date.now()/1000, newest=0;
+    wrap.innerHTML=cls.map(function(c){
+      var jb=c.jobs, age=c.ts?Math.max(0,Math.round(now-c.ts)):null;
+      if(c.ts&&c.ts>newest) newest=c.ts;
+      var stale=(age===null)||(age>JOBS_STALE_S);
+      var html="<div class='cl"+(stale?" stale":"")+"'>";
+      var total=jb?(jb.running.cpu+jb.running.gpu+jb.waiting.cpu+jb.waiting.gpu+(jb.other||0)):null;
+      html+="<div class='clh'><span class='nm'>"+esc(c.name)+"</span>"+
+            "<span class='tot'>"+(total===null?"&mdash;":total+(total===1?" job":" jobs"))+"</span>"+
+            "<span class='ago"+(stale?" old":"")+"'>"+
+              (age===null?"never":(age<90?age+"s":fmtDur(age))+" ago")+"</span></div>";
+      if(jb){
+        html+="<table class='mx'><thead><tr><th></th><th>Waiting</th><th>Running</th></tr></thead><tbody>"+
+          "<tr><th>CPU</th>"+jobCell(jb.waiting.cpu,"wait")+jobCell(jb.running.cpu,"run")+"</tr>"+
+          "<tr><th>GPU</th>"+jobCell(jb.waiting.gpu,"gpu wait")+jobCell(jb.running.gpu,"gpu run")+"</tr>"+
+          "</tbody></table>";
+        var sub=[];
+        if(c.cores&&c.gpus){
+          // Jobs are the headline; the resources behind them are the useful
+          // second question, and they come free from the same query.
+          if(c.cores.running||c.gpus.running)
+            sub.push("<b>running</b> "+c.cores.running.toLocaleString()+" cores"+
+                     (c.gpus.running?" &middot; "+c.gpus.running+" GPU":""));
+          if(c.cores.waiting||c.gpus.waiting)
+            sub.push("<b>queued</b> "+c.cores.waiting.toLocaleString()+" cores"+
+                     (c.gpus.waiting?" &middot; "+c.gpus.waiting+" GPU":""));
+        }
+        if(jb.other) sub.push("<b>other states</b> "+jb.other);
+        if(sub.length) html+="<div class='clsub'>"+sub.join("<br>")+"</div>";
+      }
+      if(!c.ok&&c.err) html+="<div class='clerr'>last poll failed: "+esc(c.err)+"</div>";
+      return html+"</div>";
+    }).join("");
+    var age=newest?Math.max(0,Math.round(now-newest)):null;
+    txt("jobsmeta", "our queued + running jobs"+
+        (age===null?"":" · polled "+(age<90?age+"s":fmtDur(age))+" ago"));
+  }
+
   // ---------- render ----------
   function render(d){
     last=d;
@@ -898,8 +984,23 @@
         document.getElementById("dot").className="dot dead";
       });
   }
+  // Fetched separately from the host metrics: it comes from a different
+  // machine on a different cadence, and its absence must not disturb the rest
+  // of the page.
+  var lastJobs=null;
+  function tickJobs(){
+    fetch(JOBS_SRC,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(j){ lastJobs=j; renderJobs(j); })
+      .catch(function(){ if(!lastJobs) renderJobs(null); });
+  }
+
   tick();
+  tickJobs();
   setInterval(tick, POLL_MS);
+  setInterval(tickJobs, 60000);
+  // Ages in the cluster panel drift between polls just like the header's does.
+  setInterval(function(){ if(lastJobs) renderJobs(lastJobs); }, 15000);
   // keep the "age" counter honest between polls
   setInterval(function(){
     if(!last) return;
