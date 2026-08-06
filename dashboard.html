@@ -37,6 +37,9 @@
   .clock .sec{color:var(--amber);font-size:.4em;vertical-align:.3em;margin-left:.12em}
   .rt{text-align:right}
   .rt .d{font-size:1.5vw;font-weight:600}
+  .rt .mon{font-size:.92vw;margin-top:5px;font-family:var(--mono)}
+  .rt .mon a{color:var(--sky);text-decoration:none}
+  .rt .mon a:hover{text-decoration:underline}
   .rt .loc{color:var(--dim);font-size:1.02vw;margin-top:3px}
   .rt .proj{color:var(--amber);font-size:.82vw;margin-top:7px;letter-spacing:.16em;font-family:var(--mono)}
   /* viewer sits flush with the top of the row (level with the weather column);
@@ -88,6 +91,7 @@
     .frame{grid-template-columns:1fr;grid-template-rows:auto auto auto auto}
     .viewer{grid-column:1;grid-row:2} aside{grid-column:1;grid-row:3} footer{grid-column:1;grid-row:4}
     .clock{font-size:16vw} .rt .d{font-size:5vw} .rt .loc{font-size:3.4vw} .rt .proj{font-size:3vw}
+    .rt .mon{font-size:3vw}
     .now .temp{font-size:15vw} .now .desc{font-size:4.4vw} .now .sub{font-size:3vw}
     .h5{font-size:2.6vw} .hourly .t,.hourly .p{font-size:2.4vw} .hourly .tp{font-size:4vw}
     .sun .row{font-size:3.2vw} .fc .row{font-size:3.2vw} footer{font-size:2.8vw}
@@ -101,6 +105,9 @@
     <div class="clock" id="clock">--:--<span class="sec" id="sec">00</span></div>
     <div class="rt">
       <div class="d" id="date">—</div>
+      <!-- Sits outside #loc deliberately: render() overwrites that element's
+           textContent from the feed, which would eat an anchor placed inside. -->
+      <div class="mon"><a href="/akdeniz.html">akdeniz host monitor →</a></div>
       <div class="loc" id="loc">Proofs &amp; Reasons @ Carnegie Mellon University • Pittsburgh, PA</div>
     </div>
   </header>
