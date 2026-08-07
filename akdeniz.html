@@ -289,7 +289,15 @@
 
     <!-- GPU -->
     <div class="card">
-      <div class="h5"><span>Graphics</span><span class="note" id="gpuname"></span></div>
+      <div class="h5"><span>Graphics</span>
+        <span class="right">
+          <span class="note" id="gpuname"></span>
+          <span class="seg" role="group" aria-label="GPU chart time range" id="gpurange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
       <div class="big"><span id="gpupct">&mdash;</span><span class="u">%</span></div>
       <div class="meter">
         <div class="lab"><span class="k">VRAM</span><span class="v" id="gpumemv">&mdash;</span></div>
@@ -301,6 +309,15 @@
         <div class="tile"><div class="k">Fan</div><div class="v" id="gpufan">&mdash;</div></div>
         <div class="tile"><div class="k">Clock</div><div class="v" id="gpuclk">&mdash;</div></div>
       </div>
+      <div class="chart" id="gpuchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="GPU utilisation over time"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend"><span class="keys" id="gpukeys"></span><span class="stat" id="gpustat"></span></div>
+      <details class="tbl">
+        <summary id="gputblcap">Table view &mdash; GPU</summary>
+        <table id="gputable"></table>
+      </details>
       <div class="rows" id="gpuprocs" style="margin-top:12px"></div>
     </div>
 
@@ -457,7 +474,7 @@
   var last = null;
   // Chart window per card. The collector ships two histories: every sample for
   // the last hour, and 5-minute means for the last 24. Default to the day view.
-  var range = {cpu:"24h", net:"24h"};
+  var range = {cpu:"24h", gpu:"24h", net:"24h"};
 
   // ---------- formatting ----------
   function fmtBytes(b){
@@ -590,7 +607,7 @@
   // the last hour, `history_24h` is 5-minute means for the last day. Both are
   // flattened here into the same {times, cpu, cpuMax, rx, tx} form.
   function windowFor(d, r){
-    var times=[], cpu=[], cpuMax=[], mem=[], memMax=[], rx=[], tx=[], t, x;
+    var times=[], cpu=[], cpuMax=[], mem=[], memMax=[], gpu=[], gpuMax=[], rx=[], tx=[], t, x;
     if(r==="24h"){
       var rows=d.history_24h||[];
       if(rows.length<2) return null;
@@ -607,14 +624,17 @@
         times.push(t);
         cpu.push(x?x.cpu:null); cpuMax.push(x?x.cpu_max:null);
         mem.push(x?x.mem:null); memMax.push(x?x.mem_max:null);
+        gpu.push(x?x.gpu:null); gpuMax.push(x?x.gpu_max:null);
         rx.push(x?x.rx:null);   tx.push(x?x.tx:null);
       }
-      // Buckets recorded before memory was tracked carry mem:null. Report the
-      // series as absent rather than drawing a line that is mostly holes.
-      var haveMem=mem.filter(function(v){ return v!==null; }).length;
+      // Buckets predating a series carry null for it (memory and GPU were
+      // added after CPU). Report such a series as absent rather than drawing
+      // a line that is mostly holes.
+      function present(a){ return a.filter(function(v){ return v!==null; }).length>1; }
       return {kind:"24h",times:times,labels:times.map(dayclock),
               cpu:cpu,cpuMax:cpuMax,
-              mem:haveMem>1?mem:null, memMax:haveMem>1?memMax:null,
+              mem:present(mem)?mem:null, memMax:present(mem)?memMax:null,
+              gpu:present(gpu)?gpu:null, gpuMax:present(gpu)?gpuMax:null,
               rx:rx,tx:tx,span:end-start+step};
     }
     var hist=d.history||[];
@@ -622,9 +642,10 @@
     hist.forEach(function(h){
       times.push(h.t); cpu.push(h.cpu); rx.push(h.rx); tx.push(h.tx);
       mem.push(h.mem===undefined?null:h.mem);
+      gpu.push(h.gpu===undefined?null:h.gpu);
     });
     return {kind:"1h",times:times,labels:times.map(clock),
-            cpu:cpu,cpuMax:null,mem:mem,memMax:null,
+            cpu:cpu,cpuMax:null,mem:mem,memMax:null,gpu:gpu,gpuMax:null,
             rx:rx,tx:tx,span:times[times.length-1]-times[0]};
   }
 
@@ -652,6 +673,51 @@
     if(!v.length) return null;
     return {avg:v.reduce(function(a,b){return a+b;},0)/v.length, max:Math.max.apply(null,v)};
   }
+  function pctFmt(v){ return v.toFixed(0)+"%"; }
+
+  // CPU, GPU and memory are the same picture: a percentage line, a dashed
+  // within-bucket peak wherever the coarse history carries one, a stat line
+  // and a table view. Only the ids, labels and which series to read differ.
+  function drawPercentSeries(d, o){
+    var w=o.win, key=o.key, maxKey=key+"Max";
+    // Series added after CPU (memory, GPU) open with a stretch of nulls in the
+    // 24h window; drop that lead-in so the chart does not start with dead space.
+    if(w && w[key]) w=trimLead(w, key, w.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30));
+    var keys="", stat="", have=!!(w && w[key] && w[key].length>1);
+    if(have){
+      var series=[{name:o.col,color:"#c58200",data:w[key],labels:w.labels}];
+      keys="<span><i style='background:var(--s1)'></i>"+o.legend+" &mdash; "+spanText(w.span)+"</span>";
+      if(w[maxKey]){
+        series.push({name:"Peak",color:"#c58200",dash:true,data:w[maxKey],labels:w.labels});
+        keys+="<span><i class='dash' style='color:var(--s1)'></i>5-min peak</span>";
+      }
+      lineChart(o.chart, series, pctFmt, 100);
+      document.querySelector("#"+o.chart+" svg")
+        .setAttribute("aria-label", o.legend+", "+spanText(w.span));
+      var s=stats(w[key]), pk=stats(w[maxKey]||w[key]);
+      // A peak of 100 should read "100%", one of 4.7 should not read "5%".
+      if(s) stat="avg "+s.avg.toFixed(1)+"% · peak "+pk.max.toFixed(pk.max>=10?0:1)+"%";
+      if(o.head) txt(o.head, o.legend+" · "+spanText(w.span));
+      document.getElementById(o.tblcap).innerHTML=
+        "Table view &mdash; "+o.tblName+", "+spanText(w.span);
+      document.getElementById(o.tbl).innerHTML=
+        "<thead><tr><th>Time</th><th>"+o.col+"</th>"+(w[maxKey]?"<th>Peak</th>":"")+
+        "</tr></thead><tbody>"+
+        w.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
+          .filter(function(r){ return w[key][r.i]!==null; }).slice(0,40).map(function(r){
+            return "<tr><td>"+(w.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
+              w[key][r.i].toFixed(1)+"%</td>"+
+              (w[maxKey]?"<td>"+(w[maxKey][r.i]===null?"—":w[maxKey][r.i].toFixed(1)+"%")+"</td>":"")+
+              "</tr>";
+          }).join("")+"</tbody>";
+    } else {
+      document.getElementById(o.tbl).innerHTML=
+        "<tbody><tr><td>No "+o.tblName+" history yet.</td></tr></tbody>";
+    }
+    document.getElementById(o.keys).innerHTML=keys;
+    txt(o.stat, stat);
+  }
+
   function setRangeUI(id, cur, has24){
     var g=document.getElementById(id);
     [].forEach.call(g.querySelectorAll("button"), function(b){
@@ -666,71 +732,32 @@
 
   function drawCharts(d){
     var has24=(d.history_24h||[]).length>=2;
-    if(!has24){ if(range.cpu==="24h") range.cpu="1h"; if(range.net==="24h") range.net="1h"; }
+    if(!has24){
+      if(range.cpu==="24h") range.cpu="1h";
+      if(range.gpu==="24h") range.gpu="1h";
+      if(range.net==="24h") range.net="1h";
+    }
     setRangeUI("cpurange", range.cpu, has24);
+    setRangeUI("gpurange", range.gpu, has24);
     setRangeUI("netrange", range.net, has24);
-    var pct=function(v){ return v.toFixed(0)+"%"; };
 
-    // --- CPU ---
-    var w=windowFor(d, range.cpu), keys="", stat="";
-    if(w){
-      var series=[{name:"CPU",color:"#c58200",data:w.cpu,labels:w.labels}];
-      keys="<span><i style='background:var(--s1)'></i>CPU utilisation &mdash; "+spanText(w.span)+"</span>";
-      if(w.cpuMax){
-        series.push({name:"Peak",color:"#c58200",dash:true,data:w.cpuMax,labels:w.labels});
-        keys+="<span><i class='dash' style='color:var(--s1)'></i>peak within each 5 min</span>";
-      }
-      lineChart("cpuchart", series, pct, 100);
-      document.querySelector("#cpuchart svg")
-        .setAttribute("aria-label","CPU utilisation, "+spanText(w.span));
-      var cs=stats(w.cpu), pk=stats(w.cpuMax||w.cpu);
-      if(cs) stat="avg "+cs.avg.toFixed(1)+"% · peak "+pk.max.toFixed(0)+"%";
-      var pkcol=w.cpuMax?"<th>Peak</th>":"";
-      document.getElementById("cputblcap").innerHTML="Table view &mdash; CPU, "+spanText(w.span);
-      document.getElementById("cputable").innerHTML=
-        "<thead><tr><th>Time</th><th>CPU</th>"+pkcol+"</tr></thead><tbody>"+
-        w.times.map(function(t,i){ return {t:t,i:i}; }).reverse().slice(0,40).map(function(r){
-          return "<tr><td>"+(w.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
-            (w.cpu[r.i]===null?"—":w.cpu[r.i].toFixed(1)+"%")+"</td>"+
-            (w.cpuMax?"<td>"+(w.cpuMax[r.i]===null?"—":w.cpuMax[r.i].toFixed(1)+"%")+"</td>":"")+"</tr>";
-        }).join("")+"</tbody>";
-    }
-    document.getElementById("cpukeys").innerHTML=keys;
-    txt("cpustat", stat);
+    drawPercentSeries(d, {win:windowFor(d, range.cpu), key:"cpu",
+      chart:"cpuchart", keys:"cpukeys", stat:"cpustat",
+      tbl:"cputable", tblcap:"cputblcap",
+      legend:"CPU utilisation", tblName:"CPU", col:"CPU"});
 
-    // --- Memory (popover chart + table; no standing chart on the card) ---
-    // Always the day view: the card itself already shows the live number, so
-    // the history is only interesting at 24h.
-    var m=windowFor(d, has24?"24h":"1h"), mkeys="", mstat="";
-    if(m && m.mem) m=trimLead(m, "mem", m.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30));
-    if(m && m.mem && m.mem.length>1){
-      var mseries=[{name:"Used",color:"#c58200",data:m.mem,labels:m.labels}];
-      mkeys="<span><i style='background:var(--s1)'></i>RAM used &mdash; "+spanText(m.span)+"</span>";
-      if(m.memMax){
-        mseries.push({name:"Peak",color:"#c58200",dash:true,data:m.memMax,labels:m.labels});
-        mkeys+="<span><i class='dash' style='color:var(--s1)'></i>5-min peak</span>";
-      }
-      lineChart("memchart", mseries, pct, 100);
-      document.querySelector("#memchart svg")
-        .setAttribute("aria-label","Memory used, "+spanText(m.span));
-      var ms=stats(m.mem), mp=stats(m.memMax||m.mem);
-      if(ms) mstat="avg "+ms.avg.toFixed(1)+"% · peak "+mp.max.toFixed(1)+"%";
-      txt("mempoph","Memory used · "+spanText(m.span));
-      document.getElementById("memtblcap").innerHTML="Table view &mdash; memory, "+spanText(m.span);
-      document.getElementById("memtable").innerHTML=
-        "<thead><tr><th>Time</th><th>Used</th>"+(m.memMax?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
-        m.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
-          .filter(function(r){ return m.mem[r.i]!==null; }).slice(0,40).map(function(r){
-            return "<tr><td>"+(m.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
-              m.mem[r.i].toFixed(1)+"%</td>"+
-              (m.memMax?"<td>"+(m.memMax[r.i]===null?"—":m.memMax[r.i].toFixed(1)+"%")+"</td>":"")+"</tr>";
-          }).join("")+"</tbody>";
-    } else {
-      document.getElementById("memtable").innerHTML=
-        "<tbody><tr><td>No memory history yet.</td></tr></tbody>";
-    }
-    document.getElementById("memkeys").innerHTML=mkeys;
-    txt("memstat", mstat);
+    drawPercentSeries(d, {win:windowFor(d, range.gpu), key:"gpu",
+      chart:"gpuchart", keys:"gpukeys", stat:"gpustat",
+      tbl:"gputable", tblcap:"gputblcap",
+      legend:"GPU utilisation", tblName:"GPU", col:"GPU"});
+
+    // Memory is always the day view -- the card already shows the live number,
+    // so its history is only interesting at 24h -- and its chart lives in the
+    // popover, which is why this one also sets a heading.
+    drawPercentSeries(d, {win:windowFor(d, has24?"24h":"1h"), key:"mem",
+      chart:"memchart", keys:"memkeys", stat:"memstat",
+      tbl:"memtable", tblcap:"memtblcap", head:"mempoph",
+      legend:"RAM used", tblName:"memory", col:"Used"});
 
     // --- Network ---
     var n=windowFor(d, range.net), nstat="";
@@ -777,7 +804,7 @@
     });
   })();
 
-  [["cpurange","cpu"],["netrange","net"]].forEach(function(p){
+  [["cpurange","cpu"],["gpurange","gpu"],["netrange","net"]].forEach(function(p){
     document.getElementById(p[0]).addEventListener("click", function(ev){
       var b=ev.target.closest("button");
       if(!b || b.disabled) return;
