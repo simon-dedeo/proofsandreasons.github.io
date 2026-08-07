@@ -10,6 +10,12 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Live host telemetry: keep it out of search results and out of caches.
+     Deliberately NOT paired with a robots.txt Disallow -- that would stop
+     crawlers fetching the page, and a directive they never read cannot be
+     obeyed, which is how URL-only listings end up indexed anyway. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <title>akdeniz · Host Monitor · Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="akdeniz · Host Monitor">
@@ -160,12 +166,6 @@
   .pill.ok{color:var(--good);border-color:rgba(99,214,143,.35)}
   .pill.warn{color:var(--warn);border-color:rgba(255,196,107,.35)}
   .pill.bad{color:var(--bad);border-color:rgba(255,107,107,.35)}
-  /* wrap between addresses, never inside one */
-  .peers{color:var(--dimmer);font-family:var(--mono);font-size:.64rem;margin-top:8px;line-height:1.7;
-    overflow-wrap:break-word;word-break:normal}
-  .peers b{font-weight:400;color:var(--dim)}
-  .peers code{white-space:nowrap;font-family:inherit;margin-right:.6em;display:inline-block}
-
   /* ---------- cluster jobs ---------- */
   /* One table across both clusters, so CPU and GPU line up column-wise and the
      two are directly comparable. Rows are grouped two-per-cluster. */
@@ -404,7 +404,6 @@
         <div class="row"><span class="k">Invalid user</span><span class="v" id="sshinv">&mdash;</span></div>
         <div class="row"><span class="k">Sessions / users</span><span class="v" id="sshwho">&mdash;</span></div>
       </div>
-      <div class="peers" id="sshpeers"></div>
       <div class="atk" id="sshatk" hidden></div>
     </div>
 
@@ -953,12 +952,6 @@
     txt("sshfail",s.failed_1h===null?"—":s.failed_1h);
     txt("sshinv",s.invalid_1h===null?"—":s.invalid_1h);
     txt("sshwho",(d.who.sessions||0)+" / "+(d.who.users||[]).join(", "));
-    function peerList(label, arr){
-      if(!arr.length) return "";
-      return "<b>"+label+"</b> "+arr.map(function(p){ return "<code>"+p+"</code>"; }).join("")+" ";
-    }
-    document.getElementById("sshpeers").innerHTML =
-      peerList("in",s.inbound_peers) + peerList("out",s.outbound_peers);
 
     // Top failed-auth source over 24h. Geo fills in a run or two behind the
     // ranking (one lookup per collector run), so treat it as optional.
