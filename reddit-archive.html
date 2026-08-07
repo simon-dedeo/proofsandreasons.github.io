@@ -1,0 +1,523 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Live status of a local archive job, with internal paths and host detail.
+     Same reasoning as akdeniz.html: keep it out of search results, and do NOT
+     pair this with a robots.txt Disallow, which would stop crawlers reading
+     the directive at all. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<title>Reddit Archive · Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Reddit Archive">
+<meta property="og:description" content="Every public Reddit comment and submission from 2005 to 2021, archived on ganesha at the Laboratory for Social Minds at CMU.">
+<meta property="og:url" content="https://proofsandreasons.io/reddit-archive.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/reddit-archive.html">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --bad:#ff6f6f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    background-attachment:fixed;
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;padding:0 20px 80px;line-height:1.55;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  a{color:var(--sky);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:3px}
+
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+    flex-wrap:wrap;padding:44px 0 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.02}
+  .sub{color:var(--dim);max-width:60ch;margin-top:9px;font-size:1.02rem}
+  .backlinks{font-family:var(--mono);font-size:.8rem;text-align:right;color:var(--dimmer)}
+  .backlinks a{display:block;margin-top:5px}
+
+  section{margin-top:42px}
+  h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;
+    font-size:.68rem;font-weight:700;margin:26px 0 11px}
+  .lede{color:var(--dim);max-width:70ch;margin-bottom:20px}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+
+  /* ---- live status ---- */
+  .live{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:.72rem;
+    letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer)}
+  .dot{width:8px;height:8px;border-radius:50%;background:var(--dimmer);flex:none}
+  .dot.on{background:var(--good);box-shadow:0 0 0 4px rgba(99,214,143,.15)}
+  .dot.done{background:var(--sky);box-shadow:0 0 0 4px rgba(102,205,255,.15)}
+  .dot.err{background:var(--bad)}
+  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
+  .dot.on{animation:pulse 2.4s ease-in-out infinite}
+  @media (prefers-reduced-motion:reduce){.dot.on{animation:none}}
+
+  .bigpct{font-size:clamp(2.6rem,7vw,4.2rem);font-weight:700;line-height:.95;
+    font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin:14px 0 4px}
+  .bigpct span{font-size:.32em;color:var(--dim);font-weight:600;margin-left:.15em}
+  .bar{height:12px;border-radius:7px;background:#0a0f18;border:1px solid var(--line);
+    overflow:hidden;margin:16px 0 10px}
+  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--sky),var(--good));
+    width:0;transition:width .6s ease}
+  .statline{display:flex;flex-wrap:wrap;gap:22px;font-family:var(--mono);font-size:.83rem;
+    color:var(--dim);font-variant-numeric:tabular-nums}
+  .statline b{color:var(--ink);font-weight:600}
+
+  .yeargrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
+    gap:9px;margin-top:20px}
+  .yr{background:#0a0f18;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
+  .yr .y{font-family:var(--mono);font-size:.76rem;color:var(--dim);display:flex;
+    justify-content:space-between;font-variant-numeric:tabular-nums}
+  .yr .y b{color:var(--ink)}
+  .yr .yb{height:5px;border-radius:3px;background:#161d2a;margin-top:7px;overflow:hidden}
+  .yr .yb>i{display:block;height:100%;background:var(--sky);width:0;transition:width .6s ease}
+  .yr.full .yb>i{background:var(--good)}
+
+  /* ---- tables ---- */
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dimmer);font-weight:700;background:#0e1320;position:sticky;top:0}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  td.mono,.hash{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
+  .period{font-family:var(--mono);font-size:.82rem}
+  tr.take td.period{color:var(--good);font-weight:600}
+
+  .tag{display:inline-block;font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;
+    padding:2px 7px;border-radius:5px;border:1px solid}
+  .t-take{color:var(--good);border-color:rgba(99,214,143,.45);background:rgba(99,214,143,.09)}
+  .t-skip{color:var(--dimmer);border-color:var(--line);background:#0e1320}
+
+  dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:14px 22px;margin-top:16px}
+  dl.facts dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dimmer)}
+  dl.facts dd{font-family:var(--mono);font-size:.92rem;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .vol{margin-bottom:14px}
+  .vol .vh{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline}
+  .vol .vn{font-family:var(--mono);font-size:.9rem;font-weight:600}
+  .vol .vd{font-family:var(--mono);font-size:.7rem;color:var(--dimmer)}
+  .meter{display:flex;height:13px;border-radius:7px;overflow:hidden;background:#0a0f18;
+    border:1px solid var(--line);margin-top:9px}
+  .m-used{background:var(--dimmer)}
+  .m-plan{background:var(--sky)}
+  .vkey{display:flex;flex-wrap:wrap;gap:16px;margin-top:8px;font-family:var(--mono);
+    font-size:.72rem;color:var(--dim)}
+  .vkey i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+
+  code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);
+    padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink)}
+
+  .note{border-left:3px solid var(--amber);background:var(--panel);padding:13px 17px;
+    border-radius:0 10px 10px 0;margin-top:18px;color:var(--dim);font-size:.93rem}
+  .note b{color:var(--ink)}
+
+  ul.links{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));
+    gap:0 26px}
+  ul.links li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+  ul.links .d{display:block;color:var(--dimmer);font-size:.79rem;margin-top:2px}
+
+  footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+    color:var(--dimmer);font-size:.79rem}
+  footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>The Reddit Archive</h1>
+    <p class="sub">Every public Reddit comment and submission from June 2005 to December 2021,
+    as zstd-compressed ndjson &mdash; the corpus as it stood before language models began writing
+    into it. Held on <b>ganesha</b>, Laboratory for Social Minds, CMU.</p>
+  </div>
+  <div class="backlinks">
+    <a href="/dashboard.html">skyline dashboard &rarr;</a>
+    <a href="/akdeniz.html">akdeniz host monitor &rarr;</a>
+    <a href="https://proofsandreasons.io/">proofsandreasons.io &rarr;</a>
+  </div>
+</header>
+
+<!-- ============ LIVE STATUS (from ganesha) ============ -->
+<section>
+  <div class="card">
+    <div class="live"><span class="dot" id="dot"></span><span id="livelabel">connecting to ganesha</span></div>
+    <div class="bigpct"><span id="pct">&mdash;</span><span>% complete</span></div>
+    <div class="bar"><i id="barfill"></i></div>
+    <div class="statline">
+      <span><b id="s-done">&mdash;</b> of <b id="s-total">1.41 TiB</b></span>
+      <span><b id="s-files">&mdash;</b> files</span>
+      <span><b id="s-rate">&mdash;</b></span>
+      <span><b id="s-eta">&mdash;</b></span>
+      <span><b id="s-free">&mdash;</b> free on /data</span>
+    </div>
+    <div class="yeargrid" id="years"></div>
+    <p style="margin-top:16px;font-family:var(--mono);font-size:.7rem;color:var(--dimmer)">
+      Served by ganesha from
+      <a href="https://photos.proofsandreasons.io/reddit/status.json">photos.proofsandreasons.io</a>,
+      refreshed every five minutes &middot; <span id="age">&mdash;</span>
+    </p>
+  </div>
+
+  <div class="note" id="donenote" style="display:none">
+    <b>Download complete.</b> The torrent was stopped automatically once every selected file
+    finished, so ganesha is no longer seeding or connecting to peers.
+  </div>
+</section>
+
+<!-- ============ WHY 2021 ============ -->
+<section>
+  <h2>Where the archive stops, and why</h2>
+  <p class="lede">The cutoff is set by free space on <code>/data</code>, not by an editorial judgment
+  &mdash; but it lands nearly a year before ChatGPT&rsquo;s November 2022 release, so the whole selection
+  predates machine-generated text on Reddit at any meaningful scale. That turns out to be the more
+  useful corpus anyway.</p>
+
+  <div class="card">
+    <dl class="facts">
+      <dt>Range</dt><dd>2005-06 &rarr; 2021-12</dd>
+      <dt>Months</dt><dd>199 of 253</dd>
+      <dt>Files</dt><dd>392 of 488</dd>
+      <dt>Size</dt><dd>1.414 TiB</dd>
+    </dl>
+  </div>
+
+  <h3>Size by year &mdash; where the disk actually goes</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Through</th><th>Cumulative</th><th>Status</th></tr></thead>
+      <tbody>
+        <tr class="take"><td class="period">2010-12</td><td class="num">0.008 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2012-12</td><td class="num">0.047 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2014-12</td><td class="num">0.143 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2016-12</td><td class="num">0.312 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2018-12</td><td class="num">0.564 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2019-12</td><td class="num">0.796 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2020-12</td><td class="num">1.076 TiB</td><td><span class="tag t-take">archived</span></td></tr>
+        <tr class="take"><td class="period">2021-12</td><td class="num">1.414 TiB</td><td><span class="tag t-take">cutoff</span></td></tr>
+        <tr><td class="period">2022-12</td><td class="num">1.814 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
+        <tr><td class="period">2023-12</td><td class="num">2.291 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
+        <tr><td class="period">2024-12</td><td class="num">2.842 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
+        <tr><td class="period">2025-12</td><td class="num">3.460 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">The first seven years are effectively
+  free &mdash; everything through 2012 is 47&nbsp;GB. Volume compounds sharply after 2018.</p>
+</section>
+
+<!-- ============ THE TORRENT ============ -->
+<section>
+  <h2>Source</h2>
+  <p class="lede">A single torrent covers 2005-06 through 2025-12 and supersedes both the older
+  2005&ndash;2023 bundle and every monthly release inside that window. It is delisted from the Academic
+  Torrents website &mdash; the details page returns 404, checked with and without a browser user-agent &mdash;
+  but the swarm is alive and was observed with 34 seeds. Only the files through 2021-12 were selected.</p>
+
+  <div class="card">
+    <h3 style="margin-top:0">zst &middot; comments + submissions</h3>
+    <div style="font-size:1.2rem;font-weight:650">Reddit 2005-06 &rarr; 2025-12</div>
+    <dl class="facts">
+      <dt>Full torrent</dt><dd>3.460 TiB</dd>
+      <dt>Selected</dt><dd>1.414 TiB</dd>
+      <dt>Files</dt><dd>392 of 488</dd>
+      <dt>Seeds</dt><dd>34 observed</dd>
+    </dl>
+    <p style="margin-top:16px;font-family:var(--mono);font-size:.78rem;color:var(--dim)">
+      reddit/comments/RC_YYYY-MM.zst &middot; reddit/submissions/RS_YYYY-MM.zst</p>
+    <p style="margin-top:12px">
+      <a href="magnet:?xt=urn:btih:3d426c47c767d40f82c7ef0f47c3acacedd2bf44&amp;dn=reddit_2005-06_to_2025-12_zst&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce">Magnet link</a>
+      &nbsp;&middot;&nbsp; <span class="hash">3d426c47c767d40f82c7ef0f47c3acacedd2bf44</span></p>
+  </div>
+</section>
+
+<!-- ============ DISKS ============ -->
+<section>
+  <h2>Disks on ganesha</h2>
+  <p class="lede">Three 1.8&nbsp;TB spindles and a 128&nbsp;GB SSD boot disk. The archive lands entirely on
+  <code>/data</code>; <code>/data2</code> and the external drive are left alone.</p>
+
+  <div class="card">
+    <div class="vol">
+      <div class="vh"><span class="vn">/data &mdash; the archive</span>
+        <span class="vd">/dev/sdc2 &middot; Hitachi HUA72302 &middot; internal SATA &middot; 1.7 TiB</span></div>
+      <div class="meter"><div class="m-used" style="flex:5.7"></div><div class="m-plan" style="flex:83.2"></div><div style="flex:11.1"></div></div>
+      <div class="vkey"><span><i style="background:var(--dimmer)"></i>100 GB existing</span>
+        <span><i style="background:var(--sky)"></i>1.414 TiB archive</span>
+        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>~60 GiB reserve</span></div>
+    </div>
+    <div class="vol">
+      <div class="vh"><span class="vn">/data2 &mdash; untouched</span>
+        <span class="vd">/dev/sda2 &middot; Hitachi HUA72302 &middot; internal SATA &middot; 1.6 TiB</span></div>
+      <div class="meter"><div class="m-used" style="flex:7"></div><div style="flex:93"></div></div>
+      <div class="vkey"><span><i style="background:var(--dimmer)"></i>115 GB existing</span>
+        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>1.4 TiB free &mdash; headroom to extend past 2021</span></div>
+    </div>
+    <div class="vol" style="margin-bottom:0">
+      <div class="vh"><span class="vn">/mnt/anopotamia &mdash; reserved</span>
+        <span class="vd">/dev/sdd1 &middot; WD My Passport &middot; USB 2.0 &middot; 1.8 TiB</span></div>
+      <div class="meter"><div class="m-used" style="flex:11.5"></div><div style="flex:88.5"></div></div>
+      <div class="vkey"><span><i style="background:var(--dimmer)"></i>212 GB spot_lab_pandr</span>
+        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>no archive data written here</span></div>
+    </div>
+  </div>
+
+  <div class="note">
+    <b>On adding capacity.</b> ganesha&rsquo;s southbridge (AMD SB7x0/SB8x0) has no USB&nbsp;3 &mdash; only OHCI
+    and EHCI &mdash; so any external enclosure is capped near 30&nbsp;MB/s. Port <code>ata6</code> is free and
+    five PCIe slots are unoccupied, so an internal 8&nbsp;TB CMR SATA drive is cheaper and several times
+    faster than an external. Avoid SMR: seeding is a random-read workload SMR handles badly. With one
+    fitted, the entire 3.46&nbsp;TiB torrent fits with room to spare.
+  </div>
+</section>
+
+<!-- ============ USING IT ============ -->
+<section>
+  <h2>Using the archive</h2>
+
+  <h3>Paths</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Path</th><th>Contents</th><th>Size</th></tr></thead>
+      <tbody>
+        <tr><td class="mono">/data/reddit-archive/historical/reddit/comments/</td><td>RC_2005-12 &hellip; RC_2021-12</td><td class="num">~1.1 TiB</td></tr>
+        <tr><td class="mono">/data/reddit-archive/historical/reddit/submissions/</td><td>RS_2005-06 &hellip; RS_2021-12</td><td class="num">~0.3 TiB</td></tr>
+        <tr><td class="mono">/data/reddit-archive/metadata/</td><td>subreddit metadata, rules, wikis</td><td class="num">4.4 GB</td></tr>
+        <tr><td class="mono">/data/reddit-archive/torrents/</td><td>every <code>.torrent</code> + download_links.md</td><td class="num">2.8 MB</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Reading a dump</h3>
+  <pre>zstd -dc --long=31 /data/reddit-archive/historical/reddit/comments/RC_2015-01.zst | head -1</pre>
+  <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">The <code>--long=31</code> window is
+  required &mdash; these use a 2&nbsp;GB compression window and fail to decompress without it. Each line is
+  one JSON object; see <a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a> for
+  iteration helpers.</p>
+
+  <h3>Extending past 2021 later</h3>
+  <p style="font-size:.9rem;color:var(--dim)">Nothing needs re-downloading. Restart the client, select
+  more files in the same torrent, and they resume where they left off &mdash; onto <code>/data2</code>, or a
+  new disk once the save location is changed.</p>
+</section>
+
+<!-- ============ ALL TORRENTS ============ -->
+<section>
+  <h2>Every torrent in the collection</h2>
+  <p class="lede">The complete index, so the record does not depend on a third-party site staying up.
+  Sizes are exact, summed from the records inside each <code>.torrent</code> file rather than quoted
+  from listing pages. Copies of every <code>.torrent</code> are on ganesha under
+  <code>/data/reddit-archive/torrents/</code>.</p>
+
+  <h3>Monthly releases</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Month</th><th>Size</th><th>Academic Torrents</th><th>Infohash</th></tr></thead>
+      <tbody>
+        <tr><td class="period">2024-04</td><td class="num">58.7 GB</td><td><a href="https://academictorrents.com/details/ad4617a3e9c1f52405197fc088b28a8018e12a7a">details</a></td><td class="mono">ad4617a3</td></tr>
+        <tr><td class="period">2024-05</td><td class="num">48.1 GB</td><td><a href="https://academictorrents.com/details/4f60634d96d35158842cd58b495dc3b444d78b0d">details</a></td><td class="mono">4f60634d</td></tr>
+        <tr><td class="period">2024-06</td><td class="num">47.5 GB</td><td><a href="https://academictorrents.com/details/dcdecc93ca9a9d758c045345112771cef5b4989a">details</a></td><td class="mono">dcdecc93</td></tr>
+        <tr><td class="period">2024-07</td><td class="num">50.6 GB</td><td><a href="https://academictorrents.com/details/6e5300446bd9b328d0b812cdb3022891e086d9ec">details</a></td><td class="mono">6e530044</td></tr>
+        <tr><td class="period">2024-08</td><td class="num">52.1 GB</td><td><a href="https://academictorrents.com/details/8c2d4b00ce8ff9d45e335bed106fe9046c60adb0">details</a></td><td class="mono">8c2d4b00</td></tr>
+        <tr><td class="period">2024-09</td><td class="num">49.7 GB</td><td><a href="https://academictorrents.com/details/43a6e113d6ecacf38e58ecc6caa28d68892dd8af">details</a></td><td class="mono">43a6e113</td></tr>
+        <tr><td class="period">2024-10</td><td class="num">51.9 GB</td><td><a href="https://academictorrents.com/details/507dfcda29de9936dd77ed4f34c6442dc675c98f">details</a></td><td class="mono">507dfcda</td></tr>
+        <tr><td class="period">2024-11</td><td class="num">50.9 GB</td><td><a href="https://academictorrents.com/details/a1b490117808d9541ab9e3e67a3447e2f4f48f01">details</a></td><td class="mono">a1b49011</td></tr>
+        <tr><td class="period">2024-12</td><td class="num">51.3 GB</td><td><a href="https://academictorrents.com/details/eb2017da9f63a49460dde21a4ebe3b7c517f3ad9">details</a></td><td class="mono">eb2017da</td></tr>
+        <tr><td class="period">2025-01</td><td class="num">56.4 GB</td><td><a href="https://academictorrents.com/details/4fd14d4c3d792e0b1c5cf6b1d9516c48ba6c4a24">details</a></td><td class="mono">4fd14d4c</td></tr>
+        <tr><td class="period">2025-02</td><td class="num">51.5 GB</td><td><a href="https://academictorrents.com/details/2f873e0b15da5ee29b63e586c0ab1dedd3508870">details</a></td><td class="mono">2f873e0b</td></tr>
+        <tr><td class="period">2025-03</td><td class="num">55.8 GB</td><td><a href="https://academictorrents.com/details/69d5e046e15c02182430879f50d62b18fe1404fb">details</a></td><td class="mono">69d5e046</td></tr>
+        <tr><td class="period">2025-04</td><td class="num">53.9 GB</td><td><a href="https://academictorrents.com/details/552f34df5b830d18f98b69541e7e84f2658346b9">details</a></td><td class="mono">552f34df</td></tr>
+        <tr><td class="period">2025-05</td><td class="num">56.9 GB</td><td><a href="https://academictorrents.com/details/186a0f85a52ff4f1b08677cd312423ace9b34976">details</a></td><td class="mono">186a0f85</td></tr>
+        <tr><td class="period">2025-06</td><td class="num">56.5 GB</td><td><a href="https://academictorrents.com/details/bec5590bd3bc6c0f2d868f36ec92bec1aff4480e">details</a></td><td class="mono">bec5590b</td></tr>
+        <tr><td class="period">2025-07</td><td class="num">58.4 GB</td><td><a href="https://academictorrents.com/details/b6a7ccf72368a7d39c018c423e01bc15aa551122">details</a></td><td class="mono">b6a7ccf7</td></tr>
+        <tr><td class="period">2025-08</td><td class="num">58.0 GB</td><td><a href="https://academictorrents.com/details/c71a97c1f7f676c56963c4e15a81f20afb0109be">details</a></td><td class="mono">c71a97c1</td></tr>
+        <tr><td class="period">2025-09</td><td class="num">55.7 GB</td><td><a href="https://academictorrents.com/details/a92ce24b4180e4aa9295353f4d26f050031e3058">details</a></td><td class="mono">a92ce24b</td></tr>
+        <tr><td class="period">2025-10</td><td class="num">56.1 GB</td><td><a href="https://academictorrents.com/details/cb4fa22ea76ea0a2bb38885b27323c94a5d9d16c">details</a></td><td class="mono">cb4fa22e</td></tr>
+        <tr><td class="period">2025-11</td><td class="num">54.5 GB</td><td><a href="https://academictorrents.com/details/2d056b22743718ac81915f25b094b6226668663f">details</a></td><td class="mono">2d056b22</td></tr>
+        <tr><td class="period">2025-12</td><td class="num">56.4 GB</td><td><a href="https://academictorrents.com/details/481bf2eac43172ae724fd6c75dbcb8e27de77734">details</a></td><td class="mono">481bf2ea</td></tr>
+        <tr><td class="period">2026-01</td><td class="num">61.6 GB</td><td><a href="https://academictorrents.com/details/8412b89151101d88c915334c45d9c223169a1a60">details</a></td><td class="mono">8412b891</td></tr>
+        <tr><td class="period">2026-02</td><td class="num">60.4 GB</td><td><a href="https://academictorrents.com/details/c5ba00048236b60f819dbf010e9034d24fc291fb">details</a></td><td class="mono">c5ba0004</td></tr>
+        <tr><td class="period">2026-03</td><td class="num">68.4 GB</td><td><a href="https://academictorrents.com/details/668087bb8c8c9c763b27a1a4c5e7fcb6add25f2c">details</a></td><td class="mono">668087bb</td></tr>
+        <tr><td class="period">2026-04</td><td class="num">68.5 GB</td><td><a href="https://academictorrents.com/details/85d017ddd06920534187e7d45f21c7cec90c9bca">details</a></td><td class="mono">85d017dd</td></tr>
+        <tr><td class="period">2026-05</td><td class="num">71.7 GB</td><td><a href="https://academictorrents.com/details/55199eff9368cde1f5c1262dd7c1af09f7503ea5">details</a></td><td class="mono">55199eff</td></tr>
+        <tr><td class="period">2026-06</td><td class="num">70.4 GB</td><td><a href="https://academictorrents.com/details/3bac8bd352bbb74bbb23df4273cf3da5d66ee5a5">details</a></td><td class="mono">3bac8bd3</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Subreddit metadata</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Dataset</th><th>Size</th><th>Magnet</th><th>Academic Torrents</th></tr></thead>
+      <tbody>
+        <tr><td>Metadata, rules &amp; wikis <span class="period">2025-01</span></td><td class="num">2.6 GB</td><td><a href="magnet:?xt=urn:btih:5d0bf258a025a5b802572ddc29cde89bf093185c&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php">magnet</a></td><td><a href="https://academictorrents.com/details/5d0bf258a025a5b802572ddc29cde89bf093185c">details</a></td></tr>
+        <tr><td>Metadata only <span class="period">2024-01</span></td><td class="num">1.8 GB</td><td><a href="magnet:?xt=urn:btih:c902f4b65f0e82a5e37db205c3405f02a028ecdf&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php">magnet</a></td><td><a href="https://academictorrents.com/details/c902f4b65f0e82a5e37db205c3405f02a028ecdf">details</a></td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Delisted &mdash; 404 on the website, infohash only</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Period</th><th>Format</th><th>Note</th><th>Infohash</th></tr></thead>
+      <tbody>
+        <tr><td class="period">2005 &rarr; 2023-09</td><td>zst</td><td>superseded</td><td class="mono">89d24ff9d5fbc1efcdaf9d7689d72b7548f699fc</td></tr>
+        <tr><td class="period">2005-06 &rarr; 2023-12</td><td>zst</td><td>superseded</td><td class="mono">9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4</td></tr>
+        <tr><td class="period">2023-04 &rarr; 2023-09</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">7810d20b3651c0060cb670032ec33818230f654d</td></tr>
+        <tr><td class="period">2023-10</td><td>zst</td><td>superseded</td><td class="mono">9a3f77cf1b16f064b8f82e75ee8d470b49c90512</td></tr>
+        <tr><td class="period">2023-10</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">52e18b6a61f243e6ae42a1f2fc8aaf9fd9c9dbdb</td></tr>
+        <tr><td class="period">2023-11</td><td>zst</td><td>superseded</td><td class="mono">aee7728b787892d3cce4d6df3c86c2728e2be1d7</td></tr>
+        <tr><td class="period">2023-11</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">425b791647cdb2752f921351828452ca8e09aef8</td></tr>
+        <tr><td class="period">2023-12</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">0d0364f8433eb90b6e3276b7e150a37da8e4a12b</td></tr>
+        <tr><td class="period">2024-01</td><td>zst</td><td>bundle only</td><td class="mono">ac88546145ca3227e2b90e51ab477c4527dd8b90</td></tr>
+        <tr><td class="period">2024-01</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">c440a293602270f03a47e3110a174365b965a093</td></tr>
+        <tr><td class="period">2024-02</td><td>zst</td><td>bundle only</td><td class="mono">5969ae3e21bb481fea63bf649ec933c222c1f824</td></tr>
+        <tr><td class="period">2024-02</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">1dc131c38d09d8f3912a0040a9a7434ffccc1c78</td></tr>
+        <tr><td class="period">2024-03</td><td>zst</td><td>bundle only</td><td class="mono">deef710de36929e0aa77200fddda73c86142372c</td></tr>
+        <tr><td class="period">2024-03</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">ca989aa94cbd0ac5258553500d9b0f3584f6e4f7</td></tr>
+        <tr><td class="period">per-subreddit split</td><td>zst</td><td>top 40k subreddits</td><td class="mono">56aa49f9653ba545f48df2e33679f014d2829c10</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">A dead web page is not a dead swarm &mdash;
+  the bundle this archive comes from is itself delisted and had 34 seeds. Note that 2024-01, 2024-02 and
+  2024-03 exist <i>only</i> as delisted torrents; the bundle is the sole working route to those months.</p>
+</section>
+
+<!-- ============ DOCS ============ -->
+<section>
+  <h2>Documentation</h2>
+  <ul class="links">
+    <li><a href="https://github.com/ArthurHeitmann/arctic_shift">arctic_shift</a>
+      <span class="d">The project that produces the dumps. Schemas and field documentation.</span></li>
+    <li><a href="https://github.com/ArthurHeitmann/arctic_shift/blob/master/download_links.md">download_links.md</a>
+      <span class="d">Canonical torrent index &mdash; the source for every hash here.</span></li>
+    <li><a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a>
+      <span class="d">Python scripts for iterating and filtering the zst files.</span></li>
+    <li><a href="https://arctic-shift.photon-reddit.com/">Arctic Shift API</a>
+      <span class="d">Web interface and API, for lookups too small to justify a dump.</span></li>
+    <li><a href="https://academictorrents.com/">Academic Torrents</a>
+      <span class="d">Host. Query <code>database.xml</code>, not the browse page.</span></li>
+  </ul>
+</section>
+
+<footer>
+  Laboratory for Social Minds, Carnegie Mellon University &middot;
+  archive held on ganesha, status served from
+  <a href="https://photos.proofsandreasons.io/reddit/status.json">photos.proofsandreasons.io</a> &middot;
+  <a href="/dashboard.html">skyline dashboard</a> &middot;
+  <a href="/akdeniz.html">akdeniz monitor</a><br>
+  TiB are binary units, matching <code>df</code>; GB in the torrent tables are decimal, matching
+  Academic Torrents.
+</footer>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+  var SRC = "https://photos.proofsandreasons.io/reddit/status.json";
+  var POLL_MS = 60000;
+  var $ = function(id){ return document.getElementById(id); };
+
+  function bytes(n){
+    if(n === null || n === undefined) return "—";
+    var t = Math.pow(1024,4), g = Math.pow(1024,3);
+    if(n >= t) return (n/t).toFixed(2) + " TiB";
+    if(n >= g) return (n/g).toFixed(1) + " GiB";
+    return (n/Math.pow(1024,2)).toFixed(0) + " MiB";
+  }
+  function rate(bps){
+    if(!bps) return "stalled";
+    return (bps/1e6).toFixed(2) + " MB/s";
+  }
+  function dur(s){
+    if(s === null || s === undefined) return "—";
+    var d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
+    if(d > 0) return d + "d " + h + "h left";
+    if(h > 0) return h + "h " + m + "m left";
+    return m + "m left";
+  }
+  function ago(ts){
+    var s = Math.max(0, Math.floor(Date.now()/1000) - ts);
+    if(s < 90) return "updated just now";
+    if(s < 5400) return "updated " + Math.round(s/60) + " min ago";
+    return "updated " + Math.round(s/3600) + " h ago";
+  }
+
+  function fail(msg){
+    $("dot").className = "dot err";
+    $("livelabel").textContent = msg;
+    $("age").textContent = "—";
+  }
+
+  function render(d){
+    var done = d.state === "complete";
+    $("dot").className = "dot " + (done ? "done" : "on");
+    $("livelabel").textContent = done
+      ? "archive complete · torrent stopped"
+      : (d.torrent_running ? "downloading on ganesha" : "paused on ganesha");
+
+    $("pct").textContent  = d.pct.toFixed(2);
+    $("barfill").style.width = Math.min(100, d.pct) + "%";
+    $("s-done").textContent  = bytes(d.bytes.done);
+    $("s-total").textContent = bytes(d.bytes.total);
+    $("s-files").textContent = d.files.done + " / " + d.files.total;
+    $("s-rate").textContent  = done ? "finished" : rate(d.rate_bps);
+    $("s-eta").textContent   = done ? "—" : dur(d.eta_s);
+    $("s-free").textContent  = bytes(d.disk.free);
+    $("age").textContent     = ago(d.ts);
+    $("donenote").style.display = done ? "" : "none";
+
+    var html = "";
+    for(var i = 0; i < d.years.length; i++){
+      var y = d.years[i];
+      var p = y.total ? (100 * y.done / y.total) : 0;
+      html += '<div class="yr' + (y.files_done === y.files_total ? " full" : "") + '">'
+           +    '<div class="y"><b>' + y.y + '</b><span>' + Math.round(p) + '%</span></div>'
+           +    '<div class="yb"><i style="width:' + Math.min(100,p) + '%"></i></div>'
+           +  '</div>';
+    }
+    $("years").innerHTML = html;
+  }
+
+  function tick(){
+    fetch(SRC, {cache:"no-store"})
+      .then(function(r){
+        if(!r.ok) throw new Error("HTTP " + r.status);
+        return r.json();
+      })
+      .then(render)
+      .catch(function(){ fail("ganesha unreachable"); });
+  }
+
+  tick();
+  setInterval(tick, POLL_MS);
+})();
+</script>
+</body>
+</html>
