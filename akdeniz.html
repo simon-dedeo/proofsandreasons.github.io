@@ -167,35 +167,34 @@
   .peers code{white-space:nowrap;font-family:inherit;margin-right:.6em;display:inline-block}
 
   /* ---------- cluster jobs ---------- */
-  .clusters{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(240px,100%),1fr));gap:14px}
-  .cl{background:#0d1119;border:1px solid var(--line);border-radius:13px;padding:12px 14px;min-width:0}
-  .cl.stale{opacity:.62}
-  .clh{display:flex;align-items:baseline;gap:9px;font-family:var(--mono);margin-bottom:10px}
-  .clh .nm{font-size:.8rem;font-weight:700;letter-spacing:.06em}
-  .clh .tot{color:var(--dim);font-size:.68rem}
-  .clh .ago{margin-left:auto;color:var(--dimmer);font-size:.62rem;white-space:nowrap}
-  .clh .ago.old{color:var(--warn)}
-  .mx{width:100%;border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
-  .mx th{color:var(--dimmer);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
-    text-align:right;padding:0 0 5px}
-  .mx th:first-child{text-align:left}
-  .mx tbody th{color:var(--dim);font-size:.66rem;letter-spacing:.08em;padding:4px 0;border-top:1px solid var(--line)}
-  .mx td{text-align:right;font-size:1.05rem;font-weight:700;padding:4px 0;border-top:1px solid var(--line);
-    width:34%}
+  /* One table across both clusters, so CPU and GPU line up column-wise and the
+     two are directly comparable. Rows are grouped two-per-cluster. */
+  .cx{width:100%;border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
+  .cx thead th{color:var(--dimmer);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+    font-weight:700;text-align:right;padding:0 0 7px;vertical-align:bottom}
+  .cx thead th.l{text-align:left}
+  .cx thead th small{display:block;font-size:.85em;letter-spacing:.04em;text-transform:none;
+    color:var(--dimmer);opacity:.75;font-weight:400}
+  /* The cluster cell spans its two rows; the group's top border is what
+     separates one cluster from the next. */
+  .cx td,.cx tbody th{padding:6px 0;border-top:1px solid var(--line)}
+  .cx tr.top td,.cx tr.top th{border-top:2px solid var(--line)}
+  .cx th.nm{text-align:left;vertical-align:middle;font-size:.82rem;font-weight:700;letter-spacing:.05em;
+    color:var(--ink);padding-right:10px;white-space:nowrap}
+  .cx th.nm .ago{display:block;font-size:.6rem;font-weight:400;letter-spacing:.02em;color:var(--dimmer);
+    margin-top:3px}
+  .cx th.nm .ago.old{color:var(--warn)}
+  .cx th.kind{text-align:left;color:var(--dim);font-size:.66rem;letter-spacing:.08em;font-weight:700;
+    width:14%}
+  .cx td{text-align:right;font-size:1.05rem;font-weight:700;width:20%}
   /* Zero is the common case and should recede; a nonzero count is the signal. */
-  .mx td.z{color:var(--dimmer);font-weight:400}
-  .mx td.wait{color:var(--warn)}
-  .mx td.run{color:var(--good)}
-  .clsub{color:var(--dimmer);font-family:var(--mono);font-size:.62rem;margin-top:9px;line-height:1.7}
-  .clsub b{font-weight:400;color:var(--dim)}
-  /* Consumed year to date -- a running total, so it sits apart from the
-     point-in-time queue counts above it. */
-  .clytd{margin-top:9px;padding-top:8px;border-top:1px dashed var(--line);
-    font-family:var(--mono);font-size:.63rem;color:var(--dim);
-    font-variant-numeric:tabular-nums;display:flex;gap:8px;flex-wrap:wrap}
-  .clytd .lab{color:var(--dimmer);letter-spacing:.06em;text-transform:uppercase;font-size:.9em}
-  .clytd .h{white-space:nowrap}
-  .clytd .h u{text-decoration:none;color:var(--dimmer)}
+  .cx td.z{color:var(--dimmer);font-weight:400}
+  .cx td.wait{color:var(--warn)}
+  .cx td.run{color:var(--good)}
+  .cx td.hrs{color:var(--ink);font-size:.92rem}
+  .cx tr.stale th.nm,.cx tr.stale td,.cx tr.stale th.kind{opacity:.62}
+  .clnotes{margin-top:11px;font-family:var(--mono);font-size:.62rem;color:var(--dimmer);line-height:1.8}
+  .clnotes b{font-weight:400;color:var(--dim)}
   .clerr{color:var(--bad);font-family:var(--mono);font-size:.63rem;margin-top:8px;
     overflow-wrap:break-word}
 
@@ -381,7 +380,8 @@
     <!-- Cluster jobs -->
     <div class="card wide">
       <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
-      <div class="clusters" id="clusters"></div>
+      <table class="cx" id="clustertable"></table>
+      <div class="clnotes" id="clnotes"></div>
     </div>
 
     <!-- SSH -->
@@ -793,51 +793,67 @@
     if(n===null||n===undefined) return "<td class='z'>&mdash;</td>";
     return "<td class='"+(n?cls:"z")+"'>"+n+"</td>";
   }
+  function hourCell(n){
+    if(n===null||n===undefined) return "<td class='hrs z'>&mdash;</td>";
+    return "<td class='hrs'>"+n.toLocaleString()+"</td>";
+  }
+  // ORCHARD first, then PSC, then anything new alphabetically.
+  var CLUSTER_ORDER={ORCHARD:0, PSC:1};
+  function clusterRank(n){
+    return CLUSTER_ORDER[n]!==undefined ? CLUSTER_ORDER[n] : 99;
+  }
+
   function renderJobs(j){
-    var wrap=document.getElementById("clusters");
-    var cls=(j&&j.clusters)||[];
+    var tbl=document.getElementById("clustertable"), notes=document.getElementById("clnotes");
+    var cls=((j&&j.clusters)||[]).slice().sort(function(a,b){
+      return clusterRank(a.name)-clusterRank(b.name) || a.name.localeCompare(b.name);
+    });
     if(!cls.length){
-      wrap.innerHTML="<div class='clsub'>No cluster data yet.</div>";
+      tbl.innerHTML=""; notes.textContent="No cluster data yet.";
       txt("jobsmeta",""); return;
     }
-    var now=Date.now()/1000, newest=0;
-    wrap.innerHTML=cls.map(function(c){
-      var jb=c.jobs, age=c.ts?Math.max(0,Math.round(now-c.ts)):null;
+    var now=Date.now()/1000, newest=0, since=null, rows="", note=[];
+    cls.forEach(function(c){
+      var jb=c.jobs, hrs=c.hours, age=c.ts?Math.max(0,Math.round(now-c.ts)):null;
       if(c.ts&&c.ts>newest) newest=c.ts;
-      var stale=(age===null)||(age>JOBS_STALE_S);
-      var html="<div class='cl"+(stale?" stale":"")+"'>";
-      var total=jb?(jb.running.cpu+jb.running.gpu+jb.waiting.cpu+jb.waiting.gpu+(jb.other||0)):null;
-      html+="<div class='clh'><span class='nm'>"+esc(c.name)+"</span>"+
-            "<span class='tot'>"+(total===null?"&mdash;":total+(total===1?" job":" jobs"))+"</span>"+
-            "<span class='ago"+(stale?" old":"")+"'>"+
-              (age===null?"never":(age<90?age+"s":fmtDur(age))+" ago")+"</span></div>";
-      if(jb){
-        html+="<table class='mx'><thead><tr><th></th><th>Waiting</th><th>Running</th></tr></thead><tbody>"+
-          "<tr><th>CPU</th>"+jobCell(jb.waiting.cpu,"wait")+jobCell(jb.running.cpu,"run")+"</tr>"+
-          "<tr><th>GPU</th>"+jobCell(jb.waiting.gpu,"gpu wait")+jobCell(jb.running.gpu,"gpu run")+"</tr>"+
-          "</tbody></table>";
-        var sub=[];
-        if(c.cores&&c.gpus){
-          // Jobs are the headline; the resources behind them are the useful
-          // second question, and they come free from the same query.
-          if(c.cores.running||c.gpus.running)
-            sub.push("<b>running</b> "+c.cores.running.toLocaleString()+" cores"+
-                     (c.gpus.running?" &middot; "+c.gpus.running+" GPU":""));
-          if(c.cores.waiting||c.gpus.waiting)
-            sub.push("<b>queued</b> "+c.cores.waiting.toLocaleString()+" cores"+
-                     (c.gpus.waiting?" &middot; "+c.gpus.waiting+" GPU":""));
-        }
-        if(jb.other) sub.push("<b>other states</b> "+jb.other);
-        if(sub.length) html+="<div class='clsub'>"+sub.join("<br>")+"</div>";
+      if(hrs&&hrs.since) since=hrs.since;
+      var stale=(age===null)||(age>JOBS_STALE_S), sc=stale?" stale":"";
+      var agetxt=(age===null?"never":(age<90?age+"s":fmtDur(age))+" ago");
+      var w=jb?jb.waiting:null, r=jb?jb.running:null;
+
+      rows+="<tr class='top"+sc+"'>"+
+        "<th class='nm' rowspan='2'>"+esc(c.name)+
+          "<span class='ago"+(stale?" old":"")+"'>"+agetxt+"</span></th>"+
+        "<th class='kind'>CPU</th>"+
+        jobCell(w?w.cpu:null,"wait")+jobCell(r?r.cpu:null,"run")+
+        hourCell(hrs?hrs.cpu:null)+"</tr>"+
+        "<tr class='"+(sc||"")+"'><th class='kind'>GPU</th>"+
+        jobCell(w?w.gpu:null,"wait")+jobCell(r?r.gpu:null,"run")+
+        hourCell(hrs?hrs.gpu:null)+"</tr>";
+
+      // Resources behind the job counts: the useful second question, free from
+      // the same query, but too much for the table itself.
+      var bits=[];
+      if(jb&&c.cores&&c.gpus){
+        if(c.cores.running||c.gpus.running)
+          bits.push("<b>running</b> "+c.cores.running.toLocaleString()+" cores"+
+                    (c.gpus.running?" &middot; "+c.gpus.running+" GPU":""));
+        if(c.cores.waiting||c.gpus.waiting)
+          bits.push("<b>queued</b> "+c.cores.waiting.toLocaleString()+" cores"+
+                    (c.gpus.waiting?" &middot; "+c.gpus.waiting+" GPU":""));
+        if(jb.other) bits.push("<b>other states</b> "+jb.other);
       }
-      if(c.hours){
-        html+="<div class='clytd'><span class='lab'>since "+esc(monthDay(c.hours.since))+"</span>"+
-              "<span class='h'>"+c.hours.cpu.toLocaleString()+" <u>CPU-h</u></span>"+
-              "<span class='h'>"+c.hours.gpu.toLocaleString()+" <u>GPU-h</u></span></div>";
-      }
-      if(!c.ok&&c.err) html+="<div class='clerr'>last poll failed: "+esc(c.err)+"</div>";
-      return html+"</div>";
-    }).join("");
+      if(bits.length) note.push("<div>"+esc(c.name)+" &mdash; "+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
+      // A failed poll is not spelled out here on purpose: the dimmed rows and
+      // the amber age already say it, and the raw scheduler/gcloud text was
+      // noise. c.err is still in jobs.json for anyone debugging.
+    });
+
+    tbl.innerHTML="<thead><tr><th class='l'>Cluster</th><th class='l'></th>"+
+      "<th>Waiting</th><th>Running</th>"+
+      "<th>Total hours"+(since?"<small>since "+esc(monthDay(since))+"</small>":"")+"</th>"+
+      "</tr></thead><tbody>"+rows+"</tbody>";
+    notes.innerHTML=note.join("");
     var age=newest?Math.max(0,Math.round(now-newest)):null;
     txt("jobsmeta", "our queued + running jobs"+
         (age===null?"":" · polled "+(age<90?age+"s":fmtDur(age))+" ago"));
