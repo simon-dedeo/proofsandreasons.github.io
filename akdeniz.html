@@ -177,7 +177,11 @@
     color:var(--dimmer);opacity:.75;font-weight:400}
   /* The cluster cell spans its two rows; the group's top border is what
      separates one cluster from the next. */
-  .cx td,.cx tbody th{padding:6px 0;border-top:1px solid var(--line)}
+  /* Left padding on the number cells: at single-column width a long hours
+     figure would otherwise butt straight up against the running count. */
+  .cx td{padding:6px 0 6px 12px}
+  .cx td,.cx tbody th{border-top:1px solid var(--line)}
+  .cx tbody th{padding:6px 0}
   .cx tr.top td,.cx tr.top th{border-top:2px solid var(--line)}
   .cx th.nm{text-align:left;vertical-align:middle;font-size:.82rem;font-weight:700;letter-spacing:.05em;
     color:var(--ink);padding-right:10px;white-space:nowrap}
@@ -378,7 +382,7 @@
     </div>
 
     <!-- Cluster jobs -->
-    <div class="card wide">
+    <div class="card">
       <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
       <table class="cx" id="clustertable"></table>
       <div class="clnotes" id="clnotes"></div>
@@ -855,7 +859,10 @@
       "</tr></thead><tbody>"+rows+"</tbody>";
     notes.innerHTML=note.join("");
     var age=newest?Math.max(0,Math.round(now-newest)):null;
-    txt("jobsmeta", "our queued + running jobs"+
+    // Kept short: the card is one column wide now, and a longer note wraps up
+    // into the title. "our" is the part worth keeping -- these are our jobs,
+    // not the clusters' whole queues.
+    txt("jobsmeta", "our jobs"+
         (age===null?"":" · polled "+(age<90?age+"s":fmtDur(age))+" ago"));
   }
 
