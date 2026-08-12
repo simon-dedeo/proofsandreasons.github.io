@@ -10,13 +10,12 @@
 </script>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
-<!-- Live status of a local archive job, with internal paths and host detail.
-     Same reasoning as akdeniz.html: keep it out of search results, and do NOT
-     pair this with a robots.txt Disallow, which would stop crawlers reading
-     the directive at all. -->
+<!-- Internal paths and host detail. Same reasoning as akdeniz.html: keep it out
+     of search results, and do NOT pair this with a robots.txt Disallow, which
+     would stop crawlers reading the directive at all. -->
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<title>Reddit Archive · Proofs &amp; Reasons</title>
+<title>Reddit Archive &middot; Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Reddit Archive">
 <meta property="og:description" content="Every public Reddit comment and submission from 2005 to 2021, archived on ganesha at the Laboratory for Social Minds at CMU.">
@@ -47,7 +46,7 @@
   header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
     flex-wrap:wrap;padding:44px 0 22px;border-bottom:1px solid var(--line)}
   h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.02}
-  .sub{color:var(--dim);max-width:60ch;margin-top:9px;font-size:1.02rem}
+  .sub{color:var(--dim);max-width:62ch;margin-top:9px;font-size:1.02rem}
   .backlinks{font-family:var(--mono);font-size:.8rem;text-align:right;color:var(--dimmer)}
   .backlinks a{display:block;margin-top:5px}
 
@@ -55,76 +54,66 @@
   h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
   h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;
     font-size:.68rem;font-weight:700;margin:26px 0 11px}
-  .lede{color:var(--dim);max-width:70ch;margin-bottom:20px}
+  .lede{color:var(--dim);max-width:72ch;margin-bottom:20px}
 
   .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
     border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
-
-  /* ---- live status ---- */
-  .live{display:flex;align-items:center;gap:9px;font-family:var(--mono);font-size:.72rem;
-    letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer)}
-  .dot{width:8px;height:8px;border-radius:50%;background:var(--dimmer);flex:none}
-  .dot.on{background:var(--good);box-shadow:0 0 0 4px rgba(99,214,143,.15)}
-  .dot.done{background:var(--sky);box-shadow:0 0 0 4px rgba(102,205,255,.15)}
-  .dot.err{background:var(--bad)}
-  @keyframes pulse{0%,100%{opacity:1}50%{opacity:.35}}
-  .dot.on{animation:pulse 2.4s ease-in-out infinite}
-  @media (prefers-reduced-motion:reduce){.dot.on{animation:none}}
-
-  .bigpct{font-size:clamp(2.6rem,7vw,4.2rem);font-weight:700;line-height:.95;
-    font-variant-numeric:tabular-nums;letter-spacing:-.03em;margin:14px 0 4px}
-  .bigpct span{font-size:.32em;color:var(--dim);font-weight:600;margin-left:.15em}
-  .bar{height:12px;border-radius:7px;background:#0a0f18;border:1px solid var(--line);
-    overflow:hidden;margin:16px 0 10px}
-  .bar>i{display:block;height:100%;background:linear-gradient(90deg,var(--sky),var(--good));
-    width:0;transition:width .6s ease}
-  .statline{display:flex;flex-wrap:wrap;gap:22px;font-family:var(--mono);font-size:.83rem;
-    color:var(--dim);font-variant-numeric:tabular-nums}
-  .statline b{color:var(--ink);font-weight:600}
-
-  .yeargrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(140px,1fr));
-    gap:9px;margin-top:20px}
-  .yr{background:#0a0f18;border:1px solid var(--line);border-radius:10px;padding:9px 11px}
-  .yr .y{font-family:var(--mono);font-size:.76rem;color:var(--dim);display:flex;
-    justify-content:space-between;font-variant-numeric:tabular-nums}
-  .yr .y b{color:var(--ink)}
-  .yr .yb{height:5px;border-radius:3px;background:#161d2a;margin-top:7px;overflow:hidden}
-  .yr .yb>i{display:block;height:100%;background:var(--sky);width:0;transition:width .6s ease}
-  .yr.full .yb>i{background:var(--good)}
-
-  /* ---- tables ---- */
-  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
-  table{border-collapse:collapse;width:100%;font-size:.86rem}
-  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
-  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
-    color:var(--dimmer);font-weight:700;background:#0e1320;position:sticky;top:0}
-  tbody tr:last-child td{border-bottom:0}
-  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
-  td.mono,.hash{font-family:var(--mono);font-size:.78rem;color:var(--dim)}
-  .period{font-family:var(--mono);font-size:.82rem}
-  tr.take td.period{color:var(--good);font-weight:600}
-
-  .tag{display:inline-block;font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;
-    padding:2px 7px;border-radius:5px;border:1px solid}
-  .t-take{color:var(--good);border-color:rgba(99,214,143,.45);background:rgba(99,214,143,.09)}
-  .t-skip{color:var(--dimmer);border-color:var(--line);background:#0e1320}
 
   dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:14px 22px;margin-top:16px}
   dl.facts dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
     text-transform:uppercase;color:var(--dimmer)}
   dl.facts dd{font-family:var(--mono);font-size:.92rem;margin-top:4px;font-variant-numeric:tabular-nums}
 
-  .vol{margin-bottom:14px}
-  .vol .vh{display:flex;justify-content:space-between;flex-wrap:wrap;gap:8px;align-items:baseline}
-  .vol .vn{font-family:var(--mono);font-size:.9rem;font-weight:600}
-  .vol .vd{font-family:var(--mono);font-size:.7rem;color:var(--dimmer)}
-  .meter{display:flex;height:13px;border-radius:7px;overflow:hidden;background:#0a0f18;
-    border:1px solid var(--line);margin-top:9px}
-  .m-used{background:var(--dimmer)}
-  .m-plan{background:var(--sky)}
-  .vkey{display:flex;flex-wrap:wrap;gap:16px;margin-top:8px;font-family:var(--mono);
-    font-size:.72rem;color:var(--dim)}
-  .vkey i{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:6px}
+  /* ---- access banner ---- */
+  .access{display:flex;gap:14px;align-items:flex-start;border-left:3px solid var(--amber);
+    background:var(--panel);padding:15px 18px;border-radius:0 10px 10px 0;margin-top:22px}
+  .access .ico{font-family:var(--mono);color:var(--amber);font-weight:700;flex:none}
+  .access p{color:var(--dim);font-size:.93rem;max-width:74ch}
+  .access b{color:var(--ink)}
+
+  /* ---- per-year file listing ---- */
+  .ybox{border:1px solid var(--line);border-radius:14px;background:var(--panel);
+    padding:13px 16px;margin-bottom:10px}
+  .yhead{display:flex;justify-content:space-between;align-items:baseline;
+    font-family:var(--mono);font-size:.8rem;color:var(--dimmer);margin-bottom:9px;
+    padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .yhead b{color:var(--ink);font-size:1.06rem;letter-spacing:-.01em}
+  .krow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 0}
+  .klabel{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;
+    color:var(--dimmer);width:6.6rem;flex:none}
+  .months{display:flex;flex-wrap:wrap;gap:5px;flex:1}
+  .ksize{font-family:var(--mono);font-size:.74rem;color:var(--dim);
+    font-variant-numeric:tabular-nums;flex:none;min-width:4.6rem;text-align:right}
+  a.mo{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;
+    border-radius:6px;border:1px solid var(--line);background:#0a0f18;color:var(--sky);
+    font-variant-numeric:tabular-nums}
+  a.mo:hover{border-color:var(--sky);text-decoration:none;background:#101a28}
+  a.mo.bad{border-color:rgba(255,182,74,.5);color:var(--amber);background:rgba(255,182,74,.07)}
+  a.mo.bad:hover{border-color:var(--amber);background:rgba(255,182,74,.14)}
+  .mo.off{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;
+    border-radius:6px;border:1px dashed var(--line);color:#39404f;background:transparent}
+  .short{color:var(--amber);font-weight:700}
+  .none{font-family:var(--mono);font-size:.76rem;color:var(--dimmer)}
+
+  /* ---- curated datasets ---- */
+  .ds{margin-bottom:12px}
+  .dsname{font-family:var(--mono);font-size:1rem;font-weight:650}
+  .dsdesc{color:var(--dim);font-size:.92rem;margin-top:7px;max-width:74ch}
+
+  /* ---- tables ---- */
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dimmer);font-weight:700;background:#0e1320}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right}
+  .period{font-family:var(--mono);font-size:.82rem}
+  tr.take td.period{color:var(--good);font-weight:600}
+  .tag{display:inline-block;font-family:var(--mono);font-size:.64rem;letter-spacing:.06em;
+    padding:2px 7px;border-radius:5px;border:1px solid}
+  .t-take{color:var(--good);border-color:rgba(99,214,143,.45);background:rgba(99,214,143,.09)}
+  .t-skip{color:var(--dimmer);border-color:var(--line);background:#0e1320}
 
   code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);
     padding:1px 5px;border-radius:5px;color:var(--ink)}
@@ -153,7 +142,8 @@
     <h1>The Reddit Archive</h1>
     <p class="sub">Every public Reddit comment and submission from June 2005 to December 2021,
     as zstd-compressed ndjson &mdash; the corpus as it stood before language models began writing
-    into it. Held on <b>ganesha</b>, Laboratory for Social Minds, CMU.</p>
+    into it. 392 files, 1.41 TiB, held on <b>ganesha</b> at the Laboratory for Social
+    Minds, CMU.</p>
   </div>
   <div class="backlinks">
     <a href="/dashboard.html">skyline dashboard &rarr;</a>
@@ -162,362 +152,265 @@
   </div>
 </header>
 
-<!-- ============ LIVE STATUS (from ganesha) ============ -->
+<div class="access">
+  <span class="ico">CMU</span>
+  <p>The monthly dumps below are served <b>only to Carnegie Mellon IP ranges</b> &mdash; on-campus
+  networks and the CMU VPN. From anywhere else they return <code>403</code>. The
+  <a href="#curated">curated datasets</a> further down are small and <b>open to everyone</b>.</p>
+</div>
+
+<!-- ============ THE ARCHIVE, BY YEAR ============ -->
 <section>
-  <div class="card">
-    <div class="live"><span class="dot" id="dot"></span><span id="livelabel">connecting to ganesha</span></div>
-    <div class="bigpct"><span id="pct">&mdash;</span><span>% complete</span></div>
-    <div class="bar"><i id="barfill"></i></div>
-    <div class="statline">
-      <span><b id="s-done">&mdash;</b> of <b id="s-total">1.41 TiB</b></span>
-      <span><b id="s-files">&mdash;</b> files</span>
-      <span><b id="s-rate">&mdash;</b></span>
-      <span><b id="s-eta">&mdash;</b></span>
-      <span><b id="s-free">&mdash;</b> free on /data</span>
-    </div>
-    <div class="yeargrid" id="years"></div>
-    <p style="margin-top:16px;font-family:var(--mono);font-size:.7rem;color:var(--dimmer)">
-      Served by ganesha from
-      <a href="https://photos.proofsandreasons.io/reddit/status.json">photos.proofsandreasons.io</a>,
-      refreshed every five minutes &middot; <span id="age">&mdash;</span>
-    </p>
+  <h2>The archive, by year</h2>
+  <p class="lede">One link per monthly file. Sizes are on-disk and appear on hover; downloads
+  support range requests, so a dropped transfer resumes rather than restarting. Comments begin
+  in December 2005, six months after submissions, because that is where the upstream dumps
+  begin &mdash; the dashed months are absent from the source, not missing here.</p>
+
+  <div class="ybox">
+  <div class="yhead"><b>2005</b><span>8 files &middot; 1.6 MiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><span class="mo off">01</span><span class="mo off">02</span><span class="mo off">03</span><span class="mo off">04</span><span class="mo off">05</span><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-06.zst" title="RS_2005-06.zst — 17 KiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-07.zst" title="RS_2005-07.zst — 97 KiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-08.zst" title="RS_2005-08.zst — 162 KiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-09.zst" title="RS_2005-09.zst — 196 KiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-10.zst" title="RS_2005-10.zst — 283 KiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-11.zst" title="RS_2005-11.zst — 303 KiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2005-12.zst" title="RS_2005-12.zst — 433 KiB">12</a></span><span class="ksize">1.5 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><span class="mo off">01</span><span class="mo off">02</span><span class="mo off">03</span><span class="mo off">04</span><span class="mo off">05</span><span class="mo off">06</span><span class="mo off">07</span><span class="mo off">08</span><span class="mo off">09</span><span class="mo off">10</span><span class="mo off">11</span><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2005-12.zst" title="RC_2005-12.zst — 140 KiB">12</a></span><span class="ksize">140 KiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2006</b><span>24 files &middot; 63 MiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-01.zst" title="RS_2006-01.zst — 642 KiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-02.zst" title="RS_2006-02.zst — 758 KiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-03.zst" title="RS_2006-03.zst — 975 KiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-04.zst" title="RS_2006-04.zst — 969 KiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-05.zst" title="RS_2006-05.zst — 1.1 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-06.zst" title="RS_2006-06.zst — 1.2 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-07.zst" title="RS_2006-07.zst — 1.8 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-08.zst" title="RS_2006-08.zst — 2.9 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-09.zst" title="RS_2006-09.zst — 3.7 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-10.zst" title="RS_2006-10.zst — 2.9 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-11.zst" title="RS_2006-11.zst — 2.8 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2006-12.zst" title="RS_2006-12.zst — 2.8 MiB">12</a></span><span class="ksize">22 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-01.zst" title="RC_2006-01.zst — 394 KiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-02.zst" title="RC_2006-02.zst — 990 KiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-03.zst" title="RC_2006-03.zst — 1.3 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-04.zst" title="RC_2006-04.zst — 2.0 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-05.zst" title="RC_2006-05.zst — 2.7 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-06.zst" title="RC_2006-06.zst — 2.9 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-07.zst" title="RC_2006-07.zst — 3.6 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-08.zst" title="RC_2006-08.zst — 4.9 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-09.zst" title="RC_2006-09.zst — 5.0 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-10.zst" title="RC_2006-10.zst — 5.0 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-11.zst" title="RC_2006-11.zst — 5.7 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2006-12.zst" title="RC_2006-12.zst — 5.8 MiB">12</a></span><span class="ksize">40 MiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2007</b><span>24 files &middot; 271 MiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-01.zst" title="RS_2007-01.zst — 3.4 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-02.zst" title="RS_2007-02.zst — 3.7 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-03.zst" title="RS_2007-03.zst — 4.6 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-04.zst" title="RS_2007-04.zst — 4.8 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-05.zst" title="RS_2007-05.zst — 5.2 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-06.zst" title="RS_2007-06.zst — 5.0 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-07.zst" title="RS_2007-07.zst — 5.8 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-08.zst" title="RS_2007-08.zst — 6.7 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-09.zst" title="RS_2007-09.zst — 7.4 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-10.zst" title="RS_2007-10.zst — 8.0 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-11.zst" title="RS_2007-11.zst — 8.2 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2007-12.zst" title="RS_2007-12.zst — 8.5 MiB">12</a></span><span class="ksize">71 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-01.zst" title="RC_2007-01.zst — 7.7 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-02.zst" title="RC_2007-02.zst — 8.8 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-03.zst" title="RC_2007-03.zst — 9.9 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-04.zst" title="RC_2007-04.zst — 11 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-05.zst" title="RC_2007-05.zst — 15 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-06.zst" title="RC_2007-06.zst — 15 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-07.zst" title="RC_2007-07.zst — 17 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-08.zst" title="RC_2007-08.zst — 19 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-09.zst" title="RC_2007-09.zst — 22 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-10.zst" title="RC_2007-10.zst — 23 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-11.zst" title="RC_2007-11.zst — 29 MiB">11</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2007-12.zst" title="RC_2007-12.zst — 22 MiB — DAMAGED: Read error (39) : premature end">12<span class="short">!</span></a></span><span class="ksize">200 MiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2008</b><span>24 files &middot; 806 MiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-01.zst" title="RS_2008-01.zst — 11 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-02.zst" title="RS_2008-02.zst — 11 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-03.zst" title="RS_2008-03.zst — 13 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-04.zst" title="RS_2008-04.zst — 13 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-05.zst" title="RS_2008-05.zst — 14 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-06.zst" title="RS_2008-06.zst — 15 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-07.zst" title="RS_2008-07.zst — 17 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-08.zst" title="RS_2008-08.zst — 17 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-09.zst" title="RS_2008-09.zst — 20 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-10.zst" title="RS_2008-10.zst — 23 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-11.zst" title="RS_2008-11.zst — 22 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2008-12.zst" title="RS_2008-12.zst — 22 MiB">12</a></span><span class="ksize">197 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-01.zst" title="RC_2008-01.zst — 38 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-02.zst" title="RC_2008-02.zst — 37 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-03.zst" title="RC_2008-03.zst — 39 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-04.zst" title="RC_2008-04.zst — 39 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-05.zst" title="RC_2008-05.zst — 45 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-06.zst" title="RC_2008-06.zst — 49 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-07.zst" title="RC_2008-07.zst — 51 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-08.zst" title="RC_2008-08.zst — 51 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-09.zst" title="RC_2008-09.zst — 58 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-10.zst" title="RC_2008-10.zst — 66 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-11.zst" title="RC_2008-11.zst — 66 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2008-12.zst" title="RC_2008-12.zst — 72 MiB">12</a></span><span class="ksize">609 MiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2009</b><span>24 files &middot; 2.0 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-01.zst" title="RS_2009-01.zst — 26 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-02.zst" title="RS_2009-02.zst — 26 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-03.zst" title="RS_2009-03.zst — 29 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-04.zst" title="RS_2009-04.zst — 29 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-05.zst" title="RS_2009-05.zst — 29 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-06.zst" title="RS_2009-06.zst — 32 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-07.zst" title="RS_2009-07.zst — 37 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-08.zst" title="RS_2009-08.zst — 39 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-09.zst" title="RS_2009-09.zst — 40 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-10.zst" title="RS_2009-10.zst — 43 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-11.zst" title="RS_2009-11.zst — 41 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2009-12.zst" title="RS_2009-12.zst — 45 MiB">12</a></span><span class="ksize">417 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-01.zst" title="RC_2009-01.zst — 89 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-02.zst" title="RC_2009-02.zst — 81 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-03.zst" title="RC_2009-03.zst — 92 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-04.zst" title="RC_2009-04.zst — 96 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-05.zst" title="RC_2009-05.zst — 107 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-06.zst" title="RC_2009-06.zst — 114 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-07.zst" title="RC_2009-07.zst — 132 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-08.zst" title="RC_2009-08.zst — 157 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-09.zst" title="RC_2009-09.zst — 179 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-10.zst" title="RC_2009-10.zst — 204 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-11.zst" title="RC_2009-11.zst — 199 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2009-12.zst" title="RC_2009-12.zst — 227 MiB">12</a></span><span class="ksize">1.6 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2010</b><span>24 files &middot; 4.9 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-01.zst" title="RS_2010-01.zst — 51 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-02.zst" title="RS_2010-02.zst — 48 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-03.zst" title="RS_2010-03.zst — 57 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-04.zst" title="RS_2010-04.zst — 58 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-05.zst" title="RS_2010-05.zst — 51 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-06.zst" title="RS_2010-06.zst — 49 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-07.zst" title="RS_2010-07.zst — 54 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-08.zst" title="RS_2010-08.zst — 57 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-09.zst" title="RS_2010-09.zst — 65 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-10.zst" title="RS_2010-10.zst — 70 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-11.zst" title="RS_2010-11.zst — 77 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2010-12.zst" title="RS_2010-12.zst — 83 MiB">12</a></span><span class="ksize">722 MiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-01.zst" title="RC_2010-01.zst — 256 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-02.zst" title="RC_2010-02.zst — 242 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-03.zst" title="RC_2010-03.zst — 288 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-04.zst" title="RC_2010-04.zst — 284 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-05.zst" title="RC_2010-05.zst — 286 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-06.zst" title="RC_2010-06.zst — 309 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-07.zst" title="RC_2010-07.zst — 358 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-08.zst" title="RC_2010-08.zst — 374 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-09.zst" title="RC_2010-09.zst — 415 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-10.zst" title="RC_2010-10.zst — 448 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-11.zst" title="RC_2010-11.zst — 506 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2010-12.zst" title="RC_2010-12.zst — 532 MiB">12</a></span><span class="ksize">4.2 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2011</b><span>24 files &middot; 12.6 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-01.zst" title="RS_2011-01.zst — 118 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-02.zst" title="RS_2011-02.zst — 114 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-03.zst" title="RS_2011-03.zst — 136 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-04.zst" title="RS_2011-04.zst — 133 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-05.zst" title="RS_2011-05.zst — 145 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-06.zst" title="RS_2011-06.zst — 155 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-07.zst" title="RS_2011-07.zst — 172 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-08.zst" title="RS_2011-08.zst — 200 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-09.zst" title="RS_2011-09.zst — 204 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-10.zst" title="RS_2011-10.zst — 227 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-11.zst" title="RS_2011-11.zst — 235 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2011-12.zst" title="RS_2011-12.zst — 252 MiB">12</a></span><span class="ksize">2.0 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-01.zst" title="RC_2011-01.zst — 593 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-02.zst" title="RC_2011-02.zst — 574 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-03.zst" title="RC_2011-03.zst — 680 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-04.zst" title="RC_2011-04.zst — 665 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-05.zst" title="RC_2011-05.zst — 772 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-06.zst" title="RC_2011-06.zst — 854 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-07.zst" title="RC_2011-07.zst — 913 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-08.zst" title="RC_2011-08.zst — 1.0 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-09.zst" title="RC_2011-09.zst — 1.0 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-10.zst" title="RC_2011-10.zst — 1.2 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-11.zst" title="RC_2011-11.zst — 1.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2011-12.zst" title="RC_2011-12.zst — 1.2 GiB">12</a></span><span class="ksize">10.6 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2012</b><span>24 files &middot; 27.0 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-01.zst" title="RS_2012-01.zst — 285 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-02.zst" title="RS_2012-02.zst — 288 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-03.zst" title="RS_2012-03.zst — 315 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-04.zst" title="RS_2012-04.zst — 334 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-05.zst" title="RS_2012-05.zst — 349 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-06.zst" title="RS_2012-06.zst — 365 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-07.zst" title="RS_2012-07.zst — 403 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-08.zst" title="RS_2012-08.zst — 425 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-09.zst" title="RS_2012-09.zst — 420 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-10.zst" title="RS_2012-10.zst — 446 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-11.zst" title="RS_2012-11.zst — 442 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2012-12.zst" title="RS_2012-12.zst — 444 MiB">12</a></span><span class="ksize">4.4 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-01.zst" title="RC_2012-01.zst — 1.4 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-02.zst" title="RC_2012-02.zst — 1.4 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-03.zst" title="RC_2012-03.zst — 1.6 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-04.zst" title="RC_2012-04.zst — 1.7 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-05.zst" title="RC_2012-05.zst — 1.8 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-06.zst" title="RC_2012-06.zst — 1.9 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-07.zst" title="RC_2012-07.zst — 2.1 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-08.zst" title="RC_2012-08.zst — 2.2 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-09.zst" title="RC_2012-09.zst — 2.0 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-10.zst" title="RC_2012-10.zst — 2.1 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-11.zst" title="RC_2012-11.zst — 2.1 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2012-12.zst" title="RC_2012-12.zst — 2.2 GiB">12</a></span><span class="ksize">22.6 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2013</b><span>24 files &middot; 41.7 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-01.zst" title="RS_2013-01.zst — 523 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-02.zst" title="RS_2013-02.zst — 477 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-03.zst" title="RS_2013-03.zst — 535 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-04.zst" title="RS_2013-04.zst — 563 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-05.zst" title="RS_2013-05.zst — 552 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-06.zst" title="RS_2013-06.zst — 551 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-07.zst" title="RS_2013-07.zst — 591 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-08.zst" title="RS_2013-08.zst — 587 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-09.zst" title="RS_2013-09.zst — 562 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-10.zst" title="RS_2013-10.zst — 620 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-11.zst" title="RS_2013-11.zst — 642 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2013-12.zst" title="RS_2013-12.zst — 688 MiB">12</a></span><span class="ksize">6.7 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-01.zst" title="RC_2013-01.zst — 2.6 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-02.zst" title="RC_2013-02.zst — 2.4 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-03.zst" title="RC_2013-03.zst — 2.7 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-04.zst" title="RC_2013-04.zst — 2.9 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-05.zst" title="RC_2013-05.zst — 2.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-06.zst" title="RC_2013-06.zst — 2.8 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-07.zst" title="RC_2013-07.zst — 3.1 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-08.zst" title="RC_2013-08.zst — 3.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-09.zst" title="RC_2013-09.zst — 2.8 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-10.zst" title="RC_2013-10.zst — 3.1 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-11.zst" title="RC_2013-11.zst — 3.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2013-12.zst" title="RC_2013-12.zst — 3.4 GiB">12</a></span><span class="ksize">35.0 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2014</b><span>24 files &middot; 57.4 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-01.zst" title="RS_2014-01.zst — 737 MiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-02.zst" title="RS_2014-02.zst — 710 MiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-03.zst" title="RS_2014-03.zst — 759 MiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-04.zst" title="RS_2014-04.zst — 742 MiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-05.zst" title="RS_2014-05.zst — 762 MiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-06.zst" title="RS_2014-06.zst — 751 MiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-07.zst" title="RS_2014-07.zst — 831 MiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-08.zst" title="RS_2014-08.zst — 854 MiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-09.zst" title="RS_2014-09.zst — 853 MiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-10.zst" title="RS_2014-10.zst — 905 MiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-11.zst" title="RS_2014-11.zst — 891 MiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2014-12.zst" title="RS_2014-12.zst — 946 MiB">12</a></span><span class="ksize">9.5 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-01.zst" title="RC_2014-01.zst — 3.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-02.zst" title="RC_2014-02.zst — 3.5 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-03.zst" title="RC_2014-03.zst — 3.8 GiB">03</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-04.zst" title="RC_2014-04.zst — 3.8 GiB — DAMAGED: Decoding error (36) : Data corruption detected">04<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-05.zst" title="RC_2014-05.zst — 3.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-06.zst" title="RC_2014-06.zst — 3.8 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-07.zst" title="RC_2014-07.zst — 4.2 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-08.zst" title="RC_2014-08.zst — 4.2 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-09.zst" title="RC_2014-09.zst — 4.1 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-10.zst" title="RC_2014-10.zst — 4.3 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-11.zst" title="RC_2014-11.zst — 4.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2014-12.zst" title="RC_2014-12.zst — 4.4 GiB">12</a></span><span class="ksize">47.9 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2015</b><span>24 files &middot; 78.8 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-01.zst" title="RS_2015-01.zst — 1.1 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-02.zst" title="RS_2015-02.zst — 1.1 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-03.zst" title="RS_2015-03.zst — 1.3 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-04.zst" title="RS_2015-04.zst — 1.5 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-05.zst" title="RS_2015-05.zst — 1.6 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-06.zst" title="RS_2015-06.zst — 1.7 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-07.zst" title="RS_2015-07.zst — 1.7 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-08.zst" title="RS_2015-08.zst — 1.7 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-09.zst" title="RS_2015-09.zst — 1.6 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-10.zst" title="RS_2015-10.zst — 1.7 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-11.zst" title="RS_2015-11.zst — 1.6 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2015-12.zst" title="RS_2015-12.zst — 1.6 GiB">12</a></span><span class="ksize">18.3 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-01.zst" title="RC_2015-01.zst — 4.9 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-02.zst" title="RC_2015-02.zst — 4.5 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-03.zst" title="RC_2015-03.zst — 5.0 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-04.zst" title="RC_2015-04.zst — 5.1 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-05.zst" title="RC_2015-05.zst — 5.1 GiB">05</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-06.zst" title="RC_2015-06.zst — 5.1 GiB — DAMAGED: Decoding error (36) : Data corruption detected">06<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-07.zst" title="RC_2015-07.zst — 5.5 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-08.zst" title="RC_2015-08.zst — 5.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-09.zst" title="RC_2015-09.zst — 4.8 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-10.zst" title="RC_2015-10.zst — 5.2 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-11.zst" title="RC_2015-11.zst — 5.0 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2015-12.zst" title="RC_2015-12.zst — 5.2 GiB">12</a></span><span class="ksize">60.5 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2016</b><span>24 files &middot; 93.8 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-01.zst" title="RS_2016-01.zst — 1.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-02.zst" title="RS_2016-02.zst — 1.8 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-03.zst" title="RS_2016-03.zst — 1.8 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-04.zst" title="RS_2016-04.zst — 1.8 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-05.zst" title="RS_2016-05.zst — 1.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-06.zst" title="RS_2016-06.zst — 1.9 GiB">06</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-07.zst" title="RS_2016-07.zst — 1.9 GiB — DAMAGED: Decoding error (36) : Data corruption detected">07<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-08.zst" title="RS_2016-08.zst — 2.0 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-09.zst" title="RS_2016-09.zst — 2.0 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-10.zst" title="RS_2016-10.zst — 2.1 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-11.zst" title="RS_2016-11.zst — 2.3 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2016-12.zst" title="RS_2016-12.zst — 2.4 GiB">12</a></span><span class="ksize">23.7 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-01.zst" title="RC_2016-01.zst — 5.5 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-02.zst" title="RC_2016-02.zst — 5.3 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-03.zst" title="RC_2016-03.zst — 5.7 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-04.zst" title="RC_2016-04.zst — 5.7 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-05.zst" title="RC_2016-05.zst — 5.8 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-06.zst" title="RC_2016-06.zst — 5.8 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-07.zst" title="RC_2016-07.zst — 6.1 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-08.zst" title="RC_2016-08.zst — 6.2 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-09.zst" title="RC_2016-09.zst — 5.9 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-10.zst" title="RC_2016-10.zst — 5.9 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-11.zst" title="RC_2016-11.zst — 5.9 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2016-12.zst" title="RC_2016-12.zst — 6.3 GiB">12</a></span><span class="ksize">70.1 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2017</b><span>24 files &middot; 104.5 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-01.zst" title="RS_2017-01.zst — 2.1 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-02.zst" title="RS_2017-02.zst — 2.0 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-03.zst" title="RS_2017-03.zst — 2.2 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-04.zst" title="RS_2017-04.zst — 2.2 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-05.zst" title="RS_2017-05.zst — 1.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-06.zst" title="RS_2017-06.zst — 2.0 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-07.zst" title="RS_2017-07.zst — 2.1 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-08.zst" title="RS_2017-08.zst — 2.2 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-09.zst" title="RS_2017-09.zst — 2.0 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-10.zst" title="RS_2017-10.zst — 2.1 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-11.zst" title="RS_2017-11.zst — 2.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2017-12.zst" title="RS_2017-12.zst — 2.3 GiB">12</a></span><span class="ksize">25.3 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-01.zst" title="RC_2017-01.zst — 6.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-02.zst" title="RC_2017-02.zst — 6.2 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-03.zst" title="RC_2017-03.zst — 7.0 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-04.zst" title="RC_2017-04.zst — 6.6 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-05.zst" title="RC_2017-05.zst — 6.0 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-06.zst" title="RC_2017-06.zst — 6.0 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-07.zst" title="RC_2017-07.zst — 6.4 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-08.zst" title="RC_2017-08.zst — 6.5 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-09.zst" title="RC_2017-09.zst — 6.2 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-10.zst" title="RC_2017-10.zst — 7.2 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-11.zst" title="RC_2017-11.zst — 7.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2017-12.zst" title="RC_2017-12.zst — 7.3 GiB">12</a></span><span class="ksize">79.2 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2018</b><span>24 files &middot; 154.0 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-01.zst" title="RS_2018-01.zst — 2.4 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-02.zst" title="RS_2018-02.zst — 2.3 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-03.zst" title="RS_2018-03.zst — 2.6 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-04.zst" title="RS_2018-04.zst — 2.8 GiB">04</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-05.zst" title="RS_2018-05.zst — 2.9 GiB — DAMAGED: Read error (39) : premature end">05<span class="short">!</span></a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-06.zst" title="RS_2018-06.zst — 2.7 GiB — DAMAGED: unsupported format">06<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-07.zst" title="RS_2018-07.zst — 3.0 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-08.zst" title="RS_2018-08.zst — 3.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-09.zst" title="RS_2018-09.zst — 3.1 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-10.zst" title="RS_2018-10.zst — 3.3 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-11.zst" title="RS_2018-11.zst — 3.4 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2018-12.zst" title="RS_2018-12.zst — 3.7 GiB">12</a></span><span class="ksize">35.2 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-01.zst" title="RC_2018-01.zst — 7.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-02.zst" title="RC_2018-02.zst — 7.4 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-03.zst" title="RC_2018-03.zst — 8.9 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-04.zst" title="RC_2018-04.zst — 8.5 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-05.zst" title="RC_2018-05.zst — 8.8 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-06.zst" title="RC_2018-06.zst — 8.9 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-07.zst" title="RC_2018-07.zst — 10.1 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-08.zst" title="RC_2018-08.zst — 10.1 GiB">08</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-09.zst" title="RC_2018-09.zst — 9.7 GiB — DAMAGED: Decoding error (36) : Data corruption detected">09<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-10.zst" title="RC_2018-10.zst — 13.8 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-11.zst" title="RC_2018-11.zst — 13.2 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2018-12.zst" title="RC_2018-12.zst — 11.7 GiB">12</a></span><span class="ksize">118.8 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2019</b><span>24 files &middot; 237.0 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-01.zst" title="RS_2019-01.zst — 4.4 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-02.zst" title="RS_2019-02.zst — 4.2 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-03.zst" title="RS_2019-03.zst — 5.2 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-04.zst" title="RS_2019-04.zst — 5.2 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-05.zst" title="RS_2019-05.zst — 5.4 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-06.zst" title="RS_2019-06.zst — 5.4 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-07.zst" title="RS_2019-07.zst — 5.8 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-08.zst" title="RS_2019-08.zst — 6.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-09.zst" title="RS_2019-09.zst — 5.4 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-10.zst" title="RS_2019-10.zst — 5.4 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-11.zst" title="RS_2019-11.zst — 5.5 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2019-12.zst" title="RS_2019-12.zst — 6.1 GiB">12</a></span><span class="ksize">64.0 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-01.zst" title="RC_2019-01.zst — 12.9 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-02.zst" title="RC_2019-02.zst — 13.1 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-03.zst" title="RC_2019-03.zst — 13.6 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-04.zst" title="RC_2019-04.zst — 14.5 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-05.zst" title="RC_2019-05.zst — 13.7 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-06.zst" title="RC_2019-06.zst — 14.6 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-07.zst" title="RC_2019-07.zst — 13.6 GiB">07</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-08.zst" title="RC_2019-08.zst — 15.6 GiB — DAMAGED: Decoding error (36) : Data corruption detected">08<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-09.zst" title="RC_2019-09.zst — 15.0 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-10.zst" title="RC_2019-10.zst — 15.8 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-11.zst" title="RC_2019-11.zst — 14.8 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2019-12.zst" title="RC_2019-12.zst — 15.8 GiB">12</a></span><span class="ksize">173.0 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2020</b><span>24 files &middot; 286.7 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-01.zst" title="RS_2020-01.zst — 6.5 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-02.zst" title="RS_2020-02.zst — 6.4 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-03.zst" title="RS_2020-03.zst — 7.6 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-04.zst" title="RS_2020-04.zst — 8.5 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-05.zst" title="RS_2020-05.zst — 6.6 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-06.zst" title="RS_2020-06.zst — 6.4 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-07.zst" title="RS_2020-07.zst — 6.8 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-08.zst" title="RS_2020-08.zst — 7.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-09.zst" title="RS_2020-09.zst — 6.9 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-10.zst" title="RS_2020-10.zst — 7.2 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-11.zst" title="RS_2020-11.zst — 7.1 GiB">11</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2020-12.zst" title="RS_2020-12.zst — 7.6 GiB — DAMAGED: Read error (39) : premature end">12<span class="short">!</span></a></span><span class="ksize">84.5 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-01.zst" title="RC_2020-01.zst — 14.5 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-02.zst" title="RC_2020-02.zst — 13.9 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-03.zst" title="RC_2020-03.zst — 15.3 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-04.zst" title="RC_2020-04.zst — 16.6 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-05.zst" title="RC_2020-05.zst — 17.9 GiB">05</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-06.zst" title="RC_2020-06.zst — 17.7 GiB — DAMAGED: Decoding error (36) : Data corruption detected">06<span class="short">!</span></a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-07.zst" title="RC_2020-07.zst — 18.4 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-08.zst" title="RC_2020-08.zst — 18.4 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-09.zst" title="RC_2020-09.zst — 17.2 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-10.zst" title="RC_2020-10.zst — 17.5 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-11.zst" title="RC_2020-11.zst — 17.2 GiB">11</a><a class="mo bad" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2020-12.zst" title="RC_2020-12.zst — 17.9 GiB — DAMAGED: Decoding error (36) : Data corruption detected">12<span class="short">!</span></a></span><span class="ksize">202.2 GiB</span></div>
+</div>
+<div class="ybox">
+  <div class="yhead"><b>2021</b><span>24 files &middot; 346.2 GiB</span></div>
+  <div class="krow"><span class="klabel">submissions</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-01.zst" title="RS_2021-01.zst — 8.1 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-02.zst" title="RS_2021-02.zst — 7.8 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-03.zst" title="RS_2021-03.zst — 8.6 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-04.zst" title="RS_2021-04.zst — 8.4 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-05.zst" title="RS_2021-05.zst — 9.1 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-06.zst" title="RS_2021-06.zst — 8.8 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-07.zst" title="RS_2021-07.zst — 7.2 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-08.zst" title="RS_2021-08.zst — 7.3 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-09.zst" title="RS_2021-09.zst — 6.8 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-10.zst" title="RS_2021-10.zst — 7.0 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-11.zst" title="RS_2021-11.zst — 7.1 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/submissions/RS_2021-12.zst" title="RS_2021-12.zst — 7.4 GiB">12</a></span><span class="ksize">93.5 GiB</span></div>
+  <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-01.zst" title="RC_2021-01.zst — 19.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-02.zst" title="RC_2021-02.zst — 19.7 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-03.zst" title="RC_2021-03.zst — 21.4 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-04.zst" title="RC_2021-04.zst — 20.0 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-05.zst" title="RC_2021-05.zst — 20.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-06.zst" title="RC_2021-06.zst — 20.0 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-07.zst" title="RC_2021-07.zst — 20.6 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-08.zst" title="RC_2021-08.zst — 22.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-09.zst" title="RC_2021-09.zst — 21.4 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-10.zst" title="RC_2021-10.zst — 21.8 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-11.zst" title="RC_2021-11.zst — 22.1 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-12.zst" title="RC_2021-12.zst — 22.9 GiB">12</a></span><span class="ksize">252.7 GiB</span></div>
+</div>
+
+  <div class="note">
+    <b>381 of 392 files decode cleanly; 11 do not</b>, and are flagged
+    <span class="short">!</span> above. Every file was decompressed end to end, so this is a
+    measurement rather than a guess &mdash; zstd verifies an XXH64 checksum over each frame&rsquo;s
+    contents, which catches damage that a file-size check cannot. The download reported 100%
+    complete regardless.
+  </div>
+</section>
+
+<!-- ============ INTEGRITY ============ -->
+<section>
+  <h2>What is damaged, and why the sizes lie</h2>
+  <p class="lede">8 files carry silent corruption and 3 are truncated. The
+  distinction matters: a truncated file is visibly short against the torrent&rsquo;s own record,
+  but a silently corrupt one has <em>exactly</em> the right byte count and passes every
+  size check while containing bad data. ext4 stores no checksums of file contents, so nothing
+  reports this until something reads the bytes.</p>
+
+  <div class="scroller">
+    <table>
+      <thead><tr><th>File</th><th>Failure mode</th><th>Evidence</th><th>zstd says</th></tr></thead>
+      <tbody><tr><td class="mono">RC_2007-12.zst</td><td>truncated</td><td>8.3 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr><tr><td class="mono">RC_2014-04.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2015-06.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2018-09.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2019-08.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2020-06.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2020-12.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RS_2016-07.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RS_2018-05.zst</td><td>truncated</td><td>8.1 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr><tr><td class="mono">RS_2018-06.zst</td><td>header destroyed</td><td>correct size, opening bytes zeroed</td><td class="mono">unsupported format</td></tr><tr><td class="mono">RS_2020-12.zst</td><td>truncated</td><td>5.3 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr></tbody>
+    </table>
   </div>
 
-  <div class="note" id="donenote" style="display:none">
-    <b>Download complete.</b> The torrent was stopped automatically once every selected file
-    finished, so ganesha is no longer seeding or connecting to peers.
+  <div class="note">
+    <b>How much is actually lost.</b> Verifying one corrupt file against the torrent&rsquo;s SHA1
+    piece hashes found a single bad 16&nbsp;MiB piece out of 1,001 &mdash; the other 1,000 hashed
+    correctly. Two independent passes returned the identical bad-piece list, which means the bytes
+    are stably wrong on disk rather than being misread, so re-fetching fixes them for good. On
+    that basis the real damage across the archive is on the order of 150&nbsp;MiB in 1.41&nbsp;TiB.
+    The exception is <code>RS_2018-06</code>, whose opening bytes are zeroed, so zstd cannot
+    identify the format at all and the whole month of submissions is unreadable.
+  </div>
+</section>
+
+<!-- ============ CURATED DATASETS ============ -->
+<section id="curated">
+  <h2>Curated datasets</h2>
+  <p class="lede">Single-subreddit extracts, built by one pass over all 392 monthly files.
+  These are small enough to download over a coffee break and are served to everyone, with no IP
+  restriction. Each is newline-delimited JSON, zstd-compressed, one record per line &mdash; and
+  unlike the dumps they need no <code>--long=31</code>, so a plain <code>zstd -dc</code> works.</p>
+
+  <div class="card ds">
+  <div class="dsname"><a href="https://photos.proofsandreasons.io/reddit-archive/curated/r-math-posts.jsonl.zst">r-math-posts.jsonl.zst</a></div>
+  <p class="dsdesc">Every r/math submission in the archive, unfiltered — no score cut, deleted and removed posts kept exactly as the dumps recorded them. One JSON object per line.</p>
+  <dl class="facts"><dt>Submissions</dt><dd>211,302</dd><dt>Size</dt><dd>37.4 MiB</dd><dt>Range</dt><dd>2008-01 → 2021-12</dd><dt>Comments</dt><dd>none — posts only</dd></dl>
+</div>
+<div class="card ds">
+  <div class="dsname"><a href="https://photos.proofsandreasons.io/reddit-archive/curated/r-math-posts-comments.jsonl.zst">r-math-posts-comments.jsonl.zst</a></div>
+  <p class="dsdesc">The best-scoring r/math threads with their comment sections. Each line is a submission with every comment on it nested under "comments", oldest first. The score cut was chosen by compressing candidate builds until this file matched the posts-only file above: comments outweigh submissions by roughly fifty to one, so equal size buys depth instead of breadth.</p>
+  <dl class="facts"><dt>Score cut</dt><dd>≥ 314</dd><dt>Submissions</dt><dd>2,928 (1.4% of all)</dd><dt>Comments</dt><dd>332,025</dd><dt>Size</dt><dd>37.2 MiB (0.99× posts)</dd><dt>Range</dt><dd>2009-07 → 2021-12</dd></dl>
+</div>
+<div class="card ds">
+  <div class="dsname"><a href="https://photos.proofsandreasons.io/reddit-archive/curated/r-askphilosophy-posts.jsonl.zst">r-askphilosophy-posts.jsonl.zst</a></div>
+  <p class="dsdesc">Every r/askphilosophy submission in the archive, unfiltered — no score cut, deleted and removed posts kept exactly as the dumps recorded them. One JSON object per line.</p>
+  <dl class="facts"><dt>Submissions</dt><dd>129,422</dd><dt>Size</dt><dd>28.7 MiB</dd><dt>Range</dt><dd>2011-02 → 2021-12</dd><dt>Comments</dt><dd>none — posts only</dd></dl>
+</div>
+<div class="card ds">
+  <div class="dsname"><a href="https://photos.proofsandreasons.io/reddit-archive/curated/r-askphilosophy-posts-comments.jsonl.zst">r-askphilosophy-posts-comments.jsonl.zst</a></div>
+  <p class="dsdesc">The best-scoring r/askphilosophy threads with their comment sections. Each line is a submission with every comment on it nested under "comments", oldest first. The score cut was chosen by compressing candidate builds until this file matched the posts-only file above: comments outweigh submissions by roughly fifty to one, so equal size buys depth instead of breadth.</p>
+  <dl class="facts"><dt>Score cut</dt><dd>≥ 28</dd><dt>Submissions</dt><dd>4,650 (3.6% of all)</dd><dt>Comments</dt><dd>178,071</dd><dt>Size</dt><dd>28.8 MiB (1.01× posts)</dd><dt>Range</dt><dd>2011-11 → 2021-12</dd></dl>
+</div>
+
+  <div class="note">
+    <b>What these inherit from the damaged months.</b> The extracts were built from what
+    decodes, so the 11 damaged files above cost them a little data: each corrupt dump
+    yields every record up to its bad piece and nothing after it. Two gaps are worth naming.
+    <code>RS_2018-06</code> contributes nothing at all, so <b>June 2018 submissions are absent
+    entirely</b>. <code>RC_2007-12</code> also contributes nothing, but costs these datasets
+    nothing either &mdash; user-created subreddits did not exist before 2008, so there is no
+    r/math or r/askphilosophy content in any 2005&ndash;2007 file. That is also why the ranges
+    below start in 2008 and 2011 rather than 2005. Once the damaged pieces are re-fetched these
+    datasets get rebuilt from the repaired dumps.
   </div>
 </section>
 
 <!-- ============ WHY 2021 ============ -->
 <section>
   <h2>Where the archive stops, and why</h2>
-  <p class="lede">The cutoff is set by free space on <code>/data</code>, not by an editorial judgment
-  &mdash; but it lands nearly a year before ChatGPT&rsquo;s November 2022 release, so the whole selection
-  predates machine-generated text on Reddit at any meaningful scale. That turns out to be the more
-  useful corpus anyway.</p>
+  <p class="lede">The cutoff is set by free space on <code>/data</code>, not by an editorial
+  judgment &mdash; but it lands nearly a year before ChatGPT&rsquo;s November 2022 release, so the
+  whole selection predates machine-generated text on Reddit at any meaningful scale. That turns
+  out to be the more useful corpus anyway.</p>
 
-  <div class="card">
-    <dl class="facts">
-      <dt>Range</dt><dd>2005-06 &rarr; 2021-12</dd>
-      <dt>Months</dt><dd>199 of 253</dd>
-      <dt>Files</dt><dd>392 of 488</dd>
-      <dt>Size</dt><dd>1.414 TiB</dd>
-    </dl>
-  </div>
-
-  <h3>Size by year &mdash; where the disk actually goes</h3>
   <div class="scroller">
     <table>
       <thead><tr><th>Through</th><th>Cumulative</th><th>Status</th></tr></thead>
-      <tbody>
-        <tr class="take"><td class="period">2010-12</td><td class="num">0.008 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2012-12</td><td class="num">0.047 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2014-12</td><td class="num">0.143 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2016-12</td><td class="num">0.312 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2018-12</td><td class="num">0.564 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2019-12</td><td class="num">0.796 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2020-12</td><td class="num">1.076 TiB</td><td><span class="tag t-take">archived</span></td></tr>
-        <tr class="take"><td class="period">2021-12</td><td class="num">1.414 TiB</td><td><span class="tag t-take">cutoff</span></td></tr>
-        <tr><td class="period">2022-12</td><td class="num">1.814 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
-        <tr><td class="period">2023-12</td><td class="num">2.291 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
-        <tr><td class="period">2024-12</td><td class="num">2.842 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
-        <tr><td class="period">2025-12</td><td class="num">3.460 TiB</td><td><span class="tag t-skip">skipped</span></td></tr>
-      </tbody>
+      <tbody><tr class="take"><td class="period">2010-12</td><td class="num">0.008 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2012-12</td><td class="num">0.047 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2014-12</td><td class="num">0.143 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2016-12</td><td class="num">0.312 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2018-12</td><td class="num">0.564 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2019-12</td><td class="num">0.796 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2020-12</td><td class="num">1.076 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2021-12</td><td class="num">1.414 TB</td><td><span class="tag t-take">cutoff</span></td></tr><tr class=""><td class="period">2022-12</td><td class="num">1.814 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2023-12</td><td class="num">2.291 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2024-12</td><td class="num">2.842 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2025-12</td><td class="num">3.460 TB</td><td><span class="tag t-skip">skipped</span></td></tr></tbody>
     </table>
   </div>
-  <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">The first seven years are effectively
-  free &mdash; everything through 2012 is 47&nbsp;GB. Volume compounds sharply after 2018.</p>
-</section>
-
-<!-- ============ THE TORRENT ============ -->
-<section>
-  <h2>Source</h2>
-  <p class="lede">A single torrent covers 2005-06 through 2025-12 and supersedes both the older
-  2005&ndash;2023 bundle and every monthly release inside that window. It is delisted from the Academic
-  Torrents website &mdash; the details page returns 404, checked with and without a browser user-agent &mdash;
-  but the swarm is alive and was observed with 34 seeds. Only the files through 2021-12 were selected.</p>
-
-  <div class="card">
-    <h3 style="margin-top:0">zst &middot; comments + submissions</h3>
-    <div style="font-size:1.2rem;font-weight:650">Reddit 2005-06 &rarr; 2025-12</div>
-    <dl class="facts">
-      <dt>Full torrent</dt><dd>3.460 TiB</dd>
-      <dt>Selected</dt><dd>1.414 TiB</dd>
-      <dt>Files</dt><dd>392 of 488</dd>
-      <dt>Seeds</dt><dd>34 observed</dd>
-    </dl>
-    <p style="margin-top:16px;font-family:var(--mono);font-size:.78rem;color:var(--dim)">
-      reddit/comments/RC_YYYY-MM.zst &middot; reddit/submissions/RS_YYYY-MM.zst</p>
-    <p style="margin-top:12px">
-      <a href="magnet:?xt=urn:btih:3d426c47c767d40f82c7ef0f47c3acacedd2bf44&amp;dn=reddit_2005-06_to_2025-12_zst&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce">Magnet link</a>
-      &nbsp;&middot;&nbsp; <span class="hash">3d426c47c767d40f82c7ef0f47c3acacedd2bf44</span></p>
-  </div>
-</section>
-
-<!-- ============ DISKS ============ -->
-<section>
-  <h2>Disks on ganesha</h2>
-  <p class="lede">Three 1.8&nbsp;TB spindles and a 128&nbsp;GB SSD boot disk. The archive lands entirely on
-  <code>/data</code>; <code>/data2</code> and the external drive are left alone.</p>
-
-  <div class="card">
-    <div class="vol">
-      <div class="vh"><span class="vn">/data &mdash; the archive</span>
-        <span class="vd">/dev/sdc2 &middot; Hitachi HUA72302 &middot; internal SATA &middot; 1.7 TiB</span></div>
-      <div class="meter"><div class="m-used" style="flex:5.7"></div><div class="m-plan" style="flex:83.2"></div><div style="flex:11.1"></div></div>
-      <div class="vkey"><span><i style="background:var(--dimmer)"></i>100 GB existing</span>
-        <span><i style="background:var(--sky)"></i>1.414 TiB archive</span>
-        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>~60 GiB reserve</span></div>
-    </div>
-    <div class="vol">
-      <div class="vh"><span class="vn">/data2 &mdash; untouched</span>
-        <span class="vd">/dev/sda2 &middot; Hitachi HUA72302 &middot; internal SATA &middot; 1.6 TiB</span></div>
-      <div class="meter"><div class="m-used" style="flex:7"></div><div style="flex:93"></div></div>
-      <div class="vkey"><span><i style="background:var(--dimmer)"></i>115 GB existing</span>
-        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>1.4 TiB free &mdash; headroom to extend past 2021</span></div>
-    </div>
-    <div class="vol" style="margin-bottom:0">
-      <div class="vh"><span class="vn">/mnt/anopotamia &mdash; reserved</span>
-        <span class="vd">/dev/sdd1 &middot; WD My Passport &middot; USB 2.0 &middot; 1.8 TiB</span></div>
-      <div class="meter"><div class="m-used" style="flex:11.5"></div><div style="flex:88.5"></div></div>
-      <div class="vkey"><span><i style="background:var(--dimmer)"></i>212 GB spot_lab_pandr</span>
-        <span><i style="background:#0a0f18;border:1px solid var(--line)"></i>no archive data written here</span></div>
-    </div>
-  </div>
-
-  <div class="note">
-    <b>On adding capacity.</b> ganesha&rsquo;s southbridge (AMD SB7x0/SB8x0) has no USB&nbsp;3 &mdash; only OHCI
-    and EHCI &mdash; so any external enclosure is capped near 30&nbsp;MB/s. Port <code>ata6</code> is free and
-    five PCIe slots are unoccupied, so an internal 8&nbsp;TB CMR SATA drive is cheaper and several times
-    faster than an external. Avoid SMR: seeding is a random-read workload SMR handles badly. With one
-    fitted, the entire 3.46&nbsp;TiB torrent fits with room to spare.
-  </div>
+  <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">The first seven years are
+  effectively free &mdash; everything through 2012 is 47&nbsp;GB. Volume compounds sharply after
+  2018, and the full 2005&ndash;2025 torrent is 3.46&nbsp;TB against a 1.7&nbsp;TB disk. Extending
+  past 2021 needs no re-downloading: re-select more files in the same torrent and they resume,
+  onto <code>/data2</code> or a new disk.</p>
 </section>
 
 <!-- ============ USING IT ============ -->
 <section>
   <h2>Using the archive</h2>
 
-  <h3>Paths</h3>
+  <h3>On ganesha</h3>
   <div class="scroller">
     <table>
-      <thead><tr><th>Path</th><th>Contents</th><th>Size</th></tr></thead>
+      <thead><tr><th>Path</th><th>Contents</th></tr></thead>
       <tbody>
-        <tr><td class="mono">/data/reddit-archive/historical/reddit/comments/</td><td>RC_2005-12 &hellip; RC_2021-12</td><td class="num">~1.1 TiB</td></tr>
-        <tr><td class="mono">/data/reddit-archive/historical/reddit/submissions/</td><td>RS_2005-06 &hellip; RS_2021-12</td><td class="num">~0.3 TiB</td></tr>
-        <tr><td class="mono">/data/reddit-archive/metadata/</td><td>subreddit metadata, rules, wikis</td><td class="num">4.4 GB</td></tr>
-        <tr><td class="mono">/data/reddit-archive/torrents/</td><td>every <code>.torrent</code> + download_links.md</td><td class="num">2.8 MB</td></tr>
+        <tr><td><code>/data/reddit-archive/historical/reddit/submissions/</code></td><td>RS_2005-06 &hellip; RS_2021-12</td></tr>
+        <tr><td><code>/data/reddit-archive/historical/reddit/comments/</code></td><td>RC_2005-12 &hellip; RC_2021-12</td></tr>
+        <tr><td><code>/data2/reddit-archive/curated/public/</code></td><td>the curated datasets above</td></tr>
+        <tr><td><code>/data/reddit-archive/torrents/</code></td><td>every <code>.torrent</code> + download_links.md</td></tr>
       </tbody>
     </table>
   </div>
 
   <h3>Reading a dump</h3>
-  <pre>zstd -dc --long=31 /data/reddit-archive/historical/reddit/comments/RC_2015-01.zst | head -1</pre>
+  <pre>zstd -dc --long=31 RC_2015-01.zst | head -1</pre>
   <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">The <code>--long=31</code> window is
-  required &mdash; these use a 2&nbsp;GB compression window and fail to decompress without it. Each line is
-  one JSON object; see <a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a> for
-  iteration helpers.</p>
+  required &mdash; these use a 2&nbsp;GB compression window and fail to decompress without it. Each
+  line is one JSON object. Field order is not stable between months and fields come and go across
+  the years, so read by key and treat every key as optional; <code>created_utc</code> in
+  particular is sometimes a number and sometimes a string. See
+  <a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a> for iteration helpers.</p>
 
-  <h3>Extending past 2021 later</h3>
-  <p style="font-size:.9rem;color:var(--dim)">Nothing needs re-downloading. Restart the client, select
-  more files in the same torrent, and they resume where they left off &mdash; onto <code>/data2</code>, or a
-  new disk once the save location is changed.</p>
-</section>
-
-<!-- ============ ALL TORRENTS ============ -->
-<section>
-  <h2>Every torrent in the collection</h2>
-  <p class="lede">The complete index, so the record does not depend on a third-party site staying up.
-  Sizes are exact, summed from the records inside each <code>.torrent</code> file rather than quoted
-  from listing pages. Copies of every <code>.torrent</code> are on ganesha under
+  <h3>Source</h3>
+  <p style="font-size:.9rem;color:var(--dim)">One torrent covers 2005-06 through 2025-12; only the
+  files through 2021-12 were taken. It is delisted from Academic Torrents &mdash; the details page
+  404s &mdash; but the swarm is alive and was observed with 34 seeds. Infohash
+  <code>3d426c47c767d40f82c7ef0f47c3acacedd2bf44</code>
+  (<a href="magnet:?xt=urn:btih:3d426c47c767d40f82c7ef0f47c3acacedd2bf44&amp;dn=reddit_2005-06_to_2025-12_zst&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce">magnet</a>).
+  A copy of every <code>.torrent</code> in the collection, including the delisted monthly releases
+  and the per-subreddit split, is on ganesha under
   <code>/data/reddit-archive/torrents/</code>.</p>
 
-  <h3>Monthly releases</h3>
-  <div class="scroller">
-    <table>
-      <thead><tr><th>Month</th><th>Size</th><th>Academic Torrents</th><th>Infohash</th></tr></thead>
-      <tbody>
-        <tr><td class="period">2024-04</td><td class="num">58.7 GB</td><td><a href="https://academictorrents.com/details/ad4617a3e9c1f52405197fc088b28a8018e12a7a">details</a></td><td class="mono">ad4617a3</td></tr>
-        <tr><td class="period">2024-05</td><td class="num">48.1 GB</td><td><a href="https://academictorrents.com/details/4f60634d96d35158842cd58b495dc3b444d78b0d">details</a></td><td class="mono">4f60634d</td></tr>
-        <tr><td class="period">2024-06</td><td class="num">47.5 GB</td><td><a href="https://academictorrents.com/details/dcdecc93ca9a9d758c045345112771cef5b4989a">details</a></td><td class="mono">dcdecc93</td></tr>
-        <tr><td class="period">2024-07</td><td class="num">50.6 GB</td><td><a href="https://academictorrents.com/details/6e5300446bd9b328d0b812cdb3022891e086d9ec">details</a></td><td class="mono">6e530044</td></tr>
-        <tr><td class="period">2024-08</td><td class="num">52.1 GB</td><td><a href="https://academictorrents.com/details/8c2d4b00ce8ff9d45e335bed106fe9046c60adb0">details</a></td><td class="mono">8c2d4b00</td></tr>
-        <tr><td class="period">2024-09</td><td class="num">49.7 GB</td><td><a href="https://academictorrents.com/details/43a6e113d6ecacf38e58ecc6caa28d68892dd8af">details</a></td><td class="mono">43a6e113</td></tr>
-        <tr><td class="period">2024-10</td><td class="num">51.9 GB</td><td><a href="https://academictorrents.com/details/507dfcda29de9936dd77ed4f34c6442dc675c98f">details</a></td><td class="mono">507dfcda</td></tr>
-        <tr><td class="period">2024-11</td><td class="num">50.9 GB</td><td><a href="https://academictorrents.com/details/a1b490117808d9541ab9e3e67a3447e2f4f48f01">details</a></td><td class="mono">a1b49011</td></tr>
-        <tr><td class="period">2024-12</td><td class="num">51.3 GB</td><td><a href="https://academictorrents.com/details/eb2017da9f63a49460dde21a4ebe3b7c517f3ad9">details</a></td><td class="mono">eb2017da</td></tr>
-        <tr><td class="period">2025-01</td><td class="num">56.4 GB</td><td><a href="https://academictorrents.com/details/4fd14d4c3d792e0b1c5cf6b1d9516c48ba6c4a24">details</a></td><td class="mono">4fd14d4c</td></tr>
-        <tr><td class="period">2025-02</td><td class="num">51.5 GB</td><td><a href="https://academictorrents.com/details/2f873e0b15da5ee29b63e586c0ab1dedd3508870">details</a></td><td class="mono">2f873e0b</td></tr>
-        <tr><td class="period">2025-03</td><td class="num">55.8 GB</td><td><a href="https://academictorrents.com/details/69d5e046e15c02182430879f50d62b18fe1404fb">details</a></td><td class="mono">69d5e046</td></tr>
-        <tr><td class="period">2025-04</td><td class="num">53.9 GB</td><td><a href="https://academictorrents.com/details/552f34df5b830d18f98b69541e7e84f2658346b9">details</a></td><td class="mono">552f34df</td></tr>
-        <tr><td class="period">2025-05</td><td class="num">56.9 GB</td><td><a href="https://academictorrents.com/details/186a0f85a52ff4f1b08677cd312423ace9b34976">details</a></td><td class="mono">186a0f85</td></tr>
-        <tr><td class="period">2025-06</td><td class="num">56.5 GB</td><td><a href="https://academictorrents.com/details/bec5590bd3bc6c0f2d868f36ec92bec1aff4480e">details</a></td><td class="mono">bec5590b</td></tr>
-        <tr><td class="period">2025-07</td><td class="num">58.4 GB</td><td><a href="https://academictorrents.com/details/b6a7ccf72368a7d39c018c423e01bc15aa551122">details</a></td><td class="mono">b6a7ccf7</td></tr>
-        <tr><td class="period">2025-08</td><td class="num">58.0 GB</td><td><a href="https://academictorrents.com/details/c71a97c1f7f676c56963c4e15a81f20afb0109be">details</a></td><td class="mono">c71a97c1</td></tr>
-        <tr><td class="period">2025-09</td><td class="num">55.7 GB</td><td><a href="https://academictorrents.com/details/a92ce24b4180e4aa9295353f4d26f050031e3058">details</a></td><td class="mono">a92ce24b</td></tr>
-        <tr><td class="period">2025-10</td><td class="num">56.1 GB</td><td><a href="https://academictorrents.com/details/cb4fa22ea76ea0a2bb38885b27323c94a5d9d16c">details</a></td><td class="mono">cb4fa22e</td></tr>
-        <tr><td class="period">2025-11</td><td class="num">54.5 GB</td><td><a href="https://academictorrents.com/details/2d056b22743718ac81915f25b094b6226668663f">details</a></td><td class="mono">2d056b22</td></tr>
-        <tr><td class="period">2025-12</td><td class="num">56.4 GB</td><td><a href="https://academictorrents.com/details/481bf2eac43172ae724fd6c75dbcb8e27de77734">details</a></td><td class="mono">481bf2ea</td></tr>
-        <tr><td class="period">2026-01</td><td class="num">61.6 GB</td><td><a href="https://academictorrents.com/details/8412b89151101d88c915334c45d9c223169a1a60">details</a></td><td class="mono">8412b891</td></tr>
-        <tr><td class="period">2026-02</td><td class="num">60.4 GB</td><td><a href="https://academictorrents.com/details/c5ba00048236b60f819dbf010e9034d24fc291fb">details</a></td><td class="mono">c5ba0004</td></tr>
-        <tr><td class="period">2026-03</td><td class="num">68.4 GB</td><td><a href="https://academictorrents.com/details/668087bb8c8c9c763b27a1a4c5e7fcb6add25f2c">details</a></td><td class="mono">668087bb</td></tr>
-        <tr><td class="period">2026-04</td><td class="num">68.5 GB</td><td><a href="https://academictorrents.com/details/85d017ddd06920534187e7d45f21c7cec90c9bca">details</a></td><td class="mono">85d017dd</td></tr>
-        <tr><td class="period">2026-05</td><td class="num">71.7 GB</td><td><a href="https://academictorrents.com/details/55199eff9368cde1f5c1262dd7c1af09f7503ea5">details</a></td><td class="mono">55199eff</td></tr>
-        <tr><td class="period">2026-06</td><td class="num">70.4 GB</td><td><a href="https://academictorrents.com/details/3bac8bd352bbb74bbb23df4273cf3da5d66ee5a5">details</a></td><td class="mono">3bac8bd3</td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Subreddit metadata</h3>
-  <div class="scroller">
-    <table>
-      <thead><tr><th>Dataset</th><th>Size</th><th>Magnet</th><th>Academic Torrents</th></tr></thead>
-      <tbody>
-        <tr><td>Metadata, rules &amp; wikis <span class="period">2025-01</span></td><td class="num">2.6 GB</td><td><a href="magnet:?xt=urn:btih:5d0bf258a025a5b802572ddc29cde89bf093185c&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php">magnet</a></td><td><a href="https://academictorrents.com/details/5d0bf258a025a5b802572ddc29cde89bf093185c">details</a></td></tr>
-        <tr><td>Metadata only <span class="period">2024-01</span></td><td class="num">1.8 GB</td><td><a href="magnet:?xt=urn:btih:c902f4b65f0e82a5e37db205c3405f02a028ecdf&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php">magnet</a></td><td><a href="https://academictorrents.com/details/c902f4b65f0e82a5e37db205c3405f02a028ecdf">details</a></td></tr>
-      </tbody>
-    </table>
-  </div>
-
-  <h3>Delisted &mdash; 404 on the website, infohash only</h3>
-  <div class="scroller">
-    <table>
-      <thead><tr><th>Period</th><th>Format</th><th>Note</th><th>Infohash</th></tr></thead>
-      <tbody>
-        <tr><td class="period">2005 &rarr; 2023-09</td><td>zst</td><td>superseded</td><td class="mono">89d24ff9d5fbc1efcdaf9d7689d72b7548f699fc</td></tr>
-        <tr><td class="period">2005-06 &rarr; 2023-12</td><td>zst</td><td>superseded</td><td class="mono">9c263fc85366c1ef8f5bb9da0203f4c8c8db75f4</td></tr>
-        <tr><td class="period">2023-04 &rarr; 2023-09</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">7810d20b3651c0060cb670032ec33818230f654d</td></tr>
-        <tr><td class="period">2023-10</td><td>zst</td><td>superseded</td><td class="mono">9a3f77cf1b16f064b8f82e75ee8d470b49c90512</td></tr>
-        <tr><td class="period">2023-10</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">52e18b6a61f243e6ae42a1f2fc8aaf9fd9c9dbdb</td></tr>
-        <tr><td class="period">2023-11</td><td>zst</td><td>superseded</td><td class="mono">aee7728b787892d3cce4d6df3c86c2728e2be1d7</td></tr>
-        <tr><td class="period">2023-11</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">425b791647cdb2752f921351828452ca8e09aef8</td></tr>
-        <tr><td class="period">2023-12</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">0d0364f8433eb90b6e3276b7e150a37da8e4a12b</td></tr>
-        <tr><td class="period">2024-01</td><td>zst</td><td>bundle only</td><td class="mono">ac88546145ca3227e2b90e51ab477c4527dd8b90</td></tr>
-        <tr><td class="period">2024-01</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">c440a293602270f03a47e3110a174365b965a093</td></tr>
-        <tr><td class="period">2024-02</td><td>zst</td><td>bundle only</td><td class="mono">5969ae3e21bb481fea63bf649ec933c222c1f824</td></tr>
-        <tr><td class="period">2024-02</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">1dc131c38d09d8f3912a0040a9a7434ffccc1c78</td></tr>
-        <tr><td class="period">2024-03</td><td>zst</td><td>bundle only</td><td class="mono">deef710de36929e0aa77200fddda73c86142372c</td></tr>
-        <tr><td class="period">2024-03</td><td>zst_blocks</td><td>&mdash;</td><td class="mono">ca989aa94cbd0ac5258553500d9b0f3584f6e4f7</td></tr>
-        <tr><td class="period">per-subreddit split</td><td>zst</td><td>top 40k subreddits</td><td class="mono">56aa49f9653ba545f48df2e33679f014d2829c10</td></tr>
-      </tbody>
-    </table>
-  </div>
-  <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">A dead web page is not a dead swarm &mdash;
-  the bundle this archive comes from is itself delisted and had 34 seeds. Note that 2024-01, 2024-02 and
-  2024-03 exist <i>only</i> as delisted torrents; the bundle is the sole working route to those months.</p>
-</section>
-
-<!-- ============ DOCS ============ -->
-<section>
-  <h2>Documentation</h2>
+  <h3>Documentation</h3>
   <ul class="links">
     <li><a href="https://github.com/ArthurHeitmann/arctic_shift">arctic_shift</a>
       <span class="d">The project that produces the dumps. Schemas and field documentation.</span></li>
     <li><a href="https://github.com/ArthurHeitmann/arctic_shift/blob/master/download_links.md">download_links.md</a>
-      <span class="d">Canonical torrent index &mdash; the source for every hash here.</span></li>
+      <span class="d">Canonical torrent index.</span></li>
     <li><a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a>
       <span class="d">Python scripts for iterating and filtering the zst files.</span></li>
     <li><a href="https://arctic-shift.photon-reddit.com/">Arctic Shift API</a>
       <span class="d">Web interface and API, for lookups too small to justify a dump.</span></li>
-    <li><a href="https://academictorrents.com/">Academic Torrents</a>
-      <span class="d">Host. Query <code>database.xml</code>, not the browse page.</span></li>
   </ul>
 </section>
 
 <footer>
   Laboratory for Social Minds, Carnegie Mellon University &middot;
-  archive held on ganesha, status served from
-  <a href="https://photos.proofsandreasons.io/reddit/status.json">photos.proofsandreasons.io</a> &middot;
+  archive and datasets served from
+  <a href="https://photos.proofsandreasons.io/reddit-archive/">photos.proofsandreasons.io</a> &middot;
   <a href="/dashboard.html">skyline dashboard</a> &middot;
   <a href="/akdeniz.html">akdeniz monitor</a><br>
-  TiB are binary units, matching <code>df</code>; GB in the torrent tables are decimal, matching
+  TiB are binary units, matching <code>df</code>; TB in the cumulative table are decimal, matching
   Academic Torrents.
 </footer>
 
 </div>
-
-<script>
-(function(){
-  "use strict";
-  var SRC = "https://photos.proofsandreasons.io/reddit/status.json";
-  var POLL_MS = 60000;
-  var $ = function(id){ return document.getElementById(id); };
-
-  function bytes(n){
-    if(n === null || n === undefined) return "—";
-    var t = Math.pow(1024,4), g = Math.pow(1024,3);
-    if(n >= t) return (n/t).toFixed(2) + " TiB";
-    if(n >= g) return (n/g).toFixed(1) + " GiB";
-    return (n/Math.pow(1024,2)).toFixed(0) + " MiB";
-  }
-  function rate(bps){
-    if(!bps) return "stalled";
-    return (bps/1e6).toFixed(2) + " MB/s";
-  }
-  function dur(s){
-    if(s === null || s === undefined) return "—";
-    var d = Math.floor(s/86400), h = Math.floor((s%86400)/3600), m = Math.floor((s%3600)/60);
-    if(d > 0) return d + "d " + h + "h left";
-    if(h > 0) return h + "h " + m + "m left";
-    return m + "m left";
-  }
-  function ago(ts){
-    var s = Math.max(0, Math.floor(Date.now()/1000) - ts);
-    if(s < 90) return "updated just now";
-    if(s < 5400) return "updated " + Math.round(s/60) + " min ago";
-    return "updated " + Math.round(s/3600) + " h ago";
-  }
-
-  function fail(msg){
-    $("dot").className = "dot err";
-    $("livelabel").textContent = msg;
-    $("age").textContent = "—";
-  }
-
-  function render(d){
-    var done = d.state === "complete";
-    $("dot").className = "dot " + (done ? "done" : "on");
-    $("livelabel").textContent = done
-      ? "archive complete · torrent stopped"
-      : (d.torrent_running ? "downloading on ganesha" : "paused on ganesha");
-
-    $("pct").textContent  = d.pct.toFixed(2);
-    $("barfill").style.width = Math.min(100, d.pct) + "%";
-    $("s-done").textContent  = bytes(d.bytes.done);
-    $("s-total").textContent = bytes(d.bytes.total);
-    $("s-files").textContent = d.files.done + " / " + d.files.total;
-    $("s-rate").textContent  = done ? "finished" : rate(d.rate_bps);
-    $("s-eta").textContent   = done ? "—" : dur(d.eta_s);
-    $("s-free").textContent  = bytes(d.disk.free);
-    $("age").textContent     = ago(d.ts);
-    $("donenote").style.display = done ? "" : "none";
-
-    var html = "";
-    for(var i = 0; i < d.years.length; i++){
-      var y = d.years[i];
-      var p = y.total ? (100 * y.done / y.total) : 0;
-      html += '<div class="yr' + (y.files_done === y.files_total ? " full" : "") + '">'
-           +    '<div class="y"><b>' + y.y + '</b><span>' + Math.round(p) + '%</span></div>'
-           +    '<div class="yb"><i style="width:' + Math.min(100,p) + '%"></i></div>'
-           +  '</div>';
-    }
-    $("years").innerHTML = html;
-  }
-
-  function tick(){
-    fetch(SRC, {cache:"no-store"})
-      .then(function(r){
-        if(!r.ok) throw new Error("HTTP " + r.status);
-        return r.json();
-      })
-      .then(render)
-      .catch(function(){ fail("ganesha unreachable"); });
-  }
-
-  tick();
-  setInterval(tick, POLL_MS);
-})();
-</script>
 </body>
 </html>
