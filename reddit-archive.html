@@ -253,39 +253,33 @@
   <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-01.zst" title="RC_2021-01.zst — 19.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-02.zst" title="RC_2021-02.zst — 19.7 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-03.zst" title="RC_2021-03.zst — 21.4 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-04.zst" title="RC_2021-04.zst — 20.0 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-05.zst" title="RC_2021-05.zst — 20.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-06.zst" title="RC_2021-06.zst — 20.0 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-07.zst" title="RC_2021-07.zst — 20.6 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-08.zst" title="RC_2021-08.zst — 22.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-09.zst" title="RC_2021-09.zst — 21.4 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-10.zst" title="RC_2021-10.zst — 21.8 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-11.zst" title="RC_2021-11.zst — 22.1 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-12.zst" title="RC_2021-12.zst — 22.9 GiB">12</a></span><span class="ksize">252.7 GiB</span></div>
 </div>
 
-  <div class="note">
-    <b>381 of 392 files decode cleanly; 11 do not</b>, and are flagged
-    <span class="short">!</span> above. Every file was decompressed end to end, so this is a
-    measurement rather than a guess &mdash; zstd verifies an XXH64 checksum over each frame&rsquo;s
-    contents, which catches damage that a file-size check cannot. The download reported 100%
-    complete regardless.
-  </div>
+  <div class="note"><b>381 of 392 files decode cleanly; 11 do not</b>, and are flagged <span class="short">!</span> above. Every file was decompressed end to end, so this is a measurement rather than a guess &mdash; zstd verifies an XXH64 checksum over each frame&rsquo;s contents, which catches damage a file-size check cannot. The download reported 100% complete regardless.</div>
 </section>
 
 <!-- ============ INTEGRITY ============ -->
 <section>
   <h2>What is damaged, and why the sizes lie</h2>
   <p class="lede">8 files carry silent corruption and 3 are truncated. The
-  distinction matters: a truncated file is visibly short against the torrent&rsquo;s own record,
-  but a silently corrupt one has <em>exactly</em> the right byte count and passes every
-  size check while containing bad data. ext4 stores no checksums of file contents, so nothing
-  reports this until something reads the bytes.</p>
-
+  distinction matters: a truncated file is visibly short against the torrent&rsquo;s
+  own record, but a silently corrupt one has <em>exactly</em> the right byte count
+  and passes every size check while containing bad data. ext4 stores no checksums of
+  file contents, so nothing reports this until something reads the bytes.</p>
   <div class="scroller">
     <table>
       <thead><tr><th>File</th><th>Failure mode</th><th>Evidence</th><th>zstd says</th></tr></thead>
       <tbody><tr><td class="mono">RC_2007-12.zst</td><td>truncated</td><td>8.3 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr><tr><td class="mono">RC_2014-04.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2015-06.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2018-09.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2019-08.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2020-06.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RC_2020-12.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RS_2016-07.zst</td><td>silent corruption</td><td>correct size, bad bytes inside</td><td class="mono">Decoding error (36) : Data corruption detected</td></tr><tr><td class="mono">RS_2018-05.zst</td><td>truncated</td><td>8.1 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr><tr><td class="mono">RS_2018-06.zst</td><td>header destroyed</td><td>correct size, opening bytes zeroed</td><td class="mono">unsupported format</td></tr><tr><td class="mono">RS_2020-12.zst</td><td>truncated</td><td>5.3 MiB short of the torrent size</td><td class="mono">Read error (39) : premature end</td></tr></tbody>
     </table>
   </div>
-
   <div class="note">
-    <b>How much is actually lost.</b> Verifying one corrupt file against the torrent&rsquo;s SHA1
-    piece hashes found a single bad 16&nbsp;MiB piece out of 1,001 &mdash; the other 1,000 hashed
-    correctly. Two independent passes returned the identical bad-piece list, which means the bytes
-    are stably wrong on disk rather than being misread, so re-fetching fixes them for good. On
-    that basis the real damage across the archive is on the order of 150&nbsp;MiB in 1.41&nbsp;TiB.
-    The exception is <code>RS_2018-06</code>, whose opening bytes are zeroed, so zstd cannot
-    identify the format at all and the whole month of submissions is unreadable.
+    <b>Where this came from.</b> Not the torrent: BitTorrent verifies every 16&nbsp;MiB
+    piece against the <code>.torrent</code>&rsquo;s SHA1 before keeping it, and checking
+    one corrupt dump against those same hashes found a single bad piece out of 1,001
+    &mdash; the other 1,000 matched. The data was right when it arrived and diverged
+    locally afterwards. The client&rsquo;s own log agrees: of the files it reported errors
+    on inside this window, every one is damaged and no undamaged file appears. On that
+    basis the real damage is on the order of 150&nbsp;MiB in 1.41&nbsp;TiB. The exception
+    is <code>RS_2018-06</code>, whose opening bytes are zeroed, so zstd cannot identify
+    the format at all and that whole month of submissions is unreadable.
   </div>
 </section>
 
@@ -319,15 +313,16 @@
 </div>
 
   <div class="note">
-    <b>What these inherit from the damaged months.</b> The extracts were built from what
-    decodes, so the 11 damaged files above cost them a little data: each corrupt dump
-    yields every record up to its bad piece and nothing after it. Two gaps are worth naming.
-    <code>RS_2018-06</code> contributes nothing at all, so <b>June 2018 submissions are absent
-    entirely</b>. <code>RC_2007-12</code> also contributes nothing, but costs these datasets
-    nothing either &mdash; user-created subreddits did not exist before 2008, so there is no
-    r/math or r/askphilosophy content in any 2005&ndash;2007 file. That is also why the ranges
-    below start in 2008 and 2011 rather than 2005. Once the damaged pieces are re-fetched these
-    datasets get rebuilt from the repaired dumps.
+    <b>What these inherit from the damaged months.</b> The extracts were built from
+    what decodes, so the 11 damaged files above cost them a little data: each corrupt
+    dump yields every record up to its bad piece and nothing after it. Two gaps are
+    worth naming. <code>RS_2018-06</code> contributes nothing at all, so <b>June 2018
+    submissions are absent entirely</b>. <code>RC_2007-12</code> also contributes
+    nothing, but costs these datasets nothing either &mdash; user-created subreddits
+    did not exist before 2008, so no 2005&ndash;2007 file contains any r/math or
+    r/askphilosophy content. That is also why the ranges start in 2008 and 2011 rather
+    than 2005. Once the damaged pieces are re-fetched these datasets are rebuilt from
+    the repaired dumps.
   </div>
 </section>
 
