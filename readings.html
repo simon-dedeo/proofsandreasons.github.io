@@ -47,12 +47,14 @@
 
   .tag-filters {
     margin-bottom: 1.4em;
-    display: grid;
-    grid-template-columns: repeat(5, max-content);
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
     gap: 6px 16px;
   }
 
-  .tag-filters a {
+  .tag-filters a,
+  .sort-options a {
     color: #666666;
     border: 1px solid #aaaaaa;
     padding: 2px 8px;
@@ -63,7 +65,9 @@
   }
 
   .tag-filters a:hover,
-  .tag-filters a:focus {
+  .tag-filters a:focus,
+  .sort-options a:hover,
+  .sort-options a:focus {
     background: #000000;
     color: #ffffff;
     border-color: #000000;
@@ -71,11 +75,25 @@
     text-decoration: none;
   }
 
-  .tag-filters a.active {
+  .tag-filters a.active,
+  .sort-options a.active {
     background: #000000;
     color: #ffffff;
     border-color: #000000;
     font-weight: normal;
+  }
+
+  .sort-options {
+    margin-bottom: 1.4em;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+
+  .filter-label {
+    color: #666666;
+    font-size: 0.9em;
+    margin-right: 4px;
   }
 
   .paper {
@@ -102,6 +120,14 @@
     color: #888888;
   }
 
+  .note-mark {
+    color: #cc0000;
+  }
+
+  .note-text {
+    font-size: 14px;
+  }
+
 </style>
 
 <nav>
@@ -110,61 +136,261 @@
 
 <div class="content">
 
-  <h1>Readings</h1>
+  <h1>A CogSci Reading List</h1>
+  <p class="subtitle">Created and curated by Amritpal Singh (email: amritpal@andrew.cmu.edu)</p>
+  <p class="subtitle">This is a list of papers to help readers build a broad and deep foundation in cognitive science. This resource is currently hosted by the Proofs and Reasons Project, which investigates higher level mathematical reasoning. I will continue to prune, add, and generally curate the list over time. Please feel free to contact me at the email address listed above with any questions, suggestions, or technical issues you may have. - Amrit</p>
   <p class="subtitle">Click on a keyword to see all papers on that topic.</p>
 
   <div class="tag-filters">
+    <span class="filter-label">Topics:</span>
     <a href="#" data-filter="all" class="active">All</a>
     <a href="#" data-filter="artificial-intelligence">artificial intelligence</a>
+    <a href="#" data-filter="attention-perception">attention &amp; perception</a>
     <a href="#" data-filter="cognition">cognition</a>
-    <a href="#" data-filter="reasoning">reasoning</a>
-    <a href="#" data-filter="language">language</a>
-    <a href="#" data-filter="cultural-evolution">cultural evolution</a>
+    <a href="#" data-filter="comparative-psychology">comparative psychology</a>
+    <a href="#" data-filter="computer-science">computer science</a>
+    <a href="#" data-filter="culture">culture</a>
     <a href="#" data-filter="embodiment">embodiment</a>
-    <a href="#" data-filter="perception">perception</a>
+    <a href="#" data-filter="language">language</a>
+    <a href="#" data-filter="philosophy">philosophy</a>
   </div>
 
-  <div class="paper" data-tags="language cultural-evolution cognition">
-    <p>Christiansen, M. H., &amp; Chater, N. (2016). <a href="readings_files/Christiansen%20and%20Chater%20(2016)%20The%20now-or-never%20bottleneck.pdf">The now-or-never bottleneck: A fundamental constraint on language</a>. <em>Behavioral and Brain Sciences</em>, <em>39</em>, e62. doi:10.1017/S0140525X1500031X</p>
-    <p class="paper-tags">language / cultural evolution / cognition</p>
+  <div class="sort-options">
+    <span class="filter-label">Sort by:</span>
+    <a href="#" data-sort="alphabetical" class="active">Alphabetical</a>
+    <a href="#" data-sort="chronological">Chronological</a>
   </div>
 
-  <div class="paper" data-tags="cognition embodiment perception">
-    <p>Firestone, C., &amp; Scholl, B. J. (2016). <a href="readings_files/Firestone%20and%20Scholl%20(2016)%20Cognition%20does%20not%20affect%20perception.pdf">Cognition does not affect perception: Evaluating the evidence for &ldquo;top-down&rdquo; effects</a>. <em>Behavioral and Brain Sciences</em>, <em>39</em>, e229. doi:10.1017/S0140525X15000965</p>
-    <p class="paper-tags">cognition / embodiment / perception</p>
-  </div>
-
-  <div class="paper" data-tags="language cognition">
-    <p>Chomsky, N. (1959). <a href="readings_files/Chomsky%20(1959)%20Verbal%20behavior%20by%20Skinner.pdf">A review of B. F. Skinner&rsquo;s <em>Verbal Behavior</em></a>. <em>Language</em>, <em>35</em>(1), 26&ndash;58. doi:10.2307/411334</p>
-    <p class="paper-tags">language / cognition</p>
-  </div>
-
-  <div class="paper" data-tags="artificial-intelligence cognition reasoning">
-    <p>Turing, A. M. (1950). <a href="readings_files/Turing%20(1950)%20Computing%20Machinery%20and%20Intelligence.pdf">Computing machinery and intelligence</a>. <em>Mind</em>, <em>59</em>(236), 433&ndash;460. doi:10.1093/mind/LIX.236.433</p>
-    <p class="paper-tags">artificial intelligence / cognition / reasoning</p>
-  </div>
+  <div id="papers"></div>
 
 </div>
 
 <script>
+  // Tag key -> display label, shared between filter buttons and each paper's tag line.
+  var TAG_LABELS = {
+    'artificial-intelligence': 'artificial intelligence',
+    'cognition': 'cognition',
+    'comparative-psychology': 'comparative psychology',
+    'computer-science': 'computer science',
+    'language': 'language',
+    'philosophy': 'philosophy',
+    'culture': 'culture',
+    'embodiment': 'embodiment',
+    'attention-perception': 'attention & perception'
+  };
+
+  // Add a paper by appending one entry here: firstAuthorLastName (used to keep the
+  // list sorted alphabetically), tags (matching TAG_LABELS keys above), and citation
+  // (HTML string, with the title wrapped in a link to its journal page).
+  var papers = [
+    {
+      firstAuthorLastName: 'Christiansen',
+      tags: ['language', 'culture', 'cognition'],
+      citation: 'Christiansen, M. H., &amp; Chater, N. (2016). <a href="https://doi.org/10.1017/S0140525X1500031X">The now-or-never bottleneck: A fundamental constraint on language</a>. <em>Behavioral and Brain Sciences</em>, <em>39</em>, e62. doi:10.1017/S0140525X1500031X'
+    },
+    {
+      firstAuthorLastName: 'Chomsky',
+      tags: ['language', 'cognition', 'philosophy'],
+      citation: 'Chomsky, N. (1959). <a href="https://doi.org/10.2307/411334">A review of B. F. Skinner&rsquo;s <em>Verbal Behavior</em></a>. <em>Language</em>, <em>35</em>(1), 26&ndash;58. doi:10.2307/411334'
+    },
+    {
+      firstAuthorLastName: 'Turing',
+      tags: ['artificial-intelligence', 'cognition'],
+      citation: 'Turing, A. M. (1950). <a href="https://doi.org/10.1093/mind/LIX.236.433">Computing machinery and intelligence</a>. <em>Mind</em>, <em>59</em>(236), 433&ndash;460. doi:10.1093/mind/LIX.236.433'
+    },
+    {
+      firstAuthorLastName: 'Baddeley',
+      tags: ['cognition'],
+      citation: 'Baddeley, A. (2012). <a href="https://doi.org/10.1146/annurev-psych-120710-100422">Working memory: Theories, models, and controversies</a>. <em>Annual Review of Psychology</em>, <em>63</em>(1), 1&ndash;29. doi:10.1146/annurev-psych-120710-100422'
+    },
+    {
+      firstAuthorLastName: 'Wertheimer',
+      tags: ['attention-perception', 'cognition'],
+      citation: 'Wertheimer, M. (1938). <a href="https://psychclassics.yorku.ca/Wertheimer/Forms/forms.htm">Laws of organization in perceptual forms</a>. In W. D. Ellis (Ed.), <em>A source book of Gestalt psychology</em> (pp. 71&ndash;88). Kegan Paul, Trench, Trubner &amp; Company. doi:10.1037/11496-005<br><span class="note-text"><span class="note-mark">*</span>The link points to a public domain copy of the article hosted on Christopher Green&rsquo;s website, which focuses on the history of psychology. I highly recommend that resource to people interested in readings from the history of psychology.</span>'
+    },
+    {
+      firstAuthorLastName: 'Thurstone',
+      tags: ['cognition'],
+      citation: 'Thurstone, L. L. (1923). <a href="https://brocku.ca/MeadProject/Thurstone/Thurstone_1923.html">The stimulus-response fallacy in psychology</a>. <em>Psychological Review</em>, <em>30</em>, 354&ndash;369.<br><span class="note-text"><span class="note-mark">*</span>The link points to a public domain copy of the article.</span>'
+    },
+    {
+      firstAuthorLastName: 'Joris',
+      tags: ['attention-perception'],
+      citation: 'Joris, P. X., Smith, P. H., &amp; Yin, T. C. (1998). <a href="https://www.sciencedirect.com/science/article/pii/S0896627300806431">Coincidence detection in the auditory system: 50 years after Jeffress</a>. <em>Neuron</em>, <em>21</em>(6), 1235&ndash;1238.'
+    },
+    {
+      firstAuthorLastName: 'Burgoon',
+      tags: ['cognition', 'attention-perception'],
+      citation: 'Burgoon, E. M., Henderson, M. D., &amp; Markman, A. B. (2013). <a href="https://journals.sagepub.com/doi/full/10.1177/1745691613497964">There are many ways to see the forest for the trees: A tour guide for abstraction</a>. <em>Perspectives on Psychological Science</em>, <em>8</em>(5), 501&ndash;520.'
+    },
+    {
+      firstAuthorLastName: 'Shepard',
+      tags: ['cognition', 'attention-perception'],
+      citation: 'Shepard, R. N. (1987). <a href="https://www.jstor.org/stable/1700004">Toward a universal law of generalization for psychological science</a>. <em>Science</em>, <em>237</em>(4820), 1317&ndash;1323.'
+    },
+    {
+      firstAuthorLastName: 'Tenenbaum',
+      tags: ['cognition'],
+      citation: 'Tenenbaum, J. B., &amp; Griffiths, T. L. (2001). <a href="https://www.cambridge.org/core/journals/behavioral-and-brain-sciences/article/generalization-similarityand-bayesian-inference/595CAA321C9C56270C624057021DE77A">Generalization, similarity, and Bayesian inference</a>. <em>Behavioral and Brain Sciences</em>, <em>24</em>(4), 629&ndash;640.'
+    },
+    {
+      firstAuthorLastName: 'Turner',
+      tags: ['cognition'],
+      citation: 'Turner, C. H. (1909). <a href="https://www.science.org/doi/abs/10.1126/science.30.773.563">The behavior of a snake</a>. <em>Science</em>, <em>30</em>(773), 563&ndash;564.<br><span class="note-text"><span class="note-mark">*</span>For background reading on Charles H. Turner, please see <a href="https://www.science.org/doi/pdf/10.1126/science.abd8754">this perspective</a> on his work.</span>'
+    },
+    {
+      firstAuthorLastName: 'Jonas',
+      tags: ['cognition'],
+      citation: 'Jonas, E., &amp; Kording, K. P. (2017). <a href="https://doi.org/10.1371/journal.pcbi.1005268">Could a neuroscientist understand a microprocessor?</a> <em>PLOS Computational Biology</em>, <em>13</em>(1), e1005268.'
+    },
+    {
+      firstAuthorLastName: 'Lamme',
+      tags: ['attention-perception'],
+      citation: 'Lamme, V. A., &amp; Roelfsema, P. R. (2000). <a href="https://www.cell.com/trends/neurosciences/fulltext/S0166-2236(00)01657-X?pagewanted=all">The distinct modes of vision offered by feedforward and recurrent processing</a>. <em>Trends in Neurosciences</em>, <em>23</em>(11), 571&ndash;579.'
+    },
+    {
+      firstAuthorLastName: 'Shepard',
+      tags: ['cognition', 'attention-perception'],
+      citation: 'Shepard, R. N., &amp; Metzler, J. (1971). <a href="https://www.science.org/doi/abs/10.1126/science.171.3972.701">Mental rotation of three-dimensional objects</a>. <em>Science</em>, <em>171</em>(3972), 701&ndash;703.'
+    },
+    {
+      firstAuthorLastName: 'Beach',
+      tags: ['comparative-psychology'],
+      citation: 'Beach, F. A. (1950). <a href="https://doi.org/10.1037/h0056510">The snark was a boojum</a>. <em>American Psychologist</em>, <em>5</em>(4), 115.'
+    },
+    {
+      firstAuthorLastName: 'Reddy',
+      tags: ['language', 'cognition'],
+      citation: 'Reddy, M. (1979). <a href="https://www.cambridge.org/core/books/abs/metaphor-and-thought/conduit-metaphor-a-case-of-frame-conflict-in-our-language-about-language/073475BB85C2B7553047D1D29F62C2E2">The conduit metaphor</a>. <em>Metaphor and Thought</em>, <em>2</em>, 285&ndash;324.'
+    },
+    {
+      firstAuthorLastName: 'Boyd',
+      tags: ['cognition', 'culture', 'language'],
+      citation: 'Boyd, R., Richerson, P. J., &amp; Henrich, J. (2011). <a href="https://www.pnas.org/doi/full/10.1073/pnas.1100290108">The cultural niche: Why social learning is essential for human adaptation</a>. <em>Proceedings of the National Academy of Sciences</em>, <em>108</em>(Supplement 2), 10918&ndash;10925.'
+    },
+    {
+      firstAuthorLastName: 'Sperling',
+      tags: ['cognition'],
+      citation: 'Sperling, G. (1960). <a href="https://doi.org/10.1037/h0093759">The information available in brief visual presentations</a>. <em>Psychological Monographs: General and Applied</em>, <em>74</em>(11), 1.'
+    },
+    {
+      firstAuthorLastName: 'Miller',
+      tags: ['cognition'],
+      citation: 'Miller, G. A. (1956). <a href="https://doi.org/10.1037/h0043158">The magical number seven, plus or minus two: Some limits on our capacity for processing information</a>. <em>Psychological Review</em>, <em>63</em>(2), 81.'
+    },
+    {
+      firstAuthorLastName: 'Henrich',
+      tags: ['cognition', 'culture'],
+      citation: 'Henrich, J., Heine, S. J., &amp; Norenzayan, A. (2010). <a href="https://www.cambridge.org/core/journals/behavioral-and-brain-sciences/article/weirdest-people-in-the-world/BF84F7517D56AFF7B7EB58411A554C17">The weirdest people in the world?</a> <em>Behavioral and Brain Sciences</em>, <em>33</em>(2&ndash;3), 61&ndash;83.'
+    },
+    {
+      firstAuthorLastName: 'Barsalou',
+      tags: ['cognition', 'attention-perception', 'embodiment', 'language', 'philosophy'],
+      citation: 'Barsalou, L. W. (1999). <a href="https://www.cambridge.org/core/journals/behavioral-and-brain-sciences/article/perceptual-symbol-systems/C2D720D63C1CE3D7153F6BA473F9DD87">Perceptual symbol systems</a>. <em>Behavioral and Brain Sciences</em>, <em>22</em>(4), 577.'
+    },
+    {
+      firstAuthorLastName: 'Kumar',
+      tags: ['cognition'],
+      citation: 'Kumar, A. A. (2021). <a href="https://link.springer.com/article/10.3758/s13423-020-01792-x">Semantic memory: A review of methods, models, and current challenges</a>. <em>Psychonomic Bulletin &amp; Review</em>, <em>28</em>(1), 40&ndash;80.'
+    },
+    {
+      firstAuthorLastName: 'Tulving',
+      tags: ['cognition'],
+      citation: 'Tulving, E. (1972). <a href="https://alicekim.ca/EMSM72.pdf">Episodic and semantic memory</a>. In E. Tulving &amp; W. Donaldson (Eds.), <em>Organization of Memory</em> (pp. 381&ndash;403).'
+    },
+    {
+      firstAuthorLastName: 'Simon',
+      tags: ['cognition', 'computer-science'],
+      citation: 'Simon, H. A., &amp; Newell, A. (1964). <a href="https://www.jstor.org/stable/27839071">Information processing in computer and man</a>. <em>American Scientist</em>, <em>52</em>(3), 281&ndash;300.'
+    },
+    {
+      firstAuthorLastName: 'Searle',
+      tags: ['philosophy', 'cognition', 'embodiment'],
+      citation: 'Searle, J. R. (1980). <a href="https://www.cambridge.org/core/journals/behavioral-and-brain-sciences/article/abs/mindsbrainsandprograms/DC644B47A4299C637C89772FACC2706A">Minds, brains, and programs</a>. <em>Behavioral and Brain Sciences</em>, <em>3</em>(3), 417&ndash;424.'
+    }
+  ];
+
+  // Publication year is parsed out of each citation string (the "(YEAR)." right
+  // after the authors) rather than stored as a separate field, so there's only one
+  // place to keep in sync when adding a paper.
+  function citationYear(citation) {
+    var match = citation.match(/\((\d{4})\)/);
+    return match ? parseInt(match[1], 10) : 0;
+  }
+
+  function sortedPapers(sortKey) {
+    var copy = papers.slice();
+    if (sortKey === 'chronological') {
+      copy.sort(function(a, b) { return citationYear(b.citation) - citationYear(a.citation); });
+    } else {
+      copy.sort(function(a, b) { return a.firstAuthorLastName.localeCompare(b.firstAuthorLastName); });
+    }
+    return copy;
+  }
+
+  function buildPaperElement(paper) {
+    var div = document.createElement('div');
+    div.className = 'paper';
+    div.setAttribute('data-tags', paper.tags.join(' '));
+    var labels = paper.tags.map(function(tag) { return TAG_LABELS[tag] || tag; }).join(' / ');
+    div.innerHTML = '<p>' + paper.citation + '</p><p class="paper-tags">' + labels + '</p>';
+    div.querySelectorAll('a').forEach(function(link) {
+      link.target = '_blank';
+      link.rel = 'noopener';
+    });
+    return div;
+  }
+
+  var papersContainer = document.getElementById('papers');
+  var currentFilter = 'all';
+  var currentSort = 'alphabetical';
+
+  function applyFilter() {
+    document.querySelectorAll('.paper').forEach(function(paperEl) {
+      var tags = paperEl.getAttribute('data-tags').split(' ');
+      if (currentFilter === 'all' || tags.indexOf(currentFilter) !== -1) {
+        paperEl.classList.remove('hidden');
+      } else {
+        paperEl.classList.add('hidden');
+      }
+    });
+  }
+
+  function renderPapers() {
+    papersContainer.innerHTML = '';
+    sortedPapers(currentSort).forEach(function(paper) {
+      papersContainer.appendChild(buildPaperElement(paper));
+    });
+    applyFilter();
+  }
+
+  renderPapers();
+
   document.querySelectorAll('.tag-filters a').forEach(function(link) {
     link.addEventListener('click', function(e) {
       e.preventDefault();
-      var filter = this.getAttribute('data-filter');
+      currentFilter = this.getAttribute('data-filter');
 
       document.querySelectorAll('.tag-filters a').forEach(function(l) {
         l.classList.remove('active');
       });
       this.classList.add('active');
 
-      document.querySelectorAll('.paper').forEach(function(paper) {
-        var tags = paper.getAttribute('data-tags').split(' ');
-        if (filter === 'all' || tags.indexOf(filter) !== -1) {
-          paper.classList.remove('hidden');
-        } else {
-          paper.classList.add('hidden');
-        }
+      applyFilter();
+    });
+  });
+
+  document.querySelectorAll('.sort-options a').forEach(function(link) {
+    link.addEventListener('click', function(e) {
+      e.preventDefault();
+      currentSort = this.getAttribute('data-sort');
+
+      document.querySelectorAll('.sort-options a').forEach(function(l) {
+        l.classList.remove('active');
       });
+      this.classList.add('active');
+
+      renderPapers();
     });
   });
 </script>
