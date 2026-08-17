@@ -70,29 +70,6 @@
     }
   }
 
-  /* ------ Top navigation bar ------ */
-  .top-nav {
-    width: 100%;
-    background: #000000;
-    padding: 7px 20px;
-    box-sizing: border-box;
-    display: flex;
-    justify-content: flex-end;
-  }
-
-  .top-nav a {
-    color: #ffffff;
-    text-decoration: none;
-    font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
-    font-size: 16px;
-  }
-
-  .top-nav a:hover,
-  .top-nav a:focus {
-    text-decoration: underline;
-    outline: none;
-  }
-
   .container {
     width: 100%;
     max-width: 1024px;                                    /* intrinsic image width cap */
@@ -218,6 +195,13 @@
     text-align: center;
   }
 
+  .readings-link {
+    margin-top: 0.75em;
+    font-size: clamp(1.15rem, 2.5vw, 1.4rem);
+    line-height: 1.2;
+    text-align: center;
+  }
+
   a { color: #8cf; text-decoration: none; }
   a:hover { text-decoration: underline; }
 
@@ -327,10 +311,6 @@
 
 <body>
 
-    <nav class="top-nav">
-      <a href="/readings.html">Reading List</a>
-    </nav>
-
     <div id="predoc-modal" class="modal">
       <div class="modal-content">
         <a href="#" class="close" aria-label="Close">&times;</a>
@@ -429,6 +409,10 @@
 
     <div class="announce">
       Made possible by the support of Grant 63750, “Explaining Universal Truths”, from the <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.<br><small>Additional support from research funds of the Laboratory for Social Minds and from the Survival and Flourishing Fund.</small>
+    </div>
+
+    <div class="readings-link">
+      <a href="/readings.html">proofs and reasons cog sci reading list</a>
     </div>
 
     <div class="credit">
