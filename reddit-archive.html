@@ -92,6 +92,11 @@
   a.mo.bad:hover{border-color:var(--amber);background:rgba(255,182,74,.14)}
   .mo.off{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;
     border-radius:6px;border:1px dashed var(--line);color:#39404f;background:transparent}
+  /* Planned but not yet downloaded. Deliberately NOT .off: .off means the month
+     is absent from the upstream source, this means it is on its way. */
+  .mo.pend{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;
+    border-radius:6px;border:1px dashed rgba(255,182,74,.45);color:var(--amber);
+    background:rgba(255,182,74,.06);font-variant-numeric:tabular-nums}
   .short{color:var(--amber);font-weight:700}
   .none{font-family:var(--mono);font-size:.76rem;color:var(--dimmer)}
 
@@ -143,7 +148,8 @@
     <p class="sub">Every public Reddit comment and submission from June 2005 to December 2021,
     as zstd-compressed ndjson &mdash; the corpus as it stood before language models began writing
     into it. 392 files, 1.41 TiB, held on <b>ganesha</b> at the Laboratory for Social
-    Minds, CMU. Four <a href="#curated">curated r/math and r/askphilosophy datasets</a> are
+    Minds, CMU. The archive is currently being extended into 2022 and 2023 on a second
+    machine; those months appear in the grid below as each one lands. Four <a href="#curated">curated r/math and r/askphilosophy datasets</a> are
     drawn from it, small enough to download in a minute and open to anyone.</p>
   </div>
   <div class="backlinks">
@@ -254,6 +260,17 @@
   <div class="krow"><span class="klabel">comments</span><span class="months"><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-01.zst" title="RC_2021-01.zst — 19.8 GiB">01</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-02.zst" title="RC_2021-02.zst — 19.7 GiB">02</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-03.zst" title="RC_2021-03.zst — 21.4 GiB">03</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-04.zst" title="RC_2021-04.zst — 20.0 GiB">04</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-05.zst" title="RC_2021-05.zst — 20.9 GiB">05</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-06.zst" title="RC_2021-06.zst — 20.0 GiB">06</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-07.zst" title="RC_2021-07.zst — 20.6 GiB">07</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-08.zst" title="RC_2021-08.zst — 22.1 GiB">08</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-09.zst" title="RC_2021-09.zst — 21.4 GiB">09</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-10.zst" title="RC_2021-10.zst — 21.8 GiB">10</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-11.zst" title="RC_2021-11.zst — 22.1 GiB">11</a><a class="mo" href="https://photos.proofsandreasons.io/reddit-archive/dumps/comments/RC_2021-12.zst" title="RC_2021-12.zst — 22.9 GiB">12</a></span><span class="ksize">252.7 GiB</span></div>
 </div>
 
+  <!-- ===== 2022 onward: held on groth, rendered live from its index ===== -->
+  <div class="ybox" style="border-color:rgba(255,182,74,.28)">
+    <div class="yhead"><b>2022 onward</b><span id="extsum">checking&hellip;</span></div>
+    <p style="margin:2px 0 12px;font-size:.86rem;color:var(--dim)">Continuing past the 2021
+    cutoff. These months are held on <b>groth</b> rather than ganesha and are reached through
+    the same CMU-restricted endpoint. This grid builds itself from the archive index, so a
+    month turns into a working link as soon as it has finished downloading and been verified;
+    amber months are still in flight.</p>
+    <div id="extyears"></div>
+  </div>
+
   <div class="note"><b>All 392 files decode cleanly.</b> Every dump was decompressed end to end and every one succeeded, which is a stronger statement than a size check: zstd verifies an XXH64 checksum over each frame&rsquo;s contents. An earlier pass found 11 damaged files; the bad pieces were re-fetched from the swarm and re-verified.</div>
 </section>
 
@@ -302,14 +319,16 @@
   <div class="scroller">
     <table>
       <thead><tr><th>Through</th><th>Cumulative</th><th>Status</th></tr></thead>
-      <tbody><tr class="take"><td class="period">2010-12</td><td class="num">0.008 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2012-12</td><td class="num">0.047 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2014-12</td><td class="num">0.143 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2016-12</td><td class="num">0.312 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2018-12</td><td class="num">0.564 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2019-12</td><td class="num">0.796 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2020-12</td><td class="num">1.076 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2021-12</td><td class="num">1.414 TB</td><td><span class="tag t-take">cutoff</span></td></tr><tr class=""><td class="period">2022-12</td><td class="num">1.814 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2023-12</td><td class="num">2.291 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2024-12</td><td class="num">2.842 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2025-12</td><td class="num">3.460 TB</td><td><span class="tag t-skip">skipped</span></td></tr></tbody>
+      <tbody><tr class="take"><td class="period">2010-12</td><td class="num">0.008 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2012-12</td><td class="num">0.047 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2014-12</td><td class="num">0.143 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2016-12</td><td class="num">0.312 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2018-12</td><td class="num">0.564 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2019-12</td><td class="num">0.796 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2020-12</td><td class="num">1.076 TB</td><td><span class="tag t-take">archived</span></td></tr><tr class="take"><td class="period">2021-12</td><td class="num">1.414 TB</td><td><span class="tag t-take">cutoff</span></td></tr><tr class="take"><td class="period">2022-12</td><td class="num">1.814 TB</td><td><span class="tag t-take">in progress</span></td></tr><tr class="take"><td class="period">2023-12</td><td class="num">2.291 TB</td><td><span class="tag t-take">in progress</span></td></tr><tr class=""><td class="period">2024-12</td><td class="num">2.842 TB</td><td><span class="tag t-skip">skipped</span></td></tr><tr class=""><td class="period">2025-12</td><td class="num">3.460 TB</td><td><span class="tag t-skip">skipped</span></td></tr></tbody>
     </table>
   </div>
   <p style="margin-top:12px;font-size:.86rem;color:var(--dim)">The first seven years are
   effectively free &mdash; everything through 2012 is 47&nbsp;GB. Volume compounds sharply after
   2018, and the full 2005&ndash;2025 torrent is 3.46&nbsp;TB against a 1.7&nbsp;TB disk. Extending
-  past 2021 needs no re-downloading: re-select more files in the same torrent and they resume,
-  onto <code>/data2</code> or a new disk.</p>
+  past 2021 needs no re-downloading: re-select more files in the same torrent and they resume.
+  That is now underway &mdash; 2022-01 through 2023-09 is being pulled onto a second machine
+  rather than onto <code>/data</code>, which is why those months appear in a separate block
+  above.</p>
 </section>
 
 <!-- ============ USING IT ============ -->
@@ -372,5 +391,106 @@
 </footer>
 
 </div>
+<script>
+/* The 2022+ grid is generated, not hardcoded, because those months are still
+   arriving. It reads the public index groth publishes (CORS-enabled; the index
+   is public even though the .zst files behind it are CMU-only) and repaints
+   every 60s so a page left open picks up new months on its own. */
+(function () {
+  var IDX  = "https://photos.proofsandreasons.io/reddit-archive/dumps-2022-index.json";
+  var BASE = "https://photos.proofsandreasons.io/reddit-archive/dumps-2022";
+  var sumEl = document.getElementById("extsum");
+  var yrsEl = document.getElementById("extyears");
+  if (!sumEl || !yrsEl) return;
+
+  function gib(b) {
+    if (!b) return "0 GiB";
+    var g = b / 1073741824;
+    return (g >= 100 ? g.toFixed(0) : g.toFixed(1)) + " GiB";
+  }
+  function esc(s) {
+    return String(s).replace(/[&<>"]/g, function (c) {
+      return { "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;" }[c];
+    });
+  }
+
+  function render(d) {
+    var planned = d.planned || [];
+    var have = {};
+    (d.months || []).forEach(function (m) { have[m] = 1; });
+    var detail = d.detail || {};
+    if (!planned.length) { sumEl.textContent = "no months planned"; return; }
+
+    var years = [];
+    planned.forEach(function (m) {
+      var y = m.slice(0, 4);
+      if (years.indexOf(y) === -1) years.push(y);
+    });
+    years.sort();
+
+    var html = "";
+    years.forEach(function (y) {
+      var inYear = planned.filter(function (m) { return m.slice(0, 4) === y; });
+      var got = inYear.filter(function (m) { return have[m]; });
+      var bytes = got.reduce(function (a, m) {
+        return a + ((detail[m] && detail[m].bytes) || 0);
+      }, 0);
+
+      var rows = [["submissions", "RS"], ["comments", "RC"]];
+      var rowHtml = rows.map(function (r) {
+        var cells = "";
+        for (var i = 1; i <= 12; i++) {
+          var mm = (i < 10 ? "0" : "") + i;
+          var key = y + "-" + mm;
+          var dir = r[1] === "RS" ? "submissions" : "comments";
+          var fn  = r[1] + "_" + key + ".zst";
+          if (have[key]) {
+            var sz = "";
+            var det = detail[key];
+            if (det && det.files) {
+              det.files.forEach(function (f) {
+                if (f.path.indexOf(fn) !== -1) sz = " \u2014 " + gib(f.bytes);
+              });
+            }
+            cells += '<a class="mo" href="' + BASE + "/" + dir + "/" + fn +
+                     '" title="' + esc(fn + sz) + '">' + mm + "</a>";
+          } else if (inYear.indexOf(key) !== -1) {
+            cells += '<span class="mo pend" title="' + esc(fn) +
+                     ' \u2014 downloading">' + mm + "</span>";
+          } else {
+            cells += '<span class="mo off">' + mm + "</span>";
+          }
+        }
+        return '<div class="krow"><span class="klabel">' + r[0] +
+               '</span><span class="months">' + cells + "</span></div>";
+      }).join("");
+
+      html += '<div class="ybox" style="margin:10px 0 0"><div class="yhead"><b>' + y +
+              "</b><span>" + got.length + " of " + inYear.length + " months &middot; " +
+              gib(bytes) + "</span></div>" + rowHtml + "</div>";
+    });
+    yrsEl.innerHTML = html;
+
+    var plannedBytes = planned.reduce(function (a, m) {
+      return a + ((detail[m] && detail[m].bytes) || 0);
+    }, 0);
+    sumEl.textContent = (d.count || 0) + " of " + planned.length + " months \u00b7 " +
+                        gib(d.bytes || 0) + " of " + gib(plannedBytes);
+  }
+
+  function poll() {
+    fetch(IDX, { cache: "no-store" })
+      .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
+      .then(render)
+      .catch(function () {
+        /* groth is a laptop; if it is off or asleep the index is simply
+           unreachable. Say so plainly rather than leaving "checking..." */
+        sumEl.textContent = "index unreachable \u2014 groth may be offline";
+      });
+  }
+  poll();
+  setInterval(poll, 60000);
+})();
+</script>
 </body>
 </html>
