@@ -456,6 +456,29 @@
       <div class="rows" id="containers"></div>
     </div>
 
+    <!-- Server-room camera (grothendieck) -->
+    <div class="card wide">
+      <div class="h5"><span>Server room</span><span class="note" id="cammeta">grothendieck &middot; live</span></div>
+      <img id="camimg" alt="server-room camera (grothendieck)" decoding="async"
+           style="width:100%;border-radius:12px;display:block;background:#000;border:1px solid var(--line)">
+      <div class="sub" id="camts" style="margin-top:8px">connecting&hellip;</div>
+    </div>
+
+    <!-- External access to hosted data -->
+    <div class="card">
+      <div class="h5"><span>External access</span><span class="note">30d &middot; excl. CMU / Pittsburgh</span></div>
+      <div class="big"><span id="axtotal">&mdash;</span><span class="u">hits</span></div>
+      <div class="tiles" style="margin-top:6px">
+        <div class="tile"><div class="k">Unique IPs</div><div class="v" id="axuniq">&mdash;</div></div>
+        <div class="tile"><div class="k">Countries</div><div class="v" id="axcc">&mdash;</div></div>
+      </div>
+      <div class="h5" style="margin-top:16px"><span>Top countries</span></div>
+      <div class="rows" id="axcountry"></div>
+      <div class="h5" style="margin-top:14px"><span>Top cities</span></div>
+      <div class="rows" id="axcity"></div>
+      <div class="sub" id="axts" style="margin-top:10px"></div>
+    </div>
+
   </div>
 
   <footer>
@@ -1110,6 +1133,44 @@
     var dot=document.getElementById("dot");
     dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
   }, 1000);
+})();
+</script>
+<script>
+/* Server-room camera + external-access panels (added 2026-08-17).
+   Self-contained and independent of the telemetry poller above.
+   Data is served from photos.proofsandreasons.io/akdeniz/ (CORS + no-cache). */
+(function(){
+  var CAM="https://photos.proofsandreasons.io/akdeniz/camera.jpg";
+  var AX ="https://photos.proofsandreasons.io/akdeniz/access-stats.json";
+  var img=document.getElementById("camimg"), camts=document.getElementById("camts");
+  function refreshCam(){
+    var u=CAM+"?t="+Date.now(), probe=new Image();
+    probe.onload=function(){ img.src=u; camts.textContent="updated "+new Date().toLocaleTimeString(); };
+    probe.onerror=function(){ camts.textContent="camera offline"; };
+    probe.src=u;
+  }
+  refreshCam(); setInterval(refreshCam,15000);
+
+  function esc(s){ return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+  function fill(el,items,labelFn){
+    if(!el) return;
+    if(!items||!items.length){ el.innerHTML='<div class="row"><span class="k" style="color:var(--dimmer)">none yet</span><span class="v">&mdash;</span></div>'; return; }
+    el.innerHTML=items.map(function(it){
+      return '<div class="row"><span class="k">'+esc(labelFn(it))+'</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
+    }).join("");
+  }
+  function num(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  function refreshAx(){
+    fetch(AX,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
+      num("axtotal",(d.total_accesses||0).toLocaleString());
+      num("axuniq",(d.unique_ips||0).toLocaleString());
+      num("axcc",(d.by_country||[]).length);
+      fill(document.getElementById("axcountry"),(d.by_country||[]).slice(0,8),function(x){return x.country;});
+      fill(document.getElementById("axcity"),(d.by_city||[]).slice(0,8),function(x){return x.city+(x.country&&x.country!=="Unknown"?", "+x.country:"");});
+      var t=document.getElementById("axts"); if(t) t.textContent=d.updated?("updated "+d.updated):"";
+    }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
+  }
+  refreshAx(); setInterval(refreshAx,60000);
 })();
 </script>
 </body>
