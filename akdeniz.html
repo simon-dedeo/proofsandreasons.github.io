@@ -245,10 +245,20 @@
   footer a{color:var(--dim)}
   .err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);color:var(--bad);
     border-radius:12px;padding:11px 14px;font-family:var(--mono);font-size:.72rem;margin-bottom:16px;display:none}
+  .topnav{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.72rem;
+    letter-spacing:.02em;margin-bottom:16px}
+  .topnav a{color:var(--dim);text-decoration:none}
+  .topnav a:hover{color:var(--sky)}
 </style>
 </head>
 <body>
 <div class="wrap">
+
+  <nav class="topnav">
+    <a href="/dashboard.html">CMU skyline monitor &rarr;</a>
+    <a href="/readings.html">cogsci reading list &rarr;</a>
+    <a href="/reddit-archive.html">reddit archive &rarr;</a>
+  </nav>
 
   <div class="err" id="err"></div>
 
