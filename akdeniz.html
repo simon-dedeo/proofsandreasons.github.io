@@ -245,20 +245,14 @@
   footer a{color:var(--dim)}
   .err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);color:var(--bad);
     border-radius:12px;padding:11px 14px;font-family:var(--mono);font-size:.72rem;margin-bottom:16px;display:none}
-  .topnav{display:flex;gap:18px;flex-wrap:wrap;font-family:var(--mono);font-size:.72rem;
-    letter-spacing:.02em;margin-bottom:16px}
-  .topnav a{color:var(--dim);text-decoration:none}
-  .topnav a:hover{color:var(--sky)}
+  .hright .mon{font-family:var(--mono);font-size:.72rem;line-height:1.75}
+  .hright .mon a{color:var(--sky);text-decoration:none}
+  .hright .mon a:hover{text-decoration:underline}
+  .hright .mon:last-of-type{margin-bottom:9px}
 </style>
 </head>
 <body>
 <div class="wrap">
-
-  <nav class="topnav">
-    <a href="/dashboard.html">CMU skyline monitor &rarr;</a>
-    <a href="/readings.html">cogsci reading list &rarr;</a>
-    <a href="/reddit-archive.html">reddit archive &rarr;</a>
-  </nav>
 
   <div class="err" id="err"></div>
 
@@ -268,6 +262,9 @@
       <div class="sub" id="subline">connecting&hellip;</div>
     </div>
     <div class="hright">
+      <div class="mon"><a href="/dashboard.html">CMU skyline monitor &rarr;</a></div>
+      <div class="mon"><a href="/readings.html">cogsci reading list &rarr;</a></div>
+      <div class="mon"><a href="/reddit-archive.html">reddit archive &rarr;</a></div>
       <div class="age" id="age">&mdash;</div>
       <div class="proj">LABORATORY FOR SOCIAL MINDS &middot; CMU</div>
     </div>
