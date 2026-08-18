@@ -476,9 +476,12 @@
          hundreds of frames, so a hit count measures image density rather than
          reach. Every row below counts unique IPs. VPN/relay egress, scanners
          and crawlers are dropped upstream in akdeniz-access-stats.py -- geo on
-         a VPN exit is fiction, and a bot is not a reader. -->
+         a VPN exit is fiction, and a bot is not a reader.
+         The window is open: totals run from the day logging started, which the
+         generator carries in "since" because a running total means nothing
+         without the date it starts from. -->
     <div class="card">
-      <div class="h5"><span>External access</span><span class="note">30d &middot; excl. CMU, VPN, bots</span></div>
+      <div class="h5"><span>External access</span><span class="note">all&#8209;time &middot; excl. CMU, VPN, bots</span></div>
       <div class="big"><span id="axtotal">&mdash;</span><span class="u">unique IPs</span></div>
       <div class="tiles" style="margin-top:6px">
         <div class="tile"><div class="k">Countries</div><div class="v" id="axcc">&mdash;</div></div>
@@ -1203,7 +1206,15 @@
       if(ex.bot)    parts.push(ex.bot+" bot"+(ex.bot===1?"":"s"));
       var dn=document.getElementById("axdropnote");
       if(dn) dn.textContent=parts.length?("filtered: "+parts.join(", ")):"";
-      var t=document.getElementById("axts"); if(t) t.textContent=d.updated?("updated "+d.updated):"";
+      // An all-time count is only readable against its start date, so "since"
+      // sits with the timestamp rather than being left to the reader.
+      var t=document.getElementById("axts");
+      if(t){
+        var bits=[];
+        if(d.since) bits.push("since "+d.since);
+        if(d.updated) bits.push("updated "+d.updated);
+        t.textContent=bits.join(" \u00b7 ");
+      }
     }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
   }
   refreshAx(); setInterval(refreshAx,60000);
