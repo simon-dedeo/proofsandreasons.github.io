@@ -472,18 +472,24 @@
     </div>
 
     <!-- External access to hosted data -->
+    <!-- Distinct people, not requests: one visitor browsing a timelapse pulls
+         hundreds of frames, so a hit count measures image density rather than
+         reach. Every row below counts unique IPs. VPN/relay egress, scanners
+         and crawlers are dropped upstream in akdeniz-access-stats.py -- geo on
+         a VPN exit is fiction, and a bot is not a reader. -->
     <div class="card">
-      <div class="h5"><span>External access</span><span class="note">30d &middot; excl. CMU / Pittsburgh</span></div>
-      <div class="big"><span id="axtotal">&mdash;</span><span class="u">hits</span></div>
+      <div class="h5"><span>External access</span><span class="note">30d &middot; excl. CMU, VPN, bots</span></div>
+      <div class="big"><span id="axtotal">&mdash;</span><span class="u">unique IPs</span></div>
       <div class="tiles" style="margin-top:6px">
-        <div class="tile"><div class="k">Unique IPs</div><div class="v" id="axuniq">&mdash;</div></div>
         <div class="tile"><div class="k">Countries</div><div class="v" id="axcc">&mdash;</div></div>
+        <div class="tile"><div class="k">Filtered out</div><div class="v" id="axdrop">&mdash;</div></div>
       </div>
-      <div class="h5" style="margin-top:16px"><span>Top countries</span></div>
-      <div class="rows" id="axcountry"></div>
-      <div class="h5" style="margin-top:14px"><span>Top cities</span></div>
+      <div class="h5" style="margin-top:16px"><span>Where from</span><span class="note">city &middot; state &middot; country</span></div>
       <div class="rows" id="axcity"></div>
-      <div class="sub" id="axts" style="margin-top:10px"></div>
+      <div class="h5" style="margin-top:14px"><span>Countries</span></div>
+      <div class="rows" id="axcountry"></div>
+      <div class="sub" id="axdropnote" style="margin-top:10px"></div>
+      <div class="sub" id="axts" style="margin-top:4px"></div>
     </div>
 
   </div>
@@ -1158,22 +1164,45 @@
   }
   refreshCam(); setInterval(refreshCam,15000);
 
-  function esc(s){ return String(s).replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c];}); }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
   function fill(el,items,labelFn){
     if(!el) return;
     if(!items||!items.length){ el.innerHTML='<div class="row"><span class="k" style="color:var(--dimmer)">none yet</span><span class="v">&mdash;</span></div>'; return; }
     el.innerHTML=items.map(function(it){
-      return '<div class="row"><span class="k">'+esc(labelFn(it))+'</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
+      var lab=labelFn(it);
+      // title= as well as the text: .row .k ellipsises, and "Glenwood Springs,
+      // Colorado, United States" is wider than the column at one card width.
+      return '<div class="row"><span class="k" title="'+esc(lab)+'">'+esc(lab)+
+             '</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
     }).join("");
+  }
+  // City / state / country, skipping unknowns and repeats: the city-states come
+  // back from the geo database as "Singapore, Singapore, Singapore", and a good
+  // few US states share a name with their own largest city.
+  function place(x){
+    var out=[];
+    [x.city,x.region,x.country].forEach(function(p){
+      if(p && p!=="Unknown" && out.indexOf(p)<0) out.push(p);
+    });
+    return out.join(", ") || "Unknown";
   }
   function num(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
   function refreshAx(){
     fetch(AX,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
-      num("axtotal",(d.total_accesses||0).toLocaleString());
-      num("axuniq",(d.unique_ips||0).toLocaleString());
-      num("axcc",(d.by_country||[]).length);
+      var ex=d.excluded||{};
+      num("axtotal",(d.unique_ips||0).toLocaleString());
+      num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
+      num("axdrop",(ex.total||0).toLocaleString());
+      fill(document.getElementById("axcity"),(d.by_city||[]).slice(0,8),place);
       fill(document.getElementById("axcountry"),(d.by_country||[]).slice(0,8),function(x){return x.country;});
-      fill(document.getElementById("axcity"),(d.by_city||[]).slice(0,8),function(x){return x.city+(x.country&&x.country!=="Unknown"?", "+x.country:"");});
+      // Spell out what was dropped rather than leaving a bare filtered count:
+      // the number only means something alongside the reasons.
+      var parts=[];
+      if(ex.vpn)    parts.push(ex.vpn+" VPN/relay");
+      if(ex.attack) parts.push(ex.attack+" scanning");
+      if(ex.bot)    parts.push(ex.bot+" bot"+(ex.bot===1?"":"s"));
+      var dn=document.getElementById("axdropnote");
+      if(dn) dn.textContent=parts.length?("filtered: "+parts.join(", ")):"";
       var t=document.getElementById("axts"); if(t) t.textContent=d.updated?("updated "+d.updated):"";
     }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
   }
