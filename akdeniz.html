@@ -171,6 +171,18 @@
   .row:last-child{border-bottom:0}
   .row .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
   .row .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+  /* Scrollable list. The access feed carries 25 places and the card should not
+     grow to three times the height of its neighbours to show them. The cap is
+     set just shy of a whole number of rows so the next one is visibly clipped:
+     a list ending flush with the bottom edge reads as a list that has ended. */
+  .rows.scroll{max-height:14.4rem;overflow-y:auto;overscroll-behavior:contain;
+    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+  .rows.scroll::-webkit-scrollbar{width:6px}
+  .rows.scroll::-webkit-scrollbar-track{background:transparent}
+  .rows.scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+  /* Focusable, so the rows past the fold are reachable without a mouse --
+     Chrome only makes a scroller keyboard-focusable on its own from 127. */
+  .rows.scroll:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
   .pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.62rem;font-family:var(--mono);
     border:1px solid var(--line);color:var(--dim)}
   .pill.ok{color:var(--good);border-color:rgba(99,214,143,.35)}
@@ -488,7 +500,8 @@
         <div class="tile"><div class="k">Filtered out</div><div class="v" id="axdrop">&mdash;</div></div>
       </div>
       <div class="h5" style="margin-top:16px"><span>Where from</span><span class="note">city &middot; state &middot; country</span></div>
-      <div class="rows" id="axcity"></div>
+      <div class="rows scroll" id="axcity" tabindex="0" role="group"
+           aria-label="Places, most visitors first, then most recently seen"></div>
       <div class="h5" style="margin-top:14px"><span>Countries</span></div>
       <div class="rows" id="axcountry"></div>
       <div class="sub" id="axdropnote" style="margin-top:10px"></div>
@@ -1196,7 +1209,10 @@
       num("axtotal",(d.unique_ips||0).toLocaleString());
       num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
       num("axdrop",(ex.total||0).toLocaleString());
-      fill(document.getElementById("axcity"),(d.by_city||[]).slice(0,8),place);
+      // All of them: the card scrolls, and the generator already caps the
+      // feed at 25. Countries stay at 8 -- there are seven, and the list is
+      // short enough that a scroller would be furniture around nothing.
+      fill(document.getElementById("axcity"),(d.by_city||[]),place);
       fill(document.getElementById("axcountry"),(d.by_country||[]).slice(0,8),function(x){return x.country;});
       // Spell out what was dropped rather than leaving a bare filtered count:
       // the number only means something alongside the reasons.
