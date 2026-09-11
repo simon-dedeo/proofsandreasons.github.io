@@ -11,18 +11,16 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <!-- Live host telemetry: keep it out of search results and out of caches.
-     Deliberately NOT paired with a robots.txt Disallow -- that would stop
-     crawlers fetching the page, and a directive they never read cannot be
-     obeyed, which is how URL-only listings end up indexed anyway. -->
+     Deliberately NOT paired with a robots.txt Disallow -- see akdeniz.html. -->
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<title>akdeniz · Host Monitor · Proofs &amp; Reasons</title>
+<title>wright · Host Monitor · Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="akdeniz · Host Monitor">
-<meta property="og:description" content="Live telemetry from akdeniz, the GPU workstation of the Laboratory for Social Minds at CMU.">
-<meta property="og:url" content="https://proofsandreasons.io/akdeniz.html">
+<meta property="og:title" content="wright · Host Monitor">
+<meta property="og:description" content="Live telemetry from pn04.wright.hss.cmu.edu: two EPYC 9555s, two RTX PRO 6000 Blackwells, and the BMC that keeps them cool.">
+<meta property="og:url" content="https://proofsandreasons.io/wright.html">
 <meta name="theme-color" content="#0b0d12">
-<link rel="canonical" href="https://proofsandreasons.io/akdeniz.html">
+<link rel="canonical" href="https://proofsandreasons.io/wright.html">
 <style>
   :root{
     /* Surfaces + ink: shared with dashboard.html so the two pages read as one site. */
@@ -261,6 +259,36 @@
   .hright .mon a{color:var(--sky);text-decoration:none}
   .hright .mon a:hover{text-decoration:underline}
   .hright .mon:last-of-type{margin-bottom:9px}
+  /* ---------- wright-specific additions (the block above is akdeniz.html's, verbatim) ---------- */
+  /* 256 logical CPUs: 32 across, half the height, so the strip stays a strip. */
+  .cores{grid-template-columns:repeat(32,1fr)}
+  @media(max-width:760px){.cores{grid-template-columns:repeat(16,1fr)}}
+  .core{height:14px}
+  /* Two GPUs side by side inside one card, sharing the chart beneath. */
+  .gpu2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
+  @media(max-width:600px){.gpu2{grid-template-columns:1fr}}
+  .gpu2 .g{min-width:0;padding:12px 13px;background:#0d1119;border:1px solid var(--line);border-radius:14px}
+  .gpu2 .gh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;
+    font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
+  .gpu2 .gh .sw{width:11px;height:3px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
+  .gpu2 .gh .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
+  .gpu2 .big{font-size:2rem}
+  .gpu2 .tile{padding:8px 10px}
+  .gpu2 .tile .v{font-size:1.02rem}
+  /* Sub-headings inside a card (temperature groups, PSU list). */
+  .sect{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;margin:13px 0 3px}
+  .sect:first-child{margin-top:0}
+  .rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
+  .rows .k .pill{margin-left:.6em;vertical-align:.08em}
+  /* A dead NFS mount: the bar has nothing to fill, so the label carries it. */
+  .meter.down .lab .k{color:var(--warn)}
+  /* Fan tiles: many small numbers, so a denser grid than the stat tiles. */
+  .fans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(78px,100%),1fr));gap:7px}
+  .fans .tile{padding:7px 9px}
+  .fans .tile .v{font-size:.9rem;margin-top:2px}
+  .fans .tile.slow .v{color:var(--warn)}
+  .fans .tile.stop .v{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -270,14 +298,12 @@
 
   <header>
     <div>
-      <div class="host"><span class="dot" id="dot"></span>akdeniz</div>
+      <div class="host"><span class="dot" id="dot"></span>wright</div>
       <div class="sub" id="subline">connecting&hellip;</div>
     </div>
     <div class="hright">
-      <div class="mon"><a href="/wright.html">wright monitor &rarr;</a></div>
+      <div class="mon"><a href="/akdeniz.html">akdeniz monitor &rarr;</a></div>
       <div class="mon"><a href="/dashboard.html">CMU skyline monitor &rarr;</a></div>
-      <div class="mon"><a href="/readings.html">cogsci reading list &rarr;</a></div>
-      <div class="mon"><a href="/reddit-archive.html">reddit archive &rarr;</a></div>
       <div class="age" id="age">&mdash;</div>
       <div class="proj">LABORATORY FOR SOCIAL MINDS &middot; CMU</div>
     </div>
@@ -287,7 +313,7 @@
 
     <!-- CPU -->
     <div class="card wide">
-      <div class="h5"><span>Processor</span>
+      <div class="h5"><span>Processors</span>
         <span class="right">
           <span class="note" id="cpumeta"></span>
           <span class="seg" role="group" aria-label="CPU chart time range" id="cpurange">
@@ -303,9 +329,11 @@
           <div class="tile"><div class="k">Load 5m</div><div class="v" id="load5">&mdash;</div></div>
           <div class="tile"><div class="k">Load 15m</div><div class="v" id="load15">&mdash;</div></div>
           <div class="tile"><div class="k">Runnable</div><div class="v" id="runq">&mdash;</div></div>
+          <div class="tile" title="Mean current clock across all logical CPUs"><div class="k">Clock</div><div class="v" id="cpuclk">&mdash;</div></div>
+          <div class="tile" title="Package power, socket 0 + socket 1 (amd_hsmp)"><div class="k">Pkg power</div><div class="v" id="cpupw">&mdash;</div></div>
         </div>
       </div>
-      <div class="cores" id="cores"></div>
+      <div class="cores" id="cores" aria-label="Per-CPU utilisation"></div>
       <div class="chart" id="cpuchart">
         <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU utilisation over time"></svg>
         <div class="tip"></div>
@@ -315,13 +343,6 @@
         <summary id="cputblcap">Table view &mdash; CPU</summary>
         <table id="cputable"></table>
       </details>
-    </div>
-
-    <!-- Cluster jobs -->
-    <div class="card">
-      <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
-      <table class="cx" id="clustertable"></table>
-      <div class="clnotes" id="clnotes"></div>
     </div>
 
     <!-- Memory -->
@@ -353,11 +374,66 @@
       <div class="rows" style="margin-top:10px">
         <div class="row"><span class="k">Cached</span><span class="v" id="memcached">&mdash;</span></div>
         <div class="row"><span class="k">Buffers</span><span class="v" id="membuf">&mdash;</span></div>
+        <div class="row"><span class="k">Shared</span><span class="v" id="memshm">&mdash;</span></div>
         <div class="row"><span class="k">Free</span><span class="v" id="memfree">&mdash;</span></div>
       </div>
       <details class="tbl">
         <summary id="memtblcap">Table view &mdash; memory</summary>
         <table id="memtable"></table>
+      </details>
+    </div>
+
+    <!-- GPUs -->
+    <div class="card wide">
+      <div class="h5"><span>Graphics</span>
+        <span class="right">
+          <span class="note" id="gpuname"></span>
+          <span class="seg" role="group" aria-label="GPU chart time range" id="gpurange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
+      <div class="gpu2" id="gpu2"></div>
+      <div class="chart" id="gpuchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="GPU utilisation over time"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend"><span class="keys" id="gpukeys"></span><span class="stat" id="gpustat"></span></div>
+      <details class="tbl">
+        <summary id="gputblcap">Table view &mdash; GPU</summary>
+        <table id="gputable"></table>
+      </details>
+    </div>
+
+    <!-- Power -->
+    <div class="card">
+      <div class="h5"><span>Power</span>
+        <span class="right">
+          <span class="note" id="pwmeta"></span>
+          <span class="seg" role="group" aria-label="Power chart time range" id="pwrange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
+      <div class="big"><span id="pwtotal">&mdash;</span><span class="u">W at the wall</span></div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile" title="Package power, socket 0 (amd_hsmp)"><div class="k">CPU 0</div><div class="v" id="pwcpu0">&mdash;</div></div>
+        <div class="tile" title="Package power, socket 1 (amd_hsmp)"><div class="k">CPU 1</div><div class="v" id="pwcpu1">&mdash;</div></div>
+        <div class="tile"><div class="k">GPU 0</div><div class="v" id="pwgpu0">&mdash;</div></div>
+        <div class="tile"><div class="k">GPU 1</div><div class="v" id="pwgpu1">&mdash;</div></div>
+      </div>
+      <div class="chart" id="pwchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="System power over time"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend"><span class="keys" id="pwkeys"></span><span class="stat" id="pwstat"></span></div>
+      <div class="sect">Power supplies</div>
+      <div class="rows" id="psus"></div>
+      <details class="tbl">
+        <summary id="pwtblcap">Table view &mdash; power</summary>
+        <table id="pwtable"></table>
       </details>
     </div>
 
@@ -397,6 +473,11 @@
         <div class="row"><span class="k">Errors (rx / tx)</span><span class="v" id="neterr">&mdash;</span></div>
         <div class="row"><span class="k">Dropped (rx)</span><span class="v" id="netdrop">&mdash;</span></div>
       </div>
+      <div class="sect" id="stmeta">Storage LAN</div>
+      <div class="rows">
+        <div class="row"><span class="k">In / out &middot; now</span><span class="v" id="strate">&mdash;</span></div>
+        <div class="row"><span class="k">Total since boot</span><span class="v" id="sttotal">&mdash;</span></div>
+      </div>
       <details class="tbl">
         <summary id="nettblcap">Table view &mdash; network</summary>
         <table><thead><tr><th>Time</th><th>Inbound</th><th>Outbound</th></tr></thead>
@@ -404,38 +485,35 @@
       </details>
     </div>
 
-    <!-- GPU -->
+    <!-- Temperatures -->
     <div class="card">
-      <div class="h5"><span>Graphics</span>
-        <span class="right">
-          <span class="note" id="gpuname"></span>
-          <span class="seg" role="group" aria-label="GPU chart time range" id="gpurange">
-            <button type="button" data-range="1h" aria-pressed="false">1H</button>
-            <button type="button" data-range="24h" aria-pressed="true">24H</button>
-          </span>
-        </span>
-      </div>
-      <div class="big"><span id="gpupct">&mdash;</span><span class="u">%</span></div>
-      <div class="meter">
-        <div class="lab"><span class="k">VRAM</span><span class="v" id="gpumemv">&mdash;</span></div>
-        <div class="track"><div class="fill" id="gpumembar" style="width:0;background:var(--s1)"></div></div>
-      </div>
+      <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;C</span></div>
+      <div id="temps"></div>
+    </div>
+
+    <!-- Storage -->
+    <div class="card">
+      <div class="h5"><span>Storage</span><span class="note" id="iometa"></span></div>
+      <div id="disks"></div>
       <div class="tiles" style="margin-top:12px">
-        <div class="tile"><div class="k">Temp</div><div class="v" id="gputemp">&mdash;</div></div>
-        <div class="tile"><div class="k">Power</div><div class="v" id="gpupower">&mdash;</div></div>
-        <div class="tile"><div class="k">Fan</div><div class="v" id="gpufan">&mdash;</div></div>
-        <div class="tile"><div class="k">Clock</div><div class="v" id="gpuclk">&mdash;</div></div>
+        <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
+        <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
       </div>
-      <div class="chart" id="gpuchart">
-        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="GPU utilisation over time"></svg>
-        <div class="tip"></div>
-      </div>
-      <div class="legend"><span class="keys" id="gpukeys"></span><span class="stat" id="gpustat"></span></div>
-      <details class="tbl">
-        <summary id="gputblcap">Table view &mdash; GPU</summary>
-        <table id="gputable"></table>
-      </details>
-      <div class="rows" id="gpuprocs" style="margin-top:12px"></div>
+    </div>
+
+    <!-- Fans -->
+    <div class="card">
+      <div class="h5"><span>Fans</span><span class="note" id="fanmeta"></span></div>
+      <div class="fans" id="fans"></div>
+    </div>
+
+    <!-- Users & processes -->
+    <div class="card">
+      <div class="h5"><span>Who is using it</span><span class="note" id="whometa"></span></div>
+      <div class="sect">By user &middot; CPU over the last sample</div>
+      <div class="rows" id="byuser"></div>
+      <div class="sect">Busiest processes</div>
+      <div class="rows" id="topprocs"></div>
     </div>
 
     <!-- SSH -->
@@ -450,73 +528,19 @@
         <div class="row"><span class="k">Failed password</span><span class="v" id="sshfail">&mdash;</span></div>
         <div class="row"><span class="k">Invalid user</span><span class="v" id="sshinv">&mdash;</span></div>
         <div class="row"><span class="k">Sessions / users</span><span class="v" id="sshwho">&mdash;</span></div>
+        <div class="row"><span class="k">fail2ban &middot; banned now / ever</span><span class="v" id="sshban">&mdash;</span></div>
       </div>
       <div class="atk" id="sshatk" hidden></div>
-    </div>
-
-    <!-- Storage -->
-    <div class="card">
-      <div class="h5"><span>Storage</span><span class="note" id="iometa"></span></div>
-      <div id="disks"></div>
-      <div class="tiles" style="margin-top:12px">
-        <div class="tile"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
-        <div class="tile"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
-      </div>
-    </div>
-
-    <!-- Temperatures -->
-    <div class="card">
-      <div class="h5"><span>Temperatures</span><span class="note">&deg;C</span></div>
-      <div class="rows" id="temps"></div>
-    </div>
-
-    <!-- Containers -->
-    <div class="card">
-      <div class="h5"><span>Containers</span><span class="note" id="ctmeta"></span></div>
-      <div class="rows" id="containers"></div>
-    </div>
-
-    <!-- Server-room camera (grothendieck) -->
-    <div class="card wide">
-      <div class="h5"><span>Server room</span><span class="note" id="cammeta">grothendieck &middot; live</span></div>
-      <img id="camimg" alt="server-room camera (grothendieck)" decoding="async"
-           style="width:100%;border-radius:12px;display:block;background:#000;border:1px solid var(--line)">
-      <div class="sub" id="camts" style="margin-top:8px">connecting&hellip;</div>
-    </div>
-
-    <!-- External access to hosted data -->
-    <!-- Distinct people, not requests: one visitor browsing a timelapse pulls
-         hundreds of frames, so a hit count measures image density rather than
-         reach. Every row below counts unique IPs. VPN/relay egress, scanners
-         and crawlers are dropped upstream in akdeniz-access-stats.py -- geo on
-         a VPN exit is fiction, and a bot is not a reader.
-         The window is open: totals run from the day logging started, which the
-         generator carries in "since" because a running total means nothing
-         without the date it starts from. -->
-    <div class="card">
-      <div class="h5"><span>External access</span><span class="note">all&#8209;time &middot; excl. CMU, VPN, bots</span></div>
-      <div class="big"><span id="axtotal">&mdash;</span><span class="u">unique IPs</span></div>
-      <div class="tiles" style="margin-top:6px">
-        <div class="tile"><div class="k">Countries</div><div class="v" id="axcc">&mdash;</div></div>
-        <div class="tile"><div class="k">Filtered out</div><div class="v" id="axdrop">&mdash;</div></div>
-      </div>
-      <div class="h5" style="margin-top:16px"><span>Where from</span><span class="note">city &middot; state &middot; country</span></div>
-      <div class="rows scroll" id="axcity" tabindex="0" role="group"
-           aria-label="Places, most visitors first, then most recently seen"></div>
-      <div class="h5" style="margin-top:14px"><span>Countries</span></div>
-      <div class="rows" id="axcountry"></div>
-      <div class="sub" id="axdropnote" style="margin-top:10px"></div>
-      <div class="sub" id="axts" style="margin-top:4px"></div>
     </div>
 
   </div>
 
   <footer>
-    Collected on akdeniz every 30s and pushed to
-    <a href="https://photos.proofsandreasons.io/akdeniz/metrics.json">photos.proofsandreasons.io</a>;
-    this page is static and reads that file. &nbsp;&middot;&nbsp;
+    Collected on pn04 (wright) every 30s and pushed to
+    <a href="https://photos.proofsandreasons.io/wright/metrics.json">photos.proofsandreasons.io</a>;
+    this page is static and reads that file. Board sensors come from the BMC every two minutes. &nbsp;&middot;&nbsp;
     <span id="foot"></span>
-    <br><a href="/wright.html">wright monitor &rarr;</a>
+    <br><a href="/akdeniz.html">akdeniz monitor &rarr;</a>
     &nbsp;&middot;&nbsp;
     <a href="/dashboard.html">CMU skyline monitor &rarr;</a>
     &nbsp;&middot;&nbsp;
@@ -527,19 +551,12 @@
 <script>
 (function(){
   "use strict";
-  var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
-  // Queue depth on ORCHARD and PSC, written by akdeniz-jobs.timer every five
-  // minutes rather than by the 30s telemetry collector -- each poll costs two
-  // remote logins. Separate file, separate cadence, separate failure: either
-  // cluster can lapse (ORCHARD's OAuth token expires on Google's reauth
-  // policy) while the other stays live, so ages are tracked per cluster.
-  var JOBS_SRC = "https://photos.proofsandreasons.io/akdeniz/jobs.json";
-  var JOBS_STALE_S = 1200;   // four missed polls
+  var SRC = "https://photos.proofsandreasons.io/wright/metrics.json";
   var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
-  // Chart window per card. The collector ships two histories: every sample for
-  // the last hour, and 5-minute means for the last 24. Default to the day view.
-  var range = {cpu:"24h", gpu:"24h", net:"24h"};
+  var range = {cpu:"24h", gpu:"24h", net:"24h", pw:"24h"};
+  // Chart series: the akdeniz palette, snapped into the dark-mode OKLCH band.
+  var S1="#c58200", S2="#108bbb", S3="#24a25f";
 
   // ---------- formatting ----------
   function fmtBytes(b){
@@ -559,53 +576,48 @@
     var d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60);
     return d>0 ? d+"d "+h+"h" : h>0 ? h+"h "+m+"m" : m+"m";
   }
+  function fmtW(v){ return v===null||v===undefined||isNaN(v) ? "—" : v.toFixed(0)+" W"; }
   function clock(ts){
     var d=new Date(ts*1000);
     return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   }
-  // A day-long axis crosses midnight, so bare HH:MM is ambiguous there.
   var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
   function dayclock(ts){ return DAYS[new Date(ts*1000).getDay()]+" "+clock(ts); }
   function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  // City/region/country come from a third-party geolocation API, so they are
-  // the one thing on this page that is not host-controlled -- escape them.
+  // Process names, user names and geo strings are not fully host-controlled: escape.
   function esc(s){
-    return String(s).replace(/[&<>"]/g, function(c){
+    return String(s===null||s===undefined?"":s).replace(/[&<>"]/g, function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; });
   }
-  // ISO 3166-1 alpha-2 -> regional indicator pair, which renders as a flag.
   function flag(cc){
     if(!cc || !/^[A-Za-z]{2}$/.test(cc)) return "";
     var a=cc.toUpperCase();
     return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
   }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
+  function pill(v, warn, bad, unit){
+    var cls=v>=bad?"bad":v>=warn?"warn":"ok";
+    return "<span class='pill "+cls+"'>"+(v===null||v===undefined?"—":v.toFixed(0)+(unit||"°"))+"</span>";
+  }
 
   // ---------- charts ----------
-  // One shared line-chart renderer. Series share a single y-axis by
-  // construction -- there is deliberately no second scale.
+  // Shared line-chart renderer, identical to akdeniz.html's. One y-axis.
   function lineChart(wrapId, series, fmt, axisMax){
     var wrap=document.getElementById(wrapId);
     var svg=wrap.querySelector("svg"), tip=wrap.querySelector(".tip");
     var W=600,H=96,PL=4,PR=4,PT=8,PB=14;
     while(svg.firstChild) svg.removeChild(svg.firstChild);
-
     var pts=series[0].data.length;
     if(pts<2){ return; }
     var all=[]; series.forEach(function(s){ s.data.forEach(function(v){ if(v!==null&&!isNaN(v)) all.push(v); }); });
     if(!all.length) return;
     var max=Math.max.apply(null,all), min=0;
     if(max<=0) max=1;
-    // axisMax pins the scale for bounded quantities (a percentage tops out at
-    // 100); otherwise leave a little headroom above the observed peak.
     max = axisMax ? axisMax : max*1.12;
-
     var X=function(i){ return PL+(W-PL-PR)*(i/(pts-1)); };
     var Y=function(v){ return PT+(H-PT-PB)*(1-(v-min)/(max-min)); };
     var NS="http://www.w3.org/2000/svg";
     function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
-
-    // recessive gridlines
     var g=el("g",{"class":"grid"});
     [0,.5,1].forEach(function(f){
       var y=PT+(H-PT-PB)*f;
@@ -613,7 +625,6 @@
     });
     svg.appendChild(g);
     var lab=el("text",{x:PL+2,y:PT+8,"class":"ax"}); lab.textContent=fmt(max); svg.appendChild(lab);
-
     series.forEach(function(s){
       var d="",open=false;
       s.data.forEach(function(v,i){
@@ -624,22 +635,16 @@
       if(s.dash){ attrs["stroke-dasharray"]="4 3"; attrs["stroke-opacity"]=".55"; }
       svg.appendChild(el("path",attrs));
     });
-
-    // time axis ends
     var t0=el("text",{x:PL,y:H-2,"class":"ax"}); t0.textContent=series[0].labels[0];
     var t1=el("text",{x:W-PR,y:H-2,"class":"ax","text-anchor":"end"});
     t1.textContent=series[0].labels[series[0].labels.length-1];
     svg.appendChild(t0); svg.appendChild(t1);
-
-    // hover layer: crosshair + per-series markers + tooltip
     var cross=el("line",{"class":"cross",y1:PT,y2:H-PB}); svg.appendChild(cross);
     var marks=el("g",{"class":"mk"});
     series.forEach(function(s){ marks.appendChild(el("circle",{fill:s.color,cx:0,cy:0})); });
     svg.appendChild(marks);
-
     var hit=el("rect",{x:0,y:0,width:W,height:H,fill:"transparent",style:"cursor:crosshair"});
     svg.appendChild(hit);
-
     function move(ev){
       var r=svg.getBoundingClientRect();
       var cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
@@ -668,119 +673,154 @@
   }
 
   // ---------- chart windows ----------
-  // Two shapes of history arrive in one payload: `history` is every sample of
-  // the last hour, `history_24h` is 5-minute means for the last day. Both are
-  // flattened here into the same {times, cpu, cpuMax, rx, tx} form.
+  // Every series the collector carries, flattened into {times, labels, <key>,
+  // <key>Max} for either the fine (1h) or coarse (24h) history.
+  var KEYS=["cpu","mem","g0","g1","rx","tx","pw"], MAXED={cpu:1,mem:1,g0:1,g1:1};
+  function present(a){ return a && a.filter(function(v){ return v!==null; }).length>1; }
   function windowFor(d, r){
-    var times=[], cpu=[], cpuMax=[], mem=[], memMax=[], gpu=[], gpuMax=[], rx=[], tx=[], t, x;
+    var w={}, times=[], t, x;
+    KEYS.forEach(function(k){ w[k]=[]; if(MAXED[k]) w[k+"Max"]=[]; });
     if(r==="24h"){
       var rows=d.history_24h||[];
       if(rows.length<2) return null;
       var step=d.bucket_s||300, byT={};
       rows.forEach(function(b){ byT[b.t]=b; });
       var end=rows[rows.length-1].t;
-      // Clamp the left edge to the oldest bucket we actually have, so a
-      // monitor that has been up for two hours draws two hours rather than
-      // 22 hours of emptiness. Gaps *inside* the window stay null: those are
-      // real collection outages and should read as breaks in the line.
       var start=Math.max(rows[0].t, end-86400+step);
       for(t=start;t<=end;t+=step){
-        x=byT[t]||null;
-        times.push(t);
-        cpu.push(x?x.cpu:null); cpuMax.push(x?x.cpu_max:null);
-        mem.push(x?x.mem:null); memMax.push(x?x.mem_max:null);
-        gpu.push(x?x.gpu:null); gpuMax.push(x?x.gpu_max:null);
-        rx.push(x?x.rx:null);   tx.push(x?x.tx:null);
+        x=byT[t]||null; times.push(t);
+        KEYS.forEach(function(k){
+          w[k].push(x&&x[k]!==undefined?x[k]:null);
+          if(MAXED[k]) w[k+"Max"].push(x&&x[k+"_max"]!==undefined?x[k+"_max"]:null);
+        });
       }
-      // Buckets predating a series carry null for it (memory and GPU were
-      // added after CPU). Report such a series as absent rather than drawing
-      // a line that is mostly holes.
-      function present(a){ return a.filter(function(v){ return v!==null; }).length>1; }
-      return {kind:"24h",times:times,labels:times.map(dayclock),
-              cpu:cpu,cpuMax:cpuMax,
-              mem:present(mem)?mem:null, memMax:present(mem)?memMax:null,
-              gpu:present(gpu)?gpu:null, gpuMax:present(gpu)?gpuMax:null,
-              rx:rx,tx:tx,span:end-start+step};
+      w.kind="24h"; w.times=times; w.labels=times.map(dayclock); w.span=end-start+step;
+    } else {
+      var hist=d.history||[];
+      if(hist.length<2) return null;
+      hist.forEach(function(h){
+        times.push(h.t);
+        KEYS.forEach(function(k){ w[k].push(h[k]===undefined?null:h[k]); });
+      });
+      KEYS.forEach(function(k){ if(MAXED[k]) w[k+"Max"]=null; });
+      w.kind="1h"; w.times=times; w.labels=times.map(clock); w.span=times[times.length-1]-times[0];
     }
-    var hist=d.history||[];
-    if(hist.length<2) return null;
-    hist.forEach(function(h){
-      times.push(h.t); cpu.push(h.cpu); rx.push(h.rx); tx.push(h.tx);
-      mem.push(h.mem===undefined?null:h.mem);
-      gpu.push(h.gpu===undefined?null:h.gpu);
-    });
-    return {kind:"1h",times:times,labels:times.map(clock),
-            cpu:cpu,cpuMax:null,mem:mem,memMax:null,gpu:gpu,gpuMax:null,
-            rx:rx,tx:tx,span:times[times.length-1]-times[0]};
+    KEYS.forEach(function(k){ if(!present(w[k])){ w[k]=null; w[k+"Max"]=null; } });
+    return w;
   }
-
-  // Memory started being recorded after CPU and network did, so the shared
-  // window opens with a stretch it has no data for. Drop that lead-in; gaps
-  // *inside* the series are left alone, since those are real outages.
-  function trimLead(w, key, step){
-    var f=0;
-    while(f<w[key].length && w[key][f]===null) f++;
+  function trimLead(w, keys, step){
+    var f=0, n=w.times.length;
+    while(f<n && keys.every(function(k){ return !w[k] || w[k][f]===null; })) f++;
     if(!f) return w;
     var out={kind:w.kind, times:w.times.slice(f), labels:w.labels.slice(f)};
-    out[key]=w[key].slice(f);
-    out[key+"Max"]=w[key+"Max"] ? w[key+"Max"].slice(f) : null;
+    keys.forEach(function(k){
+      out[k]=w[k]?w[k].slice(f):null;
+      out[k+"Max"]=w[k+"Max"]?w[k+"Max"].slice(f):null;
+    });
     out.span=out.times.length ? out.times[out.times.length-1]-out.times[0]+step : 0;
     return out;
   }
-
   function spanText(s){
     if(s>=82800) return "last 24 hours";
     if(s>=3400 && s<=3700) return "last hour";
     return "last "+fmtDur(s);
   }
   function stats(vals){
-    var v=vals.filter(function(x){ return x!==null && !isNaN(x); });
+    var v=(vals||[]).filter(function(x){ return x!==null && !isNaN(x); });
     if(!v.length) return null;
     return {avg:v.reduce(function(a,b){return a+b;},0)/v.length, max:Math.max.apply(null,v)};
   }
   function pctFmt(v){ return v.toFixed(0)+"%"; }
+  function stepOf(d,w){ return w.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30); }
+  function tstamp(w,t){ return w.kind==="24h"?dayclock(t):clock(t); }
+  function tableRows(w, keys, fmt){
+    return w.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
+      .filter(function(r){ return keys.some(function(k){ return w[k]&&w[k][r.i]!==null; }); })
+      .slice(0,40).map(function(r){
+        return "<tr><td>"+tstamp(w,r.t)+"</td>"+keys.map(function(k){
+          var v=w[k]?w[k][r.i]:null; return "<td>"+(v===null?"—":fmt(v))+"</td>"; }).join("")+"</tr>";
+      }).join("");
+  }
 
-  // CPU, GPU and memory are the same picture: a percentage line, a dashed
-  // within-bucket peak wherever the coarse history carries one, a stat line
-  // and a table view. Only the ids, labels and which series to read differ.
+  // CPU and memory: a percentage line plus dashed within-bucket peak.
   function drawPercentSeries(d, o){
     var w=o.win, key=o.key, maxKey=key+"Max";
-    // Series added after CPU (memory, GPU) open with a stretch of nulls in the
-    // 24h window; drop that lead-in so the chart does not start with dead space.
-    if(w && w[key]) w=trimLead(w, key, w.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30));
+    if(w && w[key]) w=trimLead(w, [key], stepOf(d,w));
     var keys="", stat="", have=!!(w && w[key] && w[key].length>1);
     if(have){
-      var series=[{name:o.col,color:"#c58200",data:w[key],labels:w.labels}];
+      var series=[{name:o.col,color:S1,data:w[key],labels:w.labels}];
       keys="<span><i style='background:var(--s1)'></i>"+o.legend+" &mdash; "+spanText(w.span)+"</span>";
+      var cols=[key];
       if(w[maxKey]){
-        series.push({name:"Peak",color:"#c58200",dash:true,data:w[maxKey],labels:w.labels});
+        series.push({name:"Peak",color:S1,dash:true,data:w[maxKey],labels:w.labels});
         keys+="<span><i class='dash' style='color:var(--s1)'></i>5-min peak</span>";
+        cols.push(maxKey);
       }
       lineChart(o.chart, series, pctFmt, 100);
-      document.querySelector("#"+o.chart+" svg")
-        .setAttribute("aria-label", o.legend+", "+spanText(w.span));
+      document.querySelector("#"+o.chart+" svg").setAttribute("aria-label", o.legend+", "+spanText(w.span));
       var s=stats(w[key]), pk=stats(w[maxKey]||w[key]);
-      // A peak of 100 should read "100%", one of 4.7 should not read "5%".
       if(s) stat="avg "+s.avg.toFixed(1)+"% · peak "+pk.max.toFixed(pk.max>=10?0:1)+"%";
       if(o.head) txt(o.head, o.legend+" · "+spanText(w.span));
-      document.getElementById(o.tblcap).innerHTML=
-        "Table view &mdash; "+o.tblName+", "+spanText(w.span);
+      document.getElementById(o.tblcap).innerHTML="Table view &mdash; "+o.tblName+", "+spanText(w.span);
       document.getElementById(o.tbl).innerHTML=
-        "<thead><tr><th>Time</th><th>"+o.col+"</th>"+(w[maxKey]?"<th>Peak</th>":"")+
-        "</tr></thead><tbody>"+
-        w.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
-          .filter(function(r){ return w[key][r.i]!==null; }).slice(0,40).map(function(r){
-            return "<tr><td>"+(w.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
-              w[key][r.i].toFixed(1)+"%</td>"+
-              (w[maxKey]?"<td>"+(w[maxKey][r.i]===null?"—":w[maxKey][r.i].toFixed(1)+"%")+"</td>":"")+
-              "</tr>";
-          }).join("")+"</tbody>";
+        "<thead><tr><th>Time</th><th>"+o.col+"</th>"+(w[maxKey]?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
+        tableRows(w, cols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
     } else {
-      document.getElementById(o.tbl).innerHTML=
-        "<tbody><tr><td>No "+o.tblName+" history yet.</td></tr></tbody>";
+      document.getElementById(o.tbl).innerHTML="<tbody><tr><td>No "+o.tblName+" history yet.</td></tr></tbody>";
     }
     document.getElementById(o.keys).innerHTML=keys;
     txt(o.stat, stat);
+  }
+
+  // Both GPUs on one chart, one colour each. Peaks are kept for the table but
+  // not drawn: two solid and two dashed lines on 96px is noise.
+  function drawGpu(d, w){
+    var keys="", stat="";
+    if(w) w=trimLead(w, ["g0","g1"], stepOf(d,w));
+    var have=w && (w.g0||w.g1);
+    if(have){
+      var series=[], names=["GPU 0","GPU 1"], cols=[S1,S2], tcols=[];
+      ["g0","g1"].forEach(function(k,i){
+        if(!w[k]) return;
+        series.push({name:names[i],color:cols[i],data:w[k],labels:w.labels});
+        var s=stats(w[k]), pk=stats(w[k+"Max"]||w[k]);
+        keys+="<span><i style='background:"+cols[i]+"'></i>"+names[i]+
+              (s?" <span class='stat'>avg "+s.avg.toFixed(1)+"% · peak "+pk.max.toFixed(0)+"%</span>":"")+"</span>";
+        tcols.push(k); if(w[k+"Max"]) tcols.push(k+"Max");
+      });
+      lineChart("gpuchart", series, pctFmt, 100);
+      document.querySelector("#gpuchart svg").setAttribute("aria-label","GPU utilisation, both cards, "+spanText(w.span));
+      stat=spanText(w.span);
+      document.getElementById("gputblcap").innerHTML="Table view &mdash; GPU, "+spanText(w.span);
+      document.getElementById("gputable").innerHTML=
+        "<thead><tr><th>Time</th>"+tcols.map(function(k){
+          return "<th>"+(k.slice(0,2)==="g0"?"GPU 0":"GPU 1")+(/Max$/.test(k)?" peak":"")+"</th>"; }).join("")+
+        "</tr></thead><tbody>"+tableRows(w, tcols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
+    } else {
+      document.getElementById("gputable").innerHTML="<tbody><tr><td>No GPU history yet.</td></tr></tbody>";
+    }
+    document.getElementById("gpukeys").innerHTML=keys;
+    txt("gpustat", stat);
+  }
+
+  // Wall power from the four PSUs' input readings, summed by the collector.
+  function drawPower(d, w){
+    var keys="", stat="";
+    if(w && w.pw) w=trimLead(w, ["pw"], stepOf(d,w));
+    if(w && w.pw){
+      lineChart("pwchart", [{name:"Input",color:S3,data:w.pw,labels:w.labels}], fmtW);
+      document.querySelector("#pwchart svg").setAttribute("aria-label","System input power, "+spanText(w.span));
+      var s=stats(w.pw);
+      keys="<span><i style='background:var(--s3)'></i>PSU input &mdash; "+spanText(w.span)+"</span>";
+      if(s) stat="avg "+s.avg.toFixed(0)+" W · peak "+s.max.toFixed(0)+" W";
+      document.getElementById("pwtblcap").innerHTML="Table view &mdash; power, "+spanText(w.span);
+      document.getElementById("pwtable").innerHTML="<thead><tr><th>Time</th><th>Input</th></tr></thead><tbody>"+
+        tableRows(w, ["pw"], fmtW)+"</tbody>";
+    } else {
+      document.getElementById("pwtable").innerHTML="<tbody><tr><td>No power history yet.</td></tr></tbody>";
+    }
+    document.getElementById("pwkeys").innerHTML=keys;
+    txt("pwstat", stat);
   }
 
   function setRangeUI(id, cur, has24){
@@ -797,57 +837,37 @@
 
   function drawCharts(d){
     var has24=(d.history_24h||[]).length>=2;
-    if(!has24){
-      if(range.cpu==="24h") range.cpu="1h";
-      if(range.gpu==="24h") range.gpu="1h";
-      if(range.net==="24h") range.net="1h";
-    }
+    if(!has24) Object.keys(range).forEach(function(k){ if(range[k]==="24h") range[k]="1h"; });
     setRangeUI("cpurange", range.cpu, has24);
     setRangeUI("gpurange", range.gpu, has24);
     setRangeUI("netrange", range.net, has24);
+    setRangeUI("pwrange",  range.pw,  has24);
 
     drawPercentSeries(d, {win:windowFor(d, range.cpu), key:"cpu",
-      chart:"cpuchart", keys:"cpukeys", stat:"cpustat",
-      tbl:"cputable", tblcap:"cputblcap",
+      chart:"cpuchart", keys:"cpukeys", stat:"cpustat", tbl:"cputable", tblcap:"cputblcap",
       legend:"CPU utilisation", tblName:"CPU", col:"CPU"});
-
-    drawPercentSeries(d, {win:windowFor(d, range.gpu), key:"gpu",
-      chart:"gpuchart", keys:"gpukeys", stat:"gpustat",
-      tbl:"gputable", tblcap:"gputblcap",
-      legend:"GPU utilisation", tblName:"GPU", col:"GPU"});
-
-    // Memory is always the day view -- the card already shows the live number,
-    // so its history is only interesting at 24h -- and its chart lives in the
-    // popover, which is why this one also sets a heading.
     drawPercentSeries(d, {win:windowFor(d, has24?"24h":"1h"), key:"mem",
-      chart:"memchart", keys:"memkeys", stat:"memstat",
-      tbl:"memtable", tblcap:"memtblcap", head:"mempoph",
+      chart:"memchart", keys:"memkeys", stat:"memstat", tbl:"memtable", tblcap:"memtblcap", head:"mempoph",
       legend:"RAM used", tblName:"memory", col:"Used"});
+    drawGpu(d, windowFor(d, range.gpu));
+    drawPower(d, windowFor(d, range.pw));
 
-    // --- Network ---
     var n=windowFor(d, range.net), nstat="";
-    if(n){
+    if(n && n.rx && n.tx){
       lineChart("netchart",[
-        {name:"Inbound", color:"#108bbb", data:n.rx, labels:n.labels},
-        {name:"Outbound",color:"#24a25f", data:n.tx, labels:n.labels}
+        {name:"Inbound", color:S2, data:n.rx, labels:n.labels},
+        {name:"Outbound",color:S3, data:n.tx, labels:n.labels}
       ], fmtBps);
-      document.querySelector("#netchart svg")
-        .setAttribute("aria-label","Network throughput, "+spanText(n.span));
+      document.querySelector("#netchart svg").setAttribute("aria-label","Network throughput, "+spanText(n.span));
       var rs=stats(n.rx), ts=stats(n.tx);
       nstat=spanText(n.span)+(rs&&ts ? " · avg "+fmtBps(rs.avg)+" in / "+fmtBps(ts.avg)+" out" : "");
       document.getElementById("nettblcap").innerHTML="Table view &mdash; network, "+spanText(n.span);
-      document.getElementById("nettbl").innerHTML=
-        n.times.map(function(t,i){ return {t:t,i:i}; }).reverse().slice(0,40).map(function(r){
-          return "<tr><td>"+(n.kind==="24h"?dayclock(r.t):clock(r.t))+"</td><td>"+
-            fmtBps(n.rx[r.i])+"</td><td>"+fmtBps(n.tx[r.i])+"</td></tr>";
-        }).join("");
+      document.getElementById("nettbl").innerHTML=tableRows(n, ["rx","tx"], fmtBps);
     }
     txt("netstat", nstat);
   }
 
-  // Hover to peek, click (or focus) to pin. The short close delay is what
-  // lets the pointer travel from the button into the popover to use the
-  // chart's own crosshair without the panel vanishing on the way.
+  // Memory popover: hover to peek, click (or focus) to pin. As on akdeniz.
   (function(){
     var btn=document.getElementById("mempeek"), pop=document.getElementById("mempop");
     var pinned=false, timer=null;
@@ -861,15 +881,13 @@
     pop.addEventListener("mouseenter",function(){ clearTimeout(timer); });
     pop.addEventListener("mouseleave",closeSoon);
     btn.addEventListener("click",function(){ pinned=!pinned; if(pinned) open(); else close(); });
-    document.addEventListener("keydown",function(e){
-      if(e.key==="Escape" && !pop.hidden){ pinned=false; close(); }
-    });
+    document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !pop.hidden){ pinned=false; close(); } });
     document.addEventListener("click",function(e){
       if(pinned && !pop.contains(e.target) && !btn.contains(e.target)){ pinned=false; close(); }
     });
   })();
 
-  [["cpurange","cpu"],["gpurange","gpu"],["netrange","net"]].forEach(function(p){
+  [["cpurange","cpu"],["gpurange","gpu"],["netrange","net"],["pwrange","pw"]].forEach(function(p){
     document.getElementById(p[0]).addEventListener("click", function(ev){
       var b=ev.target.closest("button");
       if(!b || b.disabled) return;
@@ -878,88 +896,74 @@
     });
   });
 
-  // ---------- cluster jobs ----------
-  var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  // "2026-01-01" -> "1 Jan". Parsed by hand rather than via Date, which would
-  // read a bare ISO date as UTC and shift it a day west of here.
-  function monthDay(iso){
-    var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||"");
-    if(!m) return iso||"";
-    return (+m[3])+" "+MONTHS[(+m[2])-1];
-  }
-  // Class q carries the alignment and must be on every count cell, including
-  // the zero and missing ones -- those drop the wait/run colour class.
-  function jobCell(n, cls){
-    if(n===null||n===undefined) return "<td class='q z'>&mdash;</td>";
-    return "<td class='q "+(n?cls:"z")+"'>"+n+"</td>";
-  }
-  function hourCell(n){
-    if(n===null||n===undefined) return "<td class='hrs z'>&mdash;</td>";
-    return "<td class='hrs'>"+n.toLocaleString()+"</td>";
-  }
-  // ORCHARD first, then PSC, then anything new alphabetically.
-  var CLUSTER_ORDER={ORCHARD:0, PSC:1};
-  function clusterRank(n){
-    return CLUSTER_ORDER[n]!==undefined ? CLUSTER_ORDER[n] : 99;
+  // ---------- GPU panels ----------
+  var GCOL=["var(--s1)","var(--s2)"];
+  function gpuPanel(g, i){
+    var mp=g.mem_total_mb?100*g.mem_used_mb/g.mem_total_mb:0;
+    var procs=(g.procs&&g.procs.length)
+      ? g.procs.map(function(p){
+          return "<div class='row'><span class='k' title='"+esc(p.name)+" pid "+esc(p.pid)+"'>"+esc(p.name)+
+            (p.user?" <span class='u'>"+esc(p.user)+"</span>":"")+"</span>"+
+            "<span class='v'>"+(p.mem_mb===null?"—":(p.mem_mb/1024).toFixed(1)+" GB")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>no compute processes</span><span class='v'>&mdash;</span></div>";
+    return "<div class='g'>"+
+      "<div class='gh'><span><i class='sw' style='background:"+GCOL[i]+"'></i>GPU "+i+"</span>"+
+        "<span class='note'>"+esc(g.pstate||"")+(g.pcie_gen?" · PCIe "+g.pcie_gen+"×"+g.pcie_width:"")+"</span></div>"+
+      "<div class='big'><span>"+(g.util===null?"—":g.util.toFixed(0))+"</span><span class='u'>%</span></div>"+
+      "<div class='meter'><div class='lab'><span class='k'>VRAM</span><span class='v'>"+
+        (g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB</span></div>"+
+        "<div class='track'><div class='fill' style='width:"+mp+"%;background:"+heat(mp)+"'></div></div></div>"+
+      "<div class='tiles' style='margin-top:10px'>"+
+        "<div class='tile'><div class='k'>Temp</div><div class='v'>"+(g.temp===null?"—":g.temp.toFixed(0)+"°")+"</div></div>"+
+        "<div class='tile'><div class='k'>Power</div><div class='v'>"+(g.power===null?"—":g.power.toFixed(0))+
+          "<small> / "+(g.power_limit===null?"—":g.power_limit.toFixed(0))+" W</small></div></div>"+
+        "<div class='tile'><div class='k'>SM clock</div><div class='v'>"+(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+"<small> MHz</small></div></div>"+
+        "<div class='tile'><div class='k'>Mem util</div><div class='v'>"+(g.util_mem===null?"—":g.util_mem.toFixed(0)+"%")+"</div></div>"+
+      "</div>"+
+      "<div class='rows' style='margin-top:10px'>"+procs+"</div>"+
+    "</div>";
   }
 
-  function renderJobs(j){
-    var tbl=document.getElementById("clustertable"), notes=document.getElementById("clnotes");
-    var cls=((j&&j.clusters)||[]).slice().sort(function(a,b){
-      return clusterRank(a.name)-clusterRank(b.name) || a.name.localeCompare(b.name);
-    });
-    if(!cls.length){
-      tbl.innerHTML=""; notes.textContent="No cluster data yet.";
-      txt("jobsmeta",""); return;
+  // ---------- temperatures ----------
+  // hwmon gives the silicon; the BMC gives the board. Grouped so the eye lands
+  // on the hot parts first and the twelve DIMMs collapse to a range.
+  function renderTemps(d){
+    var hw=d.temps||[], ip=(d.ipmi&&d.ipmi.temps)||[], gpus=d.gpu||[];
+    var byN={}; ip.forEach(function(t){ byN[t.n]=t.c; });
+    function row(label, v, warn, bad){
+      return "<div class='row'><span class='k'>"+label+"</span><span class='v'>"+pill(v,warn,bad)+"</span></div>";
     }
-    var now=Date.now()/1000, newest=0, since=null, rows="", note=[];
-    cls.forEach(function(c){
-      var jb=c.jobs, hrs=c.hours, age=c.ts?Math.max(0,Math.round(now-c.ts)):null;
-      if(c.ts&&c.ts>newest) newest=c.ts;
-      if(hrs&&hrs.since) since=hrs.since;
-      var stale=(age===null)||(age>JOBS_STALE_S), sc=stale?" stale":"";
-      var agetxt=(age===null?"never":(age<90?age+"s":fmtDur(age))+" ago");
-      var w=jb?jb.waiting:null, r=jb?jb.running:null;
-
-      rows+="<tr class='top"+sc+"'>"+
-        "<th class='nm' rowspan='2'>"+esc(c.name)+
-          "<span class='ago"+(stale?" old":"")+"'>"+agetxt+"</span></th>"+
-        "<th class='kind'>CPU</th>"+
-        jobCell(w?w.cpu:null,"wait")+jobCell(r?r.cpu:null,"run")+
-        hourCell(hrs?hrs.cpu:null)+"</tr>"+
-        "<tr class='"+(sc||"")+"'><th class='kind'>GPU</th>"+
-        jobCell(w?w.gpu:null,"wait")+jobCell(r?r.gpu:null,"run")+
-        hourCell(hrs?hrs.gpu:null)+"</tr>";
-
-      // Resources behind the job counts: the useful second question, free from
-      // the same query, but too much for the table itself.
-      var bits=[];
-      if(jb&&c.cores&&c.gpus){
-        if(c.cores.running||c.gpus.running)
-          bits.push("<b>running</b> "+c.cores.running.toLocaleString()+" cores"+
-                    (c.gpus.running?" &middot; "+c.gpus.running+" GPU":""));
-        if(c.cores.waiting||c.gpus.waiting)
-          bits.push("<b>queued</b> "+c.cores.waiting.toLocaleString()+" cores"+
-                    (c.gpus.waiting?" &middot; "+c.gpus.waiting+" GPU":""));
-        if(jb.other) bits.push("<b>other states</b> "+jb.other);
+    var h="";
+    // Silicon
+    h+="<div class='sect'>Silicon</div><div class='rows'>";
+    hw.filter(function(t){ return t.group==="cpu"; }).forEach(function(t){ h+=row(esc(t.label), t.temp, 80, 90); });
+    gpus.forEach(function(g,i){ h+=row("GPU"+i+" core", g.temp, 80, 88); });
+    hw.filter(function(t){ return t.group==="nvme"; }).forEach(function(t){ h+=row(esc(t.label)+" composite", t.temp, 60, 70); });
+    hw.filter(function(t){ return t.group==="nic"; }).forEach(function(t){ h+=row(esc(t.label), t.temp, 75, 90); });
+    h+="</div>";
+    if(ip.length){
+      h+="<div class='sect'>Board &middot; BMC</div><div class='rows'>";
+      var order=[["INLET","Inlet air"],["CPU1","CPU1 socket"],["CPU2","CPU2 socket"],["MB1","Mainboard 1"],["MB2","Mainboard 2"],
+                 ["OCP","OCP NIC"],["LAN","LAN"],["M.2_1","M.2 slot 1"],["M.2_2","M.2 slot 2"],["NVME1","NVMe bay"],
+                 ["BPB1","Backplane"],["FB1","Fan board"],["SWB1","Switch board"]];
+      order.forEach(function(p){ if(byN[p[0]]!==undefined) h+=row(p[1], byN[p[0]], 60, 75); });
+      var sides=ip.filter(function(t){ return /^CARD_SIDE/.test(t.n); }).map(function(t){ return t.c; });
+      if(sides.length) h+=row("Card side ×"+sides.length+" (max)", Math.max.apply(null,sides), 60, 75);
+      var slots=ip.filter(function(t){ return /^GPU\d/.test(t.n); }).map(function(t){ return t.c; });
+      if(slots.length) h+=row("GPU slots ×"+slots.length+" (max)", Math.max.apply(null,slots), 60, 75);
+      var psus=ip.filter(function(t){ return /^PSU\d/.test(t.n); }).map(function(t){ return t.c; });
+      if(psus.length) h+=row("PSUs ×"+psus.length+" (max)", Math.max.apply(null,psus), 60, 75);
+      var dimms=ip.filter(function(t){ return /^DDR5_/.test(t.n); }).map(function(t){ return t.c; });
+      if(dimms.length){
+        var lo=Math.min.apply(null,dimms), hi=Math.max.apply(null,dimms);
+        h+="<div class='row'><span class='k'>DDR5 DIMMs ×"+dimms.length+"</span><span class='v'>"+
+           "<span class='pill "+(hi>=85?"bad":hi>=70?"warn":"ok")+"'>"+lo.toFixed(0)+"–"+hi.toFixed(0)+"°</span></span></div>";
       }
-      if(bits.length) note.push("<div>"+esc(c.name)+" &mdash; "+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
-      // A failed poll is not spelled out here on purpose: the dimmed rows and
-      // the amber age already say it, and the raw scheduler/gcloud text was
-      // noise. c.err is still in jobs.json for anyone debugging.
-    });
-
-    tbl.innerHTML="<thead><tr><th class='l'>Cluster</th><th class='l'></th>"+
-      "<th class='l'>Waiting</th><th class='l'>Running</th>"+
-      "<th>Total hours"+(since?"<small>since "+esc(monthDay(since))+"</small>":"")+"</th>"+
-      "</tr></thead><tbody>"+rows+"</tbody>";
-    notes.innerHTML=note.join("");
-    var age=newest?Math.max(0,Math.round(now-newest)):null;
-    // Kept short: the card is one column wide now, and a longer note wraps up
-    // into the title. "our" is the part worth keeping -- these are our jobs,
-    // not the clusters' whole queues.
-    txt("jobsmeta", "our jobs"+
-        (age===null?"":" · polled "+(age<90?age+"s":fmtDur(age))+" ago"));
+      h+="</div>";
+    }
+    document.getElementById("temps").innerHTML=h;
+    var age=d.ipmi&&d.ipmi.age_s;
+    txt("tmeta", "°C"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
   }
 
   // ---------- render ----------
@@ -969,20 +973,22 @@
     var dot=document.getElementById("dot");
     dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
     txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
-    txt("subline","up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" cores  ·  "+
-        (d.gpu&&d.gpu[0]?d.gpu[0].name.replace("NVIDIA ",""):"no GPU")+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
+    var gname=(d.gpu&&d.gpu[0])?d.gpu[0].name.replace("NVIDIA ","").replace(" Server Edition",""):"no GPU";
+    txt("subline",(d.fqdn||d.host)+"  ·  up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" threads  ·  "+
+        (d.gpu?d.gpu.length+"× ":"")+gname+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
     txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+
-        d.history.length+" fine points · "+((d.history_24h||[]).length)+" × "+
-        ((d.bucket_s||300)/60)+"-min buckets");
+        d.history.length+" fine points · "+((d.history_24h||[]).length)+" × "+((d.bucket_s||300)/60)+"-min buckets");
 
     // CPU
     txt("cpupct", d.cpu.pct===null?"—":d.cpu.pct.toFixed(0));
-    txt("cpumeta", d.ncpu+" cores · "+(d.load.procs||"?")+" procs");
+    txt("cpumeta", "2× EPYC 9555 · "+d.ncpu+" threads · "+(d.load.procs||"?")+" procs");
     txt("load1", d.load["1"]!==undefined?d.load["1"].toFixed(2):"—");
     txt("load5", d.load["5"]!==undefined?d.load["5"].toFixed(2):"—");
     txt("load15",d.load["15"]!==undefined?d.load["15"].toFixed(2):"—");
     txt("runq", (d.load.running||0)+" / "+(d.load.procs||0));
-
+    txt("cpuclk", d.cpu.mhz_avg?(d.cpu.mhz_avg/1000).toFixed(2)+" GHz":"—");
+    var socks=d.cpu.sockets||[], spw=socks.filter(function(s){ return s.power_w!==null; }).map(function(s){ return s.power_w; });
+    txt("cpupw", spw.length?spw.reduce(function(a,b){return a+b;},0).toFixed(0)+" W":"—");
     var cw=document.getElementById("cores");
     if(cw.childNodes.length!==d.cpu.cores.length){
       cw.innerHTML="";
@@ -992,50 +998,60 @@
     d.cpu.cores.forEach(function(v,i){
       var bar=cw.childNodes[i].firstChild, p=(v===null?0:v);
       bar.style.height=p+"%"; bar.style.background=heat(p);
-      cw.childNodes[i].title="core "+i+": "+(v===null?"—":p.toFixed(0)+"%");
+      cw.childNodes[i].title="cpu "+i+": "+(v===null?"—":p.toFixed(0)+"%");
     });
 
-    // GPU
-    var g=d.gpu&&d.gpu[0];
-    if(g){
-      txt("gpuname", g.pstate||"");
-      txt("gpupct", g.util===null?"—":g.util.toFixed(0));
-      var mp=g.mem_total_mb?100*g.mem_used_mb/g.mem_total_mb:0;
-      txt("gpumemv",(g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB");
-      var gb=document.getElementById("gpumembar"); gb.style.width=mp+"%"; gb.style.background=heat(mp);
-      txt("gputemp",(g.temp||"—")+"°");
-      txt("gpupower",(g.power===null?"—":g.power.toFixed(0))+" W");
-      txt("gpufan",(g.fan===null?"—":g.fan.toFixed(0))+"%");
-      txt("gpuclk",(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+" MHz");
-      var gp=document.getElementById("gpuprocs");
-      gp.innerHTML=(g.procs&&g.procs.length)
-        ? g.procs.map(function(p){ return "<div class='row'><span class='k'>"+p.name+" ("+p.pid+")</span>"+
-            "<span class='v'>"+(p.mem_mb/1024).toFixed(1)+" GB</span></div>"; }).join("")
-        : "<div class='row'><span class='k'>no compute processes</span><span class='v'>&mdash;</span></div>";
-    }
+    // GPUs
+    var gpus=d.gpu||[];
+    txt("gpuname", gpus.length?gname:"");
+    document.getElementById("gpu2").innerHTML=gpus.map(gpuPanel).join("");
 
     // Memory
     txt("mempct", d.mem.pct===null?"—":d.mem.pct.toFixed(0));
     txt("memmeta", fmtBytes(d.mem.total)+" total");
     txt("memv", fmtBytes(d.mem.used)+" / "+fmtBytes(d.mem.total));
     var mb=document.getElementById("membar"); mb.style.width=(d.mem.pct||0)+"%"; mb.style.background=heat(d.mem.pct||0);
-    txt("swapv", fmtBytes(d.mem.swap_used)+" / "+fmtBytes(d.mem.swap_total));
+    txt("swapv", d.mem.swap_total?fmtBytes(d.mem.swap_used)+" / "+fmtBytes(d.mem.swap_total):"none");
     var sb=document.getElementById("swapbar"); sb.style.width=(d.mem.swap_pct||0)+"%";
     txt("memcached",fmtBytes(d.mem.cached));
     txt("membuf",fmtBytes(d.mem.buffers));
+    txt("memshm",fmtBytes(d.mem.shmem));
     txt("memfree",fmtBytes(d.mem.free));
+
+    // Power
+    var ip=d.ipmi||{}, pw=ip.power||{};
+    txt("pwtotal", pw.pin_total===null||pw.pin_total===undefined?"—":pw.pin_total.toFixed(0));
+    txt("pwmeta", (ip.age_s!==null&&ip.age_s!==undefined?"BMC · "+(ip.age_s<90?ip.age_s+"s":fmtDur(ip.age_s))+" ago":"")+
+        (d.power&&d.power.pw_24h?" · avg "+d.power.pw_24h.toFixed(0)+" W / 24h":""));
+    txt("pwcpu0", socks[0]&&socks[0].power_w!==null?socks[0].power_w.toFixed(0)+" W":"—");
+    txt("pwcpu1", socks[1]&&socks[1].power_w!==null?socks[1].power_w.toFixed(0)+" W":"—");
+    txt("pwgpu0", gpus[0]&&gpus[0].power!==null?gpus[0].power.toFixed(0)+" W":"—");
+    txt("pwgpu1", gpus[1]&&gpus[1].power!==null?gpus[1].power.toFixed(0)+" W":"—");
+    var vin={}; (ip.volts||[]).forEach(function(v){ var m=/^PSU(\d+)_VIN$/.exec(v.n); if(m) vin[m[1]]=v.v; });
+    document.getElementById("psus").innerHTML=(pw.psu&&pw.psu.length)
+      ? pw.psu.map(function(p){
+          var ok=p.present!==false, eff=(p.pin&&p.pout)?(100*p.pout/p.pin):null;
+          return "<div class='row'><span class='k'>PSU "+p.n+(vin[p.n]?" <span class='u'>"+vin[p.n].toFixed(0)+" V</span>":"")+"</span>"+
+            "<span class='v'>"+(ok?fmtW(p.pin)+" in · "+fmtW(p.pout)+" out"+(eff?" <span class='u'>"+eff.toFixed(0)+"%</span>":"")
+                                :"<span class='pill bad'>absent</span>")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>BMC not read yet</span><span class='v'>&mdash;</span></div>";
+    if(pw.pout_total) txt("pwmeta", document.getElementById("pwmeta").textContent+" · "+pw.pout_total+" W DC");
 
     // Network
     var n=d.net;
-    txt("netmeta", n.iface+(n.link_mbit?" · "+n.link_mbit+" Mb/s link":""));
+    txt("netmeta", n.iface+(n.link_mbit?" · "+(n.link_mbit>=1000?(n.link_mbit/1000)+" Gb/s":n.link_mbit+" Mb/s")+" campus":""));
     txt("rxnow",fmtBps(n.rx_bps)); txt("txnow",fmtBps(n.tx_bps));
     txt("rx5",fmtBps(n.rx_bps_5m)); txt("tx5",fmtBps(n.tx_bps_5m));
     txt("rx24",fmtBps(n.rx_bps_24h)); txt("tx24",fmtBps(n.tx_bps_24h));
-    var use=(n.link_mbit&&n.rx_bps!==null)?(((n.rx_bps+ (n.tx_bps||0))*8/1e6)/n.link_mbit*100):null;
-    txt("linkuse", use===null?"—":use.toFixed(1)+"%");
+    var use=(n.link_mbit&&n.rx_bps!==null)?(((n.rx_bps+(n.tx_bps||0))*8/1e6)/n.link_mbit*100):null;
+    txt("linkuse", use===null?"—":(use<0.1?"<0.1":use.toFixed(1))+"%");
     txt("nettotal", fmtBytes(n.rx_total)+" in / "+fmtBytes(n.tx_total)+" out");
     txt("neterr", n.rx_errors+" / "+n.tx_errors);
     txt("netdrop", n.rx_dropped.toLocaleString());
+    var st=n.storage||{};
+    txt("stmeta", "Storage LAN · "+(st.iface||"")+(st.link_mbit?" · "+(st.link_mbit>=1000?(st.link_mbit/1000)+" Gb/s":st.link_mbit+" Mb/s"):"")+" · NFS home from wrightss");
+    txt("strate", fmtBps(st.rx_bps)+" / "+fmtBps(st.tx_bps));
+    txt("sttotal", fmtBytes(st.rx_total)+" in / "+fmtBytes(st.tx_total)+" out");
 
     // SSH
     var s=d.ssh;
@@ -1043,69 +1059,76 @@
     txt("sshacc",s.accepted_1h===null?"—":s.accepted_1h);
     txt("sshfail",s.failed_1h===null?"—":s.failed_1h);
     txt("sshinv",s.invalid_1h===null?"—":s.invalid_1h);
-    txt("sshwho",(d.who.sessions||0)+" / "+(d.who.users||[]).join(", "));
-
-    // Top failed-auth source over 24h. Geo fills in a run or two behind the
-    // ranking (one lookup per collector run), so treat it as optional.
+    txt("sshwho",(d.who.sessions||0)+" / "+((d.who.users||[]).join(", ")||"nobody"));
+    txt("sshban",(s.banned_now===null||s.banned_now===undefined?"—":s.banned_now)+" / "+
+        (s.banned_total===null||s.banned_total===undefined?"—":s.banned_total));
     var atk=document.getElementById("sshatk"), top=s.top_attackers||[];
     if(top.length){
       var a=top[0], parts=[];
-      [a.city,a.region,a.country].forEach(function(p){
-        if(p && parts.indexOf(p)<0) parts.push(p);   // "Ho Chi Minh City" twice, otherwise
-      });
+      [a.city,a.region,a.country].forEach(function(p){ if(p && parts.indexOf(p)<0) parts.push(p); });
       var fl=flag(a.cc);
-      var html="<div class='cap'>Most persistent attacker &middot; 24h</div>"+
+      var html="<div class='cap'>Most persistent failed login &middot; 24h</div>"+
         "<div class='who'>"+(fl?"<span class='flag'>"+fl+"</span>":"")+
         "<span class='ip'>"+esc(a.ip)+"</span>"+
-        "<span class='n'>"+a.n.toLocaleString()+" failed logins</span></div>"+
-        "<div class='where'>"+(parts.length?esc(parts.join(", ")):"locating&hellip;")+"</div>";
+        "<span class='n'>"+a.n.toLocaleString()+" failed login"+(a.n===1?"":"s")+"</span></div>"+
+        "<div class='where'>"+(parts.length?esc(parts.join(", ")):(/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(a.ip)?"private address":"locating&hellip;"))+"</div>";
       var rest=top.slice(1);
       if(rest.length){
         html+="<div class='rest'>then "+rest.map(function(r){
-          return "<span>"+(flag(r.cc)||"&middot;")+" "+esc(r.ip)+" ("+r.n+")</span>";
-        }).join("")+"</div>";
+          return "<span>"+(flag(r.cc)||"&middot;")+" "+esc(r.ip)+" ("+r.n+")</span>"; }).join("")+"</div>";
       }
       if(s.failed_24h!==null&&s.failed_24h!==undefined){
-        html+="<div class='tot'>"+s.failed_24h.toLocaleString()+" failed attempts from "+
-              s.attackers_24h+" addresses in 24h</div>";
+        html+="<div class='tot'>"+s.failed_24h.toLocaleString()+" failed attempt"+(s.failed_24h===1?"":"s")+" from "+
+              s.attackers_24h+" address"+(s.attackers_24h===1?"":"es")+" in 24h</div>";
       }
       atk.innerHTML=html; atk.hidden=false;
     } else { atk.hidden=true; }
 
     // Storage
     document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
-      return "<div class='meter'><div class='lab'><span class='k'>"+k.mount+"</span>"+
+      var kind="<span class='pill'>"+(k.kind==="nfs"?"NFS":"NVMe")+"</span>";
+      if(!k.ok) return "<div class='meter down'><div class='lab'><span class='k'>"+esc(k.label)+kind+"</span>"+
+        "<span class='v'><span class='pill bad'>unreachable</span></span></div>"+
+        "<div class='track'><div class='fill' style='width:0'></div></div></div>";
+      return "<div class='meter'><div class='lab'><span class='k' title='"+esc(k.mount)+"'>"+esc(k.label)+kind+"</span>"+
         "<span class='v'>"+fmtBytes(k.used)+" / "+fmtBytes(k.total)+" · "+k.pct+"%</span></div>"+
         "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
     }).join("");
     txt("ioread",fmtBps(d.diskio.read_bps)); txt("iowrite",fmtBps(d.diskio.write_bps));
-    txt("iometa","I/O now");
+    txt("iometa","local I/O now");
 
     // Temperatures
-    document.getElementById("temps").innerHTML=(d.temps||[]).map(function(t){
-      var cls=t.temp>=85?"bad":t.temp>=70?"warn":"ok";
-      return "<div class='row'><span class='k'>"+t.chip+" · "+t.label+"</span>"+
-        "<span class='v'><span class='pill "+cls+"'>"+t.temp.toFixed(1)+"°</span></span></div>";
-    }).join("");
+    renderTemps(d);
 
-    // Containers
-    var c=d.containers||{};
-    txt("ctmeta",(c.running===null?"unavailable":c.running+" running"));
-    // Container names share a long run prefix; strip the longest common one so
-    // the part that actually distinguishes them survives truncation.
-    var names=(c.names||[]).map(function(x){ return x.name; }), pre="";
-    if(names.length>1){
-      pre=names[0];
-      names.forEach(function(n){ while(pre && n.indexOf(pre)!==0) pre=pre.slice(0,-1); });
-      if(pre.length<4) pre="";
+    // Fans
+    var fans=(ip.fans||[]);
+    document.getElementById("fans").innerHTML=fans.length
+      ? fans.map(function(f){
+          var cls=f.rpm<=0?" stop":f.rpm<1000?" slow":"";
+          return "<div class='tile"+cls+"' title='"+esc(f.n)+"'><div class='k'>"+esc(f.n.replace(/^FAN/,"F"))+"</div>"+
+            "<div class='v'>"+f.rpm.toLocaleString()+"</div></div>"; }).join("")
+      : "<div class='rows'><div class='row'><span class='k'>BMC not read yet</span><span class='v'>&mdash;</span></div></div>";
+    if(fans.length){
+      var rp=fans.map(function(f){ return f.rpm; });
+      txt("fanmeta", fans.length+" fans · "+Math.min.apply(null,rp).toLocaleString()+"–"+Math.max.apply(null,rp).toLocaleString()+" rpm");
     }
-    document.getElementById("containers").innerHTML=(c.names&&c.names.length)
-      ? c.names.map(function(x){
-          var short=pre?x.name.slice(pre.length):x.name;
-          return "<div class='row' title='"+x.name+"'><span class='k'>"+(short||x.name)+"</span>"+
-            "<span class='v'><span class='pill "+(x.healthy?"ok":"warn")+"'>"+x.status+"</span></span></div>"; }).join("")
-      : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
-    if(pre) txt("ctmeta", c.running+" running · "+pre+"*");
+
+    // Users & processes. CPU% is of one core, so 6400% would be every thread.
+    var pr=d.procs||{}, bu=pr.by_user||[], tp=pr.top||[];
+    txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
+        ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
+    document.getElementById("byuser").innerHTML=bu.length
+      ? bu.map(function(u){
+          return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
+            " <span class='u'>"+u.n+" proc"+(u.n===1?"":"s")+" · "+fmtBytes(u.rss)+"</span></span>"+
+            "<span class='v'>"+(u.cpu>=100?(u.cpu/100).toFixed(1)+" cores":u.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>no data yet</span><span class='v'>&mdash;</span></div>";
+    document.getElementById("topprocs").innerHTML=tp.length
+      ? tp.map(function(p){
+          return "<div class='row' title='pid "+p.pid+"'><span class='k'>"+esc(p.comm)+
+            " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
+            "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
 
     drawCharts(d);
   }
@@ -1123,41 +1146,20 @@
         document.getElementById("dot").className="dot dead";
       });
   }
-  // Fetched separately from the host metrics: it comes from a different
-  // machine on a different cadence, and its absence must not disturb the rest
-  // of the page.
-  var lastJobs=null;
-  function tickJobs(){
-    fetch(JOBS_SRC,{cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(j){ lastJobs=j; renderJobs(j); })
-      .catch(function(){ if(!lastJobs) renderJobs(null); });
-  }
 
   // ---------- masonry ----------
-  // Re-measures on any card resize, which covers the lot: charts drawing,
-  // a <details> table opening, a container appearing, and window reflow.
   (function(){
     var grid=document.querySelector(".grid");
-    if(!grid || !window.ResizeObserver) return;   // falls back to the row grid
+    if(!grid || !window.ResizeObserver) return;
     var ROW=4, GAP=16;
-    function fit(card){
-      card.style.gridRowEnd="span "+Math.ceil((card.offsetHeight+GAP)/ROW);
-    }
+    function fit(card){ card.style.gridRowEnd="span "+Math.ceil((card.offsetHeight+GAP)/ROW); }
     grid.classList.add("masonry");
-    var ro=new ResizeObserver(function(entries){
-      entries.forEach(function(e){ fit(e.target); });
-    });
+    var ro=new ResizeObserver(function(entries){ entries.forEach(function(e){ fit(e.target); }); });
     [].forEach.call(grid.children, function(c){ fit(c); ro.observe(c); });
   })();
 
   tick();
-  tickJobs();
   setInterval(tick, POLL_MS);
-  setInterval(tickJobs, 60000);
-  // Ages in the cluster panel drift between polls just like the header's does.
-  setInterval(function(){ if(lastJobs) renderJobs(lastJobs); }, 15000);
-  // keep the "age" counter honest between polls
   setInterval(function(){
     if(!last) return;
     var age=Math.max(0,Math.round(Date.now()/1000-last.ts));
@@ -1165,78 +1167,6 @@
     var dot=document.getElementById("dot");
     dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
   }, 1000);
-})();
-</script>
-<script>
-/* Server-room camera + external-access panels (added 2026-08-17).
-   Self-contained and independent of the telemetry poller above.
-   Data is served from photos.proofsandreasons.io/akdeniz/ (CORS + no-cache). */
-(function(){
-  var CAM="https://photos.proofsandreasons.io/akdeniz/camera.jpg";
-  var AX ="https://photos.proofsandreasons.io/akdeniz/access-stats.json";
-  var img=document.getElementById("camimg"), camts=document.getElementById("camts");
-  function refreshCam(){
-    var u=CAM+"?t="+Date.now(), probe=new Image();
-    probe.onload=function(){ img.src=u; camts.textContent="updated "+new Date().toLocaleTimeString(); };
-    probe.onerror=function(){ camts.textContent="camera offline"; };
-    probe.src=u;
-  }
-  refreshCam(); setInterval(refreshCam,15000);
-
-  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-  function fill(el,items,labelFn){
-    if(!el) return;
-    if(!items||!items.length){ el.innerHTML='<div class="row"><span class="k" style="color:var(--dimmer)">none yet</span><span class="v">&mdash;</span></div>'; return; }
-    el.innerHTML=items.map(function(it){
-      var lab=labelFn(it);
-      // title= as well as the text: .row .k ellipsises, and "Glenwood Springs,
-      // Colorado, United States" is wider than the column at one card width.
-      return '<div class="row"><span class="k" title="'+esc(lab)+'">'+esc(lab)+
-             '</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
-    }).join("");
-  }
-  // City / state / country, skipping unknowns and repeats: the city-states come
-  // back from the geo database as "Singapore, Singapore, Singapore", and a good
-  // few US states share a name with their own largest city.
-  function place(x){
-    var out=[];
-    [x.city,x.region,x.country].forEach(function(p){
-      if(p && p!=="Unknown" && out.indexOf(p)<0) out.push(p);
-    });
-    return out.join(", ") || "Unknown";
-  }
-  function num(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  function refreshAx(){
-    fetch(AX,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
-      var ex=d.excluded||{};
-      num("axtotal",(d.unique_ips||0).toLocaleString());
-      num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
-      num("axdrop",(ex.total||0).toLocaleString());
-      // All of them: the card scrolls, and the generator already caps the
-      // feed at 25. Countries stay at 8 -- there are seven, and the list is
-      // short enough that a scroller would be furniture around nothing.
-      fill(document.getElementById("axcity"),(d.by_city||[]),place);
-      fill(document.getElementById("axcountry"),(d.by_country||[]).slice(0,8),function(x){return x.country;});
-      // Spell out what was dropped rather than leaving a bare filtered count:
-      // the number only means something alongside the reasons.
-      var parts=[];
-      if(ex.vpn)    parts.push(ex.vpn+" VPN/relay");
-      if(ex.attack) parts.push(ex.attack+" scanning");
-      if(ex.bot)    parts.push(ex.bot+" bot"+(ex.bot===1?"":"s"));
-      var dn=document.getElementById("axdropnote");
-      if(dn) dn.textContent=parts.length?("filtered: "+parts.join(", ")):"";
-      // An all-time count is only readable against its start date, so "since"
-      // sits with the timestamp rather than being left to the reader.
-      var t=document.getElementById("axts");
-      if(t){
-        var bits=[];
-        if(d.since) bits.push("since "+d.since);
-        if(d.updated) bits.push("updated "+d.updated);
-        t.textContent=bits.join(" \u00b7 ");
-      }
-    }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
-  }
-  refreshAx(); setInterval(refreshAx,60000);
 })();
 </script>
 </body>
