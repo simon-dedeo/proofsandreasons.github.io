@@ -456,12 +456,18 @@
   <!-- CMU skyline monitor — latest inferred peak golden-hour frame, shown ABOVE
        the energy-usage panels. golden peak + golden.js hosted on ganesha. -->
   <figure id="golden-figure" style="width:620px; max-width:100%; margin:0 auto 2rem; text-align:left;">
+    <!-- click-through to the full-resolution 4K frame (the dated peak file once golden.js
+         has loaded, golden.jpg until then) -->
+    <a id="g-link" href="https://photos.proofsandreasons.io/golden.jpg" target="_blank" rel="noopener"
+       title="Open the full-resolution image" style="display:block;">
     <img id="g-img" src="https://photos.proofsandreasons.io/golden.jpg"
          alt="Latest inferred peak golden-hour view of the CMU skyline"
          style="display:block; width:100%; height:auto; border:3px solid white; box-shadow:0 2px 8px rgba(0,0,0,0.15);">
+    </a>
     <figcaption style="margin-top:8px; font-family:'SF Mono',ui-monospace,Menlo,monospace; color:#fff;">
       <div id="g-cap1" style="font-size:0.9rem; font-weight:600;"></div>
       <div id="g-cap2" style="font-size:0.72rem; color:#c7d0e0; margin-top:3px;"></div>
+      <div style="font-size:0.72rem; margin-top:3px;"><a href="https://photos.proofsandreasons.io/golden.jpg" id="g-full" target="_blank" rel="noopener" style="color:#c7d0e0;">full size ↗</a> &nbsp;·&nbsp; <a href="https://sites.santafe.edu/~simon/hours.html" style="color:#c7d0e0;">recent golden hours ↗</a></div>
     </figcaption>
   </figure>
   <script>
@@ -488,6 +494,7 @@
                                  : huebit('avg total image hue',g.img_hue,g.img_hue_name);
       if(i) b.push(i);
       document.getElementById('g-cap2').textContent = b.join('  ·  ');
+      if(g.date && g.which){ var u=SF+'peak_'+g.date+'_'+g.which+'.jpg'; document.getElementById('g-link').href=u; document.getElementById('g-full').href=u; }
     }
     function load(){
       document.getElementById('g-img').src = SF+'golden.jpg?_='+Date.now();
