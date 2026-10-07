@@ -512,7 +512,7 @@
       <div class="rows scroll" id="axcity" tabindex="0" role="group"
            aria-label="Places, most visitors first, then most recently seen"></div>
       <div class="h5" style="margin-top:14px"><span>Countries</span></div>
-      <div class="rows" id="axcountry"></div>
+      <div class="rows scroll" id="axcountry" tabindex="0" role="group" aria-label="Countries, most visitors first"></div>
       <div class="sub" id="axdropnote" style="margin-top:10px"></div>
       <div class="sub" id="axts" style="margin-top:4px"></div>
     </div>
@@ -1224,11 +1224,10 @@
       num("axtotal",(d.unique_ips||0).toLocaleString());
       num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
       num("axdrop",(ex.total||0).toLocaleString());
-      // All of them: the card scrolls, and the generator already caps the
-      // feed at 25. Countries stay at 8 -- there are seven, and the list is
-      // short enough that a scroller would be furniture around nothing.
+      // Both lists in full: the generator caps the feed at 1000 cities and 400
+      // countries, and both cards scroll past the fold rather than growing.
       fill(document.getElementById("axcity"),(d.by_city||[]),place);
-      fill(document.getElementById("axcountry"),(d.by_country||[]).slice(0,8),function(x){return x.country;});
+      fill(document.getElementById("axcountry"),(d.by_country||[]),function(x){return x.country;});
       // Spell out what was dropped rather than leaving a bare filtered count:
       // the number only means something alongside the reasons.
       var parts=[];
