@@ -1216,11 +1216,14 @@
       rows+=hrow("NIC watchdog", spill(wd.recoveries_7d?"warn":"ok", (wd.recoveries_30d||0)+" recover"+(wd.recoveries_30d===1?"y":"ies")+" / 30d")+
         (wd.last_event?" <span class='u'>"+esc(wd.last_event.msg.split(":")[0].toLowerCase())+" · "+esc(dateclock(wd.last_event.t))+"</span>":""));
     }
+    var sinceEm="";
     if(em.world){
-      var w=em.world;
-      rows+=hrow("Last world update", (w.ok===true?spill("ok","ok"):w.ok===false?spill("bad","failed"):spill("warn","running"))+
+      var w=em.world, days=Math.floor((Date.now()/1000-w.t)/86400);
+      sinceEm=days===0?"today":days===1?"1 day ago":days+" days ago";
+      rows+=hrow("Last emerge update", "<b style='font-weight:700;color:var(--ink)'>"+sinceEm+"</b> "+
+        (w.ok===true?spill("ok","ok"):w.ok===false?spill("bad","failed"):spill("warn","running"))+
         " <span class='u'>"+esc(dateclock(w.t))+" · "+w.merged+" package"+(w.merged===1?"":"s")+
-        (w.done?" · "+fmtDur(w.done-w.t):"")+"</span>"+(em.running?" "+spill("warn","emerge running now"):""));
+        (w.done?" · took "+fmtDur(w.done-w.t):"")+"</span>"+(em.running?" "+spill("warn","emerge running now"):""));
     }
     document.getElementById("sysrows").innerHTML=rows;
     var ns=sv.not_started||[];
@@ -1228,7 +1231,7 @@
       ? ns.map(function(x){ return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
           spill(x.status==="crashed"?"bad":"", x.status)+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>everything in the default runlevel is up</span><span class='v'>"+spill("ok", (sv.started||0)+" started")+"</span></div>";
-    txt("sysmeta", sv.started!==undefined?sv.started+" services up":"");
+    txt("sysmeta", (sv.started!==undefined?sv.started+" services up":"")+(sinceEm?" · updated "+sinceEm:""));
 
     drawCharts(d);
   }

@@ -182,7 +182,7 @@
 
   /* ------ Footer bits ------ */
   .announce {
-    margin-top: 0.75em;
+    margin-top: 0.5em;
     font-size: clamp(1rem, 2.2vw, 1.2rem);
     line-height: 1.05;
     text-align: center;
@@ -196,7 +196,8 @@
   }
 
   .readings-link {
-    margin-top: 0.75em;
+    margin-top: 0.3em;
+    line-height: 1.15;
     font-size: clamp(1.15rem, 2.5vw, 1.4rem);
     line-height: 1.2;
     text-align: center;
@@ -415,7 +416,7 @@
       <a href="/readings.html">proofs and reasons cog sci reading list</a>
     </div>
 
-    <div class="credit">
+    <div class="credit" style="margin-top:0.15em;">
       <a href="/dashboard.html">proofs and reasons dashboard</a>
     </div>
 
@@ -444,7 +445,7 @@
 
   </div>
   
-  <br><br>
+  <br>
   <!-- CMU skyline monitor — latest inferred peak golden-hour frame, shown ABOVE
        the live-monitor links. golden peak + golden.js hosted on ganesha. -->
   <figure id="golden-figure" style="width:620px; max-width:100%; margin:0 auto 2rem; text-align:left;">
@@ -501,11 +502,11 @@
 
   <!-- Live host monitors, directly under the golden-hour frame. (The
        energy-usage iframes that used to sit here were retired 2026-10-07.) -->
-  <div id="monitors" style="width:620px; max-width:100%; margin:0 auto; text-align:left;
+  <div id="monitors" style="width:960px; max-width:calc(100% - 32px); margin:0 auto; text-align:left;
               font-family:'SF Mono',ui-monospace,Menlo,monospace; font-size:0.78rem; line-height:1.9;">
     <div style="color:#8a97b0; letter-spacing:.14em; text-transform:uppercase; font-size:0.66rem; margin-bottom:2px;">Live host monitors</div>
     <a href="/ganesha.html">ganesha &rarr;</a>
-    <span style="color:#8a97b0;">&nbsp; web server and reddit archive: two Opterons, five disks, Caddy traffic</span>
+    <span style="color:#8a97b0;">&nbsp; web server and reddit archive: Opterons, five disks, Caddy traffic</span>
     <br>
     <a href="/akdeniz.html">akdeniz &rarr;</a>
     <span style="color:#8a97b0;">&nbsp; GPU workstation: CPU, GPU, memory, network, cluster queues</span>
@@ -515,7 +516,7 @@
   </div>
 
   <br><br>
-  <div style="width:620px; max-width:100%; margin:0 auto 2rem;">
+  <div style="width:960px; max-width:calc(100% - 32px); margin:0 auto 2rem;">
     <div class="credit" style="margin-top:0;">
       Top Image: Type Theory over the Island of Samos / cc by-sa/4.0, modified from
       <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a>.
