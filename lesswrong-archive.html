@@ -1,0 +1,321 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Internal paths and host detail. Same reasoning as akdeniz.html: keep it out
+     of search results, and do NOT pair this with a robots.txt Disallow, which
+     would stop crawlers reading the directive at all. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<title>LessWrong Archive &middot; Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="LessWrong Archive">
+<meta property="og:description" content="Every post and comment on LessWrong from 2003 onward, with full metadata, archived month by month on ganesha at the Laboratory for Social Minds at CMU.">
+<meta property="og:url" content="https://proofsandreasons.io/lesswrong-archive.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/lesswrong-archive.html">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --bad:#ff6f6f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    background-attachment:fixed;
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;padding:0 20px 80px;line-height:1.55;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  a{color:var(--sky);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:3px}
+
+  header.top{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;
+    flex-wrap:wrap;padding:44px 0 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.02}
+  .sub{color:var(--dim);max-width:62ch;margin-top:9px;font-size:1.02rem}
+  .backlinks{font-family:var(--mono);font-size:.8rem;text-align:right;color:var(--dimmer)}
+  .backlinks a{display:block;margin-top:5px}
+
+  section{margin-top:42px}
+  h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;
+    font-size:.68rem;font-weight:700;margin:26px 0 11px}
+  .lede{color:var(--dim);max-width:72ch;margin-bottom:20px}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+  dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:14px 22px;margin-top:16px}
+  dl.facts dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer)}
+  dl.facts dd{font-family:var(--mono);font-size:.92rem;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .access{display:flex;gap:14px;align-items:flex-start;border-left:3px solid var(--amber);
+    background:var(--panel);padding:15px 18px;border-radius:0 10px 10px 0;margin-top:22px}
+  .access .ico{font-family:var(--mono);color:var(--amber);font-weight:700;flex:none}
+  .access p{color:var(--dim);font-size:.93rem;max-width:74ch}
+  .access b{color:var(--ink)}
+
+  /* ---- puller status strip ---- */
+  .status{display:flex;gap:10px 22px;flex-wrap:wrap;align-items:baseline;font-family:var(--mono);
+    font-size:.78rem;color:var(--dim);margin-top:18px;padding:12px 16px;border:1px solid var(--line);
+    border-radius:12px;background:var(--panel)}
+  .status b{color:var(--ink);font-weight:600}
+  .status .dot{display:inline-block;width:.6em;height:.6em;border-radius:50%;background:var(--good);
+    box-shadow:0 0 10px var(--good);margin-right:.45em;vertical-align:.02em}
+  .status .dot.warn{background:var(--amber);box-shadow:0 0 10px var(--amber)}
+  .status .dot.bad{background:var(--bad);box-shadow:0 0 10px var(--bad)}
+
+  .ybox{border:1px solid var(--line);border-radius:14px;background:var(--panel);padding:13px 16px;margin-bottom:10px}
+  .yhead{display:flex;justify-content:space-between;align-items:baseline;font-family:var(--mono);font-size:.8rem;
+    color:var(--dimmer);margin-bottom:9px;padding-bottom:8px;border-bottom:1px solid var(--line)}
+  .yhead b{color:var(--ink);font-size:1.06rem;letter-spacing:-.01em}
+  .krow{display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:4px 0}
+  .klabel{font-family:var(--mono);font-size:.7rem;letter-spacing:.1em;text-transform:uppercase;color:var(--dimmer);width:6.6rem;flex:none}
+  .months{display:flex;flex-wrap:wrap;gap:5px;flex:1}
+  a.mo{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;border-radius:6px;
+    border:1px solid var(--line);background:#0a0f18;color:var(--sky);font-variant-numeric:tabular-nums}
+  a.mo:hover{border-color:var(--sky);text-decoration:none;background:#101a28}
+  a.mo.cur{border-color:rgba(99,214,143,.5)}
+  .mo.off{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;border-radius:6px;
+    border:1px dashed var(--line);color:#39404f;background:transparent}
+  .mo.pend{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;border-radius:6px;
+    border:1px dashed rgba(255,182,74,.45);color:var(--amber);background:rgba(255,182,74,.06);font-variant-numeric:tabular-nums}
+  .mo.now{display:inline-block;font-family:var(--mono);font-size:.76rem;padding:3px 7px;border-radius:6px;
+    border:1px solid var(--amber);color:var(--amber);background:rgba(255,182,74,.14);font-variant-numeric:tabular-nums}
+  .ksize{font-family:var(--mono);font-size:.74rem;color:var(--dim);font-variant-numeric:tabular-nums;flex:none;min-width:4.6rem;text-align:right}
+
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);white-space:nowrap}
+  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);font-weight:700;background:#0e1320}
+  tbody tr:last-child td{border-bottom:0}
+  td.wrap{white-space:normal}
+  code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);border-radius:12px;
+    padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink)}
+  .note{border-left:3px solid var(--amber);background:var(--panel);padding:13px 17px;border-radius:0 10px 10px 0;
+    margin-top:18px;color:var(--dim);font-size:.93rem}
+  .note b{color:var(--ink)}
+  ul.links{list-style:none;display:grid;grid-template-columns:repeat(auto-fit,minmax(17rem,1fr));gap:0 26px}
+  ul.links li{padding:9px 0;border-bottom:1px solid var(--line);font-size:.9rem}
+  ul.links .d{display:block;color:var(--dimmer);font-size:.79rem;margin-top:2px}
+  footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);color:var(--dimmer);font-size:.79rem}
+  footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="top">
+  <div>
+    <h1>The LessWrong Archive</h1>
+    <p class="sub">Every post and comment on <a href="https://www.lesswrong.com/">LessWrong</a>, from the
+    2003 essays imported from Overcoming Bias through LessWrong 1.0 to this morning, pulled from the
+    site's public API with every field it exposes: bodies as HTML and Markdown, karma and vote
+    counts, reacts, tags, curation and review state, Alignment Forum flags, legacy identifiers.
+    One zstd-compressed ndjson file per month, posts and comments together, held at the Laboratory
+    for Social Minds, CMU, and refreshed continuously so scores and edits stay current.</p>
+  </div>
+  <div class="backlinks">
+    <a href="/reddit-archive.html">reddit archive &rarr;</a>
+    <a href="/dashboard.html">skyline dashboard &rarr;</a>
+    <a href="/akdeniz.html">akdeniz host monitor &rarr;</a>
+    <a href="/wright.html">wright host monitor &rarr;</a>
+    <a href="/ganesha.html">ganesha host monitor &rarr;</a>
+    <a href="https://proofsandreasons.io/">proofsandreasons.io &rarr;</a>
+  </div>
+</header>
+
+<div class="access">
+  <span class="ico">CMU</span>
+  <p>The monthly files are served <b>only to Carnegie Mellon IP ranges</b> &mdash; on-campus networks
+  and the CMU VPN. From anywhere else they return <code>403</code>. The content is the authors' own,
+  published on LessWrong under its terms; this copy is held for research at CMU and is not a
+  redistribution.</p>
+</div>
+
+<div class="status" id="status"><span><span class="dot warn"></span>connecting to the archive index&hellip;</span></div>
+
+<!-- ============ THE ARCHIVE, BY YEAR ============ -->
+<section>
+  <h2>The archive, by year</h2>
+  <p class="lede">One link per month. Hover a month for its counts and size. Dashed months had nothing
+  posted (the pre-2009 years hold only the essays later imported into the site); amber months are
+  being fetched now; the green-edged month is the current one, re-pulled every six hours. The grid is
+  drawn from the archive index and refreshes itself.</p>
+  <div class="yhead" style="border:0;padding:0 2px 6px">
+    <b>The whole archive</b><span id="extsum">loading&hellip;</span>
+  </div>
+  <div id="extyears"></div>
+  <div class="note"><b>Scores move; the archive follows.</b> Karma, reacts, edits and deletions keep
+  changing long after a post goes up, so the files are rewritten from the database, not appended to:
+  the current and previous month every six hours, the last fifteen months weekly, and the whole
+  archive once a month. The <code>fetched_at</code> field on each record says when its copy was taken,
+  and the index below lists each file's SHA-256.</div>
+</section>
+
+<!-- ============ USING IT ============ -->
+<section>
+  <h2>Using the archive</h2>
+
+  <h3>On ganesha (kubrick, a 20&nbsp;TB disk at <code>/mnt/kubrick</code>)</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Path</th><th>Contents</th></tr></thead>
+      <tbody>
+        <tr><td><code>/mnt/kubrick/lesswrong/dumps/</code></td><td>LW_2003-01 &hellip; the current month, <code>LW_YYYY-MM.jsonl.zst</code></td></tr>
+        <tr><td><code>/mnt/kubrick/lesswrong/meta/</code></td><td><code>tags</code>, <code>sequences</code>, <code>collections</code> (the editorial structure), refreshed weekly</td></tr>
+        <tr><td><code>/mnt/kubrick/lesswrong/lesswrong.sqlite</code></td><td>every record, latest version, indexed by month, post and user &mdash; the source the files are written from</td></tr>
+        <tr><td><code>/mnt/kubrick/lesswrong/index.json</code></td><td>the month list with counts, sizes and hashes, plus the puller's status</td></tr>
+        <tr><td><code>/mnt/kubrick/README.md</code></td><td>how the archive is held, served and extended</td></tr>
+      </tbody>
+    </table>
+  </div>
+
+  <h3>Reading a dump</h3>
+  <pre>zstd -dc LW_2012-03.jsonl.zst | head -1 | python3 -m json.tool | head -40
+zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore, voteCount, user: .user.username}'</pre>
+  <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">Plain <code>zstd -dc</code> works; no long
+  window is needed. Each line is one JSON object with a <code>type</code> of <code>post</code> or
+  <code>comment</code> and a <code>fetched_at</code> timestamp, followed by the record exactly as the
+  LessWrong API returned it. Records are ordered by <code>postedAt</code>, so a month reads
+  chronologically, posts before the comments made in the same instant. Comments carry
+  <code>postId</code>, <code>parentCommentId</code> and <code>topLevelCommentId</code>, so a thread
+  rebuilds from one month's file when the post is in the same month, or from the SQLite otherwise.</p>
+
+  <h3>What a record holds</h3>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Group</th><th>Fields (posts)</th><th>Fields (comments)</th></tr></thead>
+      <tbody>
+        <tr><td>Identity</td><td class="wrap"><code>_id</code> <code>slug</code> <code>title</code> <code>userId</code> <code>user{username, displayName, karma, createdAt}</code> <code>coauthors</code> <code>legacy</code> <code>legacyId</code> <code>legacyData</code></td><td class="wrap"><code>_id</code> <code>postId</code> <code>parentCommentId</code> <code>topLevelCommentId</code> <code>userId</code> <code>user{&hellip;}</code> <code>legacyId</code> <code>legacyParentId</code></td></tr>
+        <tr><td>Time</td><td class="wrap"><code>postedAt</code> <code>modifiedAt</code> <code>createdAt</code> <code>lastCommentedAt</code> <code>curatedDate</code> <code>frontpageDate</code> <code>scoreExceeded&hellip;Date</code></td><td class="wrap"><code>postedAt</code> <code>lastEditedAt</code> <code>lastSubthreadActivity</code> <code>promotedAt</code> <code>deletedDate</code></td></tr>
+        <tr><td>Text</td><td class="wrap"><code>contents{html, markdown, wordCount, version, editedAt}</code> <code>htmlBody</code> <code>tableOfContents</code></td><td class="wrap"><code>contents{html, markdown, wordCount, version, editedAt}</code> <code>htmlBody</code></td></tr>
+        <tr><td>Reception</td><td class="wrap"><code>baseScore</code> <code>voteCount</code> <code>score</code> <code>extendedScore</code> (reacts, agreement) <code>maxBaseScore</code> <code>commentCount</code> <code>viewCount</code> <code>afBaseScore</code> <code>afVoteCount</code></td><td class="wrap"><code>baseScore</code> <code>voteCount</code> <code>score</code> <code>extendedScore</code> <code>directChildrenCount</code> <code>descendentCount</code> <code>afBaseScore</code></td></tr>
+        <tr><td>Editorial</td><td class="wrap"><code>tags{name, slug, core}</code> <code>tagRelevance</code> <code>frontpageDate</code> <code>curatedDate</code> <code>reviewCount</code> <code>reviewVoteScore&hellip;</code> <code>finalReviewVote&hellip;</code> <code>reviewWinner</code> <code>spotlight</code> <code>canonicalSequenceId</code> <code>canonicalCollectionSlug</code> <code>sticky</code> <code>meta</code> <code>question</code> <code>shortform</code> <code>isEvent</code> <code>af</code></td><td class="wrap"><code>answer</code> <code>promoted</code> <code>moderatorHat</code> <code>shortform</code> <code>af</code> <code>relevantTagIds</code> <code>nominatedForReview</code> <code>reviewingForReview</code></td></tr>
+        <tr><td>Moderation</td><td class="wrap"><code>status</code> <code>draft</code> <code>unlisted</code> <code>rejected</code> <code>rejectedReason</code> <code>bannedUserIds</code> <code>commentsLocked</code> <code>authorIsUnreviewed</code></td><td class="wrap"><code>deleted</code> <code>deletedPublic</code> <code>deletedReason</code> <code>retracted</code> <code>spam</code> <code>rejected</code> <code>needsReview</code> <code>repliesBlockedUntil</code></td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">Fields are present with <code>null</code> when
+  they do not apply, so a reader can rely on the keys. What the API does not expose to an anonymous reader,
+  and so is not here: individual votes (only the aggregates), drafts, private messages, and anything
+  deleted before the 2017 migration to the current site.</p>
+
+  <h3>Source and method</h3>
+  <p style="font-size:.9rem;color:var(--dim)">LessWrong's public GraphQL endpoint
+  (<code>https://www.lesswrong.com/graphql</code>), read one request per second with an identifying
+  User-Agent, from ganesha, by the <code>lesswrong-pull</code> service. Posts come from the
+  <code>new</code> view and comments from <code>allRecentComments</code>, each walked month by month and
+  page by page on <code>postedAt</code>; posts that the lists leave out but comments refer to (shortform
+  containers, unlisted posts) are fetched by id. Everything is upserted into SQLite and a month's file is
+  rewritten whenever any record in it changed. The site is on the same software as the EA Forum and the
+  Alignment Forum, so the same tool would cover those.</p>
+
+  <h3>Documentation</h3>
+  <ul class="links">
+    <li><a href="https://www.lesswrong.com/api/SKILL.md">LessWrong API guide</a>
+      <span class="d">The site's own notes on its agent-facing and GraphQL APIs.</span></li>
+    <li><a href="https://www.lesswrong.com/graphiql">GraphiQL explorer</a>
+      <span class="d">Interactive schema browser for the endpoint the puller reads.</span></li>
+    <li><a href="https://github.com/ForumMagnum/ForumMagnum">ForumMagnum</a>
+      <span class="d">The open-source codebase behind LessWrong; the schema files define every field above.</span></li>
+    <li><a href="https://photos.proofsandreasons.io/lesswrong-archive/index.json">index.json</a>
+      <span class="d">The live month list and puller status this page is drawn from.</span></li>
+  </ul>
+</section>
+
+<footer>
+  Laboratory for Social Minds, Carnegie Mellon University &middot;
+  archive served from
+  <a href="https://photos.proofsandreasons.io/lesswrong-archive/">photos.proofsandreasons.io</a> &middot;
+  <a href="/reddit-archive.html">reddit archive</a> &middot;
+  <a href="/dashboard.html">skyline dashboard</a> &middot;
+  <a href="/akdeniz.html">akdeniz monitor</a> &middot;
+  <a href="/wright.html">wright monitor</a> &middot;
+  <a href="/ganesha.html">ganesha monitor</a>
+</footer>
+
+</div>
+<script>
+(function () {
+  var IDX  = "https://photos.proofsandreasons.io/lesswrong-archive/index.json";
+  var HOST = "https://photos.proofsandreasons.io";
+  var sumEl = document.getElementById("extsum"), yrsEl = document.getElementById("extyears"), stEl = document.getElementById("status");
+  function mib(b){ if(!b) return "0 MiB"; var m=b/1048576; return m>=1024 ? (m/1024).toFixed(2)+" GiB" : (m>=100?m.toFixed(0):m.toFixed(1))+" MiB"; }
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){ return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; }); }
+  function n(v){ return (v||0).toLocaleString(); }
+  function ago(isoStr){
+    if(!isoStr) return "never";
+    var s=Math.max(0,Math.round((Date.now()-Date.parse(isoStr))/1000));
+    if(s<90) return s+"s ago"; if(s<5400) return Math.round(s/60)+" min ago"; if(s<172800) return Math.round(s/3600)+" h ago"; return Math.round(s/86400)+" days ago";
+  }
+  function render(d){
+    var by={}; (d.months||[]).forEach(function(m){ by[m.m]=m; });
+    var planned=d.planned||[], years=[];
+    planned.forEach(function(m){ var y=m.slice(0,4); if(years.indexOf(y)<0) years.push(y); });
+    var st=d.status||{}, cur=st.current_month;
+    var html="";
+    years.forEach(function(y){
+      var inYear=planned.filter(function(m){ return m.slice(0,4)===y; });
+      var held=inYear.filter(function(m){ return by[m]&&by[m].file; });
+      var bytes=held.reduce(function(a,m){ return a+(by[m].bytes||0); },0);
+      var posts=inYear.reduce(function(a,m){ return a+((by[m]&&by[m].posts)||0); },0);
+      var comments=inYear.reduce(function(a,m){ return a+((by[m]&&by[m].comments)||0); },0);
+      var cells="";
+      for(var i=1;i<=12;i++){
+        var mm=(i<10?"0":"")+i, key=y+"-"+mm, rec=by[key];
+        if(inYear.indexOf(key)<0){ cells+='<span class="mo off">'+mm+'</span>'; continue; }
+        if(key===cur){ cells+='<span class="mo now" title="'+key+' — being fetched now">'+mm+'</span>'; continue; }
+        if(rec&&rec.file){
+          var t=key+" — "+n(rec.posts)+" posts, "+n(rec.comments)+" comments — "+mib(rec.bytes)+(rec.status==="partial"?" — partial, awaiting its own pass":"")+(rec.exported_at?" — written "+rec.exported_at.slice(0,16).replace("T"," "):"");
+          cells+='<a class="mo'+(rec.status==="current"?" cur":"")+'" href="'+HOST+d.base+"/"+rec.file+'" title="'+esc(t)+'">'+mm+'</a>';
+        } else if(rec&&rec.status==="empty"){
+          cells+='<span class="mo off" title="'+key+' — nothing posted">'+mm+'</span>';
+        } else if(st.backfill_done){
+          cells+='<span class="mo off" title="'+key+' — nothing posted">'+mm+'</span>';
+        } else {
+          cells+='<span class="mo pend" title="'+key+' — not fetched yet">'+mm+'</span>';
+        }
+      }
+      html+='<div class="ybox" style="margin:10px 0 0"><div class="yhead"><b>'+y+'</b><span>'+held.length+' of '+inYear.length+' months &middot; '+n(posts)+' posts &middot; '+n(comments)+' comments &middot; '+mib(bytes)+'</span></div>'+
+            '<div class="krow"><span class="klabel">posts + comments</span><span class="months">'+cells+'</span></div></div>';
+    });
+    yrsEl.innerHTML=html;
+    var tot=d.totals||{};
+    sumEl.textContent=(d.count||0)+" of "+planned.length+" months held · "+n(tot.posts)+" posts · "+n(tot.comments)+" comments · "+mib(d.bytes||0);
+    var mode=st.mode||"?", dotCls=mode==="stopped"?"bad":(mode==="backfill"||mode==="manual")?"warn":"";
+    var genAge=(Date.now()-Date.parse(d.generated))/1000;
+    if(genAge>8*3600) dotCls="bad";
+    var bits=['<span><span class="dot '+dotCls+'"></span>puller: <b>'+esc(mode)+'</b>'+(cur?" · on <b>"+esc(cur)+"</b>":"")+'</span>'];
+    if(st.backfill_done) bits.push('<span>backfill finished <b>'+esc(st.backfill_done.slice(0,10))+'</b></span>');
+    bits.push('<span>index written <b>'+ago(d.generated)+'</b></span>');
+    if(st.last_cycle) bits.push('<span>last 6-hourly pass <b>'+ago(st.last_cycle)+'</b></span>');
+    if(st.next_cycle&&mode==="continuous") bits.push('<span>next <b>'+esc(st.next_cycle.slice(11,16))+' UTC</b></span>');
+    bits.push('<span>requests this run <b>'+n(st.requests)+'</b> at <b>'+(st.rate_rps||0)+'/s</b></span>');
+    if(st.errors) bits.push('<span style="color:var(--amber)">errors <b>'+n(st.errors)+'</b>'+(st.last_error?' · '+esc(st.last_error.slice(20,110)):'')+'</span>');
+    if(st.note&&mode!=="continuous") bits.push('<span style="color:var(--dimmer)">'+esc(st.note)+'</span>');
+    stEl.innerHTML=bits.join("");
+  }
+  function poll(){
+    fetch(IDX,{cache:"no-store"}).then(function(r){ if(!r.ok) throw new Error(r.status); return r.json(); }).then(render)
+      .catch(function(){ sumEl.textContent="index unreachable — ganesha may be down"; stEl.innerHTML='<span><span class="dot bad"></span>index unreachable</span>'; });
+  }
+  poll(); setInterval(poll, 60000);
+})();
+</script>
+</body>
+</html>
