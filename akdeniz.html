@@ -480,9 +480,15 @@
 
     <!-- Server-room camera (grothendieck) -->
     <div class="card wide">
-      <div class="h5"><span>Server room</span><span class="note" id="cammeta">grothendieck &middot; live</span></div>
-      <img id="camimg" alt="server-room camera (grothendieck)" decoding="async"
-           style="width:100%;border-radius:12px;display:block;background:#000;border:1px solid var(--line)">
+      <div class="h5"><span>Server room</span><span class="note" id="cammeta">grothendieck &middot; live &middot;
+        <a href="http://groth.lan.cmu.edu/camera/" style="color:var(--sky);text-decoration:none">events &rarr;</a></span></div>
+      <!-- The frame links to groth's own camera page (LAN only), which keeps the
+           list of "unusual" frames the motion worker flagged. -->
+      <a href="http://groth.lan.cmu.edu/camera/" title="Open the camera page on groth: live frame and flagged events (CMU network only)"
+         style="display:block;border-radius:12px">
+      <img id="camimg" alt="server-room camera (grothendieck); click for the camera page with flagged events" decoding="async"
+           style="width:100%;border-radius:12px;display:block;background:#000;border:1px solid var(--line);cursor:pointer">
+      </a>
       <div class="sub" id="camts" style="margin-top:8px">connecting&hellip;</div>
     </div>
 
