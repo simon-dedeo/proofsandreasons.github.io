@@ -442,19 +442,11 @@
     </figcaption>
   </figure> -->
 
-    <div class="credit">
-      Top Image: Type Theory over the Island of Samos / cc by-sa/4.0, modified from
-      <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a>.
-      Samos, a nexus of trade between the Greek Aegean and the Near East, was the birthplace of the philosopher
-      <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>, for whom the logical simplicity of mathematical proof was the sense-making principle of the universe.
-      <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a> is the engine beneath modern A.I. systems that can frame, and prove, theorems of human mathematics.<br>
-      <small>* The opinions expressed in this publication are those of the researchers and do not necessarily reflect the views of the John Templeton Foundation, or any other funder.</small>
-    </div>
   </div>
   
   <br><br>
   <!-- CMU skyline monitor — latest inferred peak golden-hour frame, shown ABOVE
-       the energy-usage panels. golden peak + golden.js hosted on ganesha. -->
+       the live-monitor links. golden peak + golden.js hosted on ganesha. -->
   <figure id="golden-figure" style="width:620px; max-width:100%; margin:0 auto 2rem; text-align:left;">
     <!-- click-through to the full-resolution 4K frame (the dated peak file once golden.js
          has loaded, golden.jpg until then) -->
@@ -507,30 +499,32 @@
   })();
   </script>
 
-  <br><br>
-  <!-- Energy-usage panels (akdeniz, then ganesha), below the monitor image.
-       Plain static heights + scrolling="no": each report shows in full, no
-       scrollbar, no resizing. Bump the height if a report ever outgrows it. -->
-  <iframe scrolling="no"
-          src="https://sites.santafe.edu/~simon/usage.html"
-          style="width:620px; max-width:100%; height:760px; border:none; overflow:hidden;">
-  </iframe>
-
-  <!-- Live host telemetry for akdeniz, directly under its usage panel. -->
-  <div style="width:620px; max-width:100%; margin-top:4px;
-              font-family:'SF Mono',ui-monospace,Menlo,monospace; font-size:0.78rem;">
-    <a href="/akdeniz.html">Live host monitor for akdeniz &rarr;</a>
-    <span style="color:#8a97b0;">&nbsp; CPU, GPU, memory, network, temperatures</span>
+  <!-- Live host monitors, directly under the golden-hour frame. (The
+       energy-usage iframes that used to sit here were retired 2026-10-07.) -->
+  <div id="monitors" style="width:620px; max-width:100%; margin:0 auto; text-align:left;
+              font-family:'SF Mono',ui-monospace,Menlo,monospace; font-size:0.78rem; line-height:1.9;">
+    <div style="color:#8a97b0; letter-spacing:.14em; text-transform:uppercase; font-size:0.66rem; margin-bottom:2px;">Live host monitors</div>
+    <a href="/ganesha.html">ganesha &rarr;</a>
+    <span style="color:#8a97b0;">&nbsp; web server and reddit archive: two Opterons, five disks, Caddy traffic</span>
     <br>
-    <a href="/wright.html">Live host monitor for wright &rarr;</a>
+    <a href="/akdeniz.html">akdeniz &rarr;</a>
+    <span style="color:#8a97b0;">&nbsp; GPU workstation: CPU, GPU, memory, network, cluster queues</span>
+    <br>
+    <a href="/wright.html">wright &rarr;</a>
     <span style="color:#8a97b0;">&nbsp; two EPYCs, two Blackwells, fans, power</span>
   </div>
 
   <br><br>
-  <iframe scrolling="no"
-          src="https://sites.santafe.edu/~simon/ganesha_usage.html"
-          style="width:620px; max-width:100%; height:520px; border:none; overflow:hidden;">
-  </iframe>
+  <div style="width:620px; max-width:100%; margin:0 auto 2rem;">
+    <div class="credit" style="margin-top:0;">
+      Top Image: Type Theory over the Island of Samos / cc by-sa/4.0, modified from
+      <a href="https://commons.wikimedia.org/wiki/File:Samos_town_aerial_3.jpg">User:Tomisti</a>.
+      Samos, a nexus of trade between the Greek Aegean and the Near East, was the birthplace of the philosopher
+      <a href="https://en.wikipedia.org/wiki/Pythagoras">Pythagoras</a>, for whom the logical simplicity of mathematical proof was the sense-making principle of the universe.
+      <a href="https://en.wikipedia.org/wiki/Type_theory">Type theory</a> is the engine beneath modern A.I. systems that can frame, and prove, theorems of human mathematics.<br>
+      <small>* The opinions expressed in this publication are those of the researchers and do not necessarily reflect the views of the John Templeton Foundation, or any other funder.</small>
+    </div>
+  </div>
 
 </body>
 </html>

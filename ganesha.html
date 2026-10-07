@@ -14,13 +14,13 @@
      Deliberately NOT paired with a robots.txt Disallow -- see akdeniz.html. -->
 <meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
 <meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
-<title>wright · Host Monitor · Proofs &amp; Reasons</title>
+<title>ganesha · Host Monitor · Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
-<meta property="og:title" content="wright · Host Monitor">
-<meta property="og:description" content="Live telemetry from pn04.wright.hss.cmu.edu: two EPYC 9555s, two RTX PRO 6000 Blackwells, and the BMC that keeps them cool.">
-<meta property="og:url" content="https://proofsandreasons.io/wright.html">
+<meta property="og:title" content="ganesha · Host Monitor">
+<meta property="og:description" content="Live telemetry from ganesha.lan.cmu.edu, the Laboratory for Social Minds' web server and reddit archive host: two 2011 Opterons, five disks, Caddy, and the puller that keeps the archive current.">
+<meta property="og:url" content="https://proofsandreasons.io/ganesha.html">
 <meta name="theme-color" content="#0b0d12">
-<link rel="canonical" href="https://proofsandreasons.io/wright.html">
+<link rel="canonical" href="https://proofsandreasons.io/ganesha.html">
 <style>
   :root{
     /* Surfaces + ink: shared with dashboard.html so the two pages read as one site. */
@@ -259,36 +259,26 @@
   .hright .mon a{color:var(--sky);text-decoration:none}
   .hright .mon a:hover{text-decoration:underline}
   .hright .mon:last-of-type{margin-bottom:9px}
-  /* ---------- wright-specific additions (the block above is akdeniz.html's, verbatim) ---------- */
-  /* 256 logical CPUs: 32 across, half the height, so the strip stays a strip. */
-  .cores{grid-template-columns:repeat(32,1fr)}
-  @media(max-width:760px){.cores{grid-template-columns:repeat(16,1fr)}}
-  .core{height:14px}
-  /* Two GPUs side by side inside one card, sharing the chart beneath. */
-  .gpu2{display:grid;grid-template-columns:1fr 1fr;gap:16px}
-  @media(max-width:600px){.gpu2{grid-template-columns:1fr}}
-  .gpu2 .g{min-width:0;padding:12px 13px;background:#0d1119;border:1px solid var(--line);border-radius:14px}
-  .gpu2 .gh{display:flex;justify-content:space-between;align-items:center;gap:8px;margin-bottom:8px;
-    font-family:var(--mono);font-size:.62rem;letter-spacing:.12em;text-transform:uppercase;font-weight:700}
-  .gpu2 .gh .sw{width:11px;height:3px;border-radius:2px;display:inline-block;margin-right:6px;vertical-align:middle}
-  .gpu2 .gh .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
-  .gpu2 .big{font-size:2rem}
-  .gpu2 .tile{padding:8px 10px}
-  .gpu2 .tile .v{font-size:1.02rem}
-  /* Sub-headings inside a card (temperature groups, PSU list). */
+  /* ---------- ganesha-specific additions (the block above is akdeniz.html's, verbatim) ---------- */
+  /* Sub-headings inside a card (temperature groups, health sections). */
   .sect{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
     font-weight:700;margin:13px 0 3px}
   .sect:first-child{margin-top:0}
   .rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
   .rows .k .pill{margin-left:.6em;vertical-align:.08em}
-  /* A dead NFS mount: the bar has nothing to fill, so the label carries it. */
+  .meter .lab .k .pill{margin-left:.5em;vertical-align:.08em}
   .meter.down .lab .k{color:var(--warn)}
-  /* Fan tiles: many small numbers, so a denser grid than the stat tiles. */
+  /* Fan tiles: a few small numbers, denser than the stat tiles. */
   .fans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(78px,100%),1fr));gap:7px}
   .fans .tile{padding:7px 9px}
   .fans .tile .v{font-size:.9rem;margin-top:2px}
   .fans .tile.slow .v{color:var(--warn)}
   .fans .tile.stop .v{color:var(--bad)}
+  /* Web-traffic class bars: a stacked strip, one colour per class, with a key. */
+  .strip{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#0a0d14;border:1px solid var(--line);margin-top:8px}
+  .strip i{display:block;height:100%}
+  .rows .v.wrap{white-space:normal;text-align:right}
+  .note.ok{color:var(--good)} .note.warn{color:var(--warn)} .note.bad{color:var(--bad)}
 </style>
 </head>
 <body>
@@ -298,13 +288,14 @@
 
   <header>
     <div>
-      <div class="host"><span class="dot" id="dot"></span>wright</div>
+      <div class="host"><span class="dot" id="dot"></span>ganesha</div>
       <div class="sub" id="subline">connecting&hellip;</div>
     </div>
     <div class="hright">
       <div class="mon"><a href="/akdeniz.html">akdeniz monitor &rarr;</a></div>
-      <div class="mon"><a href="/ganesha.html">ganesha monitor &rarr;</a></div>
+      <div class="mon"><a href="/wright.html">wright monitor &rarr;</a></div>
       <div class="mon"><a href="/dashboard.html">CMU skyline monitor &rarr;</a></div>
+      <div class="mon"><a href="/reddit-archive.html">reddit archive &rarr;</a></div>
       <div class="age" id="age">&mdash;</div>
       <div class="proj">LABORATORY FOR SOCIAL MINDS &middot; CMU</div>
     </div>
@@ -330,11 +321,11 @@
           <div class="tile"><div class="k">Load 5m</div><div class="v" id="load5">&mdash;</div></div>
           <div class="tile"><div class="k">Load 15m</div><div class="v" id="load15">&mdash;</div></div>
           <div class="tile"><div class="k">Runnable</div><div class="v" id="runq">&mdash;</div></div>
-          <div class="tile" title="Mean current clock across all logical CPUs"><div class="k">Clock</div><div class="v" id="cpuclk">&mdash;</div></div>
-          <div class="tile" title="Package power, socket 0 + socket 1 (amd_hsmp)"><div class="k">Pkg power</div><div class="v" id="cpupw">&mdash;</div></div>
+          <div class="tile" title="Mean current clock across all 32 cores"><div class="k">Clock</div><div class="v" id="cpuclk">&mdash;</div></div>
+          <div class="tile" title="Package power, both sockets (fam15h_power)"><div class="k">Pkg power</div><div class="v" id="cpupw">&mdash;</div></div>
         </div>
       </div>
-      <div class="cores" id="cores" aria-label="Per-CPU utilisation"></div>
+      <div class="cores" id="cores" aria-label="Per-core utilisation"></div>
       <div class="chart" id="cpuchart">
         <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU utilisation over time"></svg>
         <div class="tip"></div>
@@ -384,30 +375,11 @@
       </details>
     </div>
 
-    <!-- GPUs -->
-    <div class="card wide">
-      <div class="h5"><span>Graphics</span>
-        <span class="right">
-          <span class="note" id="gpuname"></span>
-          <span class="seg" role="group" aria-label="GPU chart time range" id="gpurange">
-            <button type="button" data-range="1h" aria-pressed="false">1H</button>
-            <button type="button" data-range="24h" aria-pressed="true">24H</button>
-          </span>
-        </span>
-      </div>
-      <div class="gpu2" id="gpu2"></div>
-      <div class="chart" id="gpuchart">
-        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="GPU utilisation over time"></svg>
-        <div class="tip"></div>
-      </div>
-      <div class="legend"><span class="keys" id="gpukeys"></span><span class="stat" id="gpustat"></span></div>
-      <details class="tbl">
-        <summary id="gputblcap">Table view &mdash; GPU</summary>
-        <table id="gputable"></table>
-      </details>
-    </div>
-
     <!-- Power -->
+    <!-- This board's BMC has no PSU telemetry (dcmi power reading is
+         unsupported), so the only measured figure is the two Opterons'
+         package power from AMD APM (fam15h_power). The wall draw is higher
+         by the disks, fans and board -- it is shown as what it is. -->
     <div class="card">
       <div class="h5"><span>Power</span>
         <span class="right">
@@ -418,20 +390,19 @@
           </span>
         </span>
       </div>
-      <div class="big"><span id="pwtotal">&mdash;</span><span class="u">W at the wall</span></div>
+      <div class="big"><span id="pwtotal">&mdash;</span><span class="u">W &middot; CPU packages</span></div>
       <div class="tiles" style="margin-top:12px">
-        <div class="tile" title="Package power, socket 0 (amd_hsmp)"><div class="k">CPU 0</div><div class="v" id="pwcpu0">&mdash;</div></div>
-        <div class="tile" title="Package power, socket 1 (amd_hsmp)"><div class="k">CPU 1</div><div class="v" id="pwcpu1">&mdash;</div></div>
-        <div class="tile"><div class="k">GPU 0</div><div class="v" id="pwgpu0">&mdash;</div></div>
-        <div class="tile"><div class="k">GPU 1</div><div class="v" id="pwgpu1">&mdash;</div></div>
+        <div class="tile" title="Package power, socket 0 (fam15h_power), against its cap"><div class="k">Socket 0</div><div class="v" id="pwcpu0">&mdash;</div></div>
+        <div class="tile" title="Package power, socket 1 (fam15h_power), against its cap"><div class="k">Socket 1</div><div class="v" id="pwcpu1">&mdash;</div></div>
+        <div class="tile" title="Lowest package power ever observed; per-user energy in system_load.csv is attributed above this floor"><div class="k">Idle floor</div><div class="v" id="pwidle">&mdash;</div></div>
+        <div class="tile"><div class="k">24h avg</div><div class="v" id="pw24">&mdash;</div></div>
       </div>
       <div class="chart" id="pwchart">
-        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="System power over time"></svg>
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="CPU package power over time"></svg>
         <div class="tip"></div>
       </div>
       <div class="legend"><span class="keys" id="pwkeys"></span><span class="stat" id="pwstat"></span></div>
-      <div class="sect">Power supplies</div>
-      <div class="rows" id="psus"></div>
+      <div class="sub" style="margin-top:9px;font-size:.68rem">CPU package power only (AMD APM). No PSU telemetry on this board; disks, fans and the board add to the wall figure.</div>
       <details class="tbl">
         <summary id="pwtblcap">Table view &mdash; power</summary>
         <table id="pwtable"></table>
@@ -473,11 +444,7 @@
         <div class="row"><span class="k">Total since boot</span><span class="v" id="nettotal">&mdash;</span></div>
         <div class="row"><span class="k">Errors (rx / tx)</span><span class="v" id="neterr">&mdash;</span></div>
         <div class="row"><span class="k">Dropped (rx)</span><span class="v" id="netdrop">&mdash;</span></div>
-      </div>
-      <div class="sect" id="stmeta">Storage LAN</div>
-      <div class="rows">
-        <div class="row"><span class="k">In / out &middot; now</span><span class="v" id="strate">&mdash;</span></div>
-        <div class="row"><span class="k">Total since boot</span><span class="v" id="sttotal">&mdash;</span></div>
+        <div class="row"><span class="k">NIC watchdog</span><span class="v" id="netwd">&mdash;</span></div>
       </div>
       <details class="tbl">
         <summary id="nettblcap">Table view &mdash; network</summary>
@@ -486,26 +453,82 @@
       </details>
     </div>
 
+    <!-- Storage -->
+    <div class="card">
+      <div class="h5"><span>Storage</span><span class="note" id="iometa"></span></div>
+      <div id="disks"></div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile" title="All five disks"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
+        <div class="tile" title="All five disks"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
+        <div class="tile" title="kubrick alone, read + write; USB 2.0 tops out near 35 MB/s"><div class="k">kubrick &middot; now</div><div class="v" id="kionow">&mdash;</div></div>
+        <div class="tile" title="kubrick alone, mean over 24 hours"><div class="k">kubrick &middot; 24h</div><div class="v" id="kio24">&mdash;</div></div>
+      </div>
+    </div>
+
+    <!-- Reddit archive -->
+    <div class="card">
+      <div class="h5"><span>Reddit archive</span><span class="note" id="rdmeta"></span></div>
+      <div class="big"><span id="rdmonths">&mdash;</span><span class="u" id="rdmonthsu">months</span></div>
+      <div class="tiles" style="margin-top:12px">
+        <div class="tile" title="Verified months on kubrick"><div class="k">On disk</div><div class="v" id="rdsize">&mdash;</div></div>
+        <div class="tile" title="Months symlinked into reddit-served and listed in the public index"><div class="k">Published</div><div class="v" id="rdpub">&mdash;</div></div>
+        <div class="tile"><div class="k">Downloading</div><div class="v" id="rddl">&mdash;</div></div>
+        <div class="tile" title="Free space on kubrick against the puller's floor"><div class="k">kubrick free</div><div class="v" id="rdfree">&mdash;</div></div>
+      </div>
+      <div class="rows" style="margin-top:12px">
+        <div class="row"><span class="k">Latest month</span><span class="v" id="rdlatest">&mdash;</span></div>
+        <div class="row"><span class="k">Puller</span><span class="v" id="rdsvc">&mdash;</span></div>
+        <div class="row"><span class="k">Upstream checked</span><span class="v" id="rddisc">&mdash;</span></div>
+        <div class="row"><span class="k">Next check</span><span class="v" id="rdnext">&mdash;</span></div>
+      </div>
+      <div class="sub" id="rdlog" style="margin-top:9px;font-size:.66rem;overflow-wrap:anywhere"></div>
+    </div>
+
+    <!-- Web traffic -->
+    <div class="card wide">
+      <div class="h5"><span>Web traffic</span>
+        <span class="right">
+          <span class="note" id="webmeta">photos.proofsandreasons.io</span>
+          <span class="seg" role="group" aria-label="Web chart time range" id="webrange">
+            <button type="button" data-range="1h" aria-pressed="false">1H</button>
+            <button type="button" data-range="24h" aria-pressed="true">24H</button>
+          </span>
+        </span>
+      </div>
+      <div style="display:flex;align-items:baseline;gap:20px;flex-wrap:wrap">
+        <div class="big"><span id="webreq">&mdash;</span><span class="u">req / hour</span></div>
+        <div class="tiles" style="flex:1;min-width:230px">
+          <div class="tile"><div class="k">Requests &middot; 24h</div><div class="v" id="webreq24">&mdash;</div></div>
+          <div class="tile"><div class="k">Served &middot; 1h</div><div class="v" id="webby1">&mdash;</div></div>
+          <div class="tile"><div class="k">Served &middot; 24h</div><div class="v" id="webby24">&mdash;</div></div>
+          <div class="tile" title="Distinct client addresses"><div class="k">Clients 1h / 24h</div><div class="v" id="webips">&mdash;</div></div>
+          <div class="tile" title="4xx / 5xx responses in the last 24 hours"><div class="k">Errors &middot; 24h</div><div class="v" id="weberr">&mdash;</div></div>
+        </div>
+      </div>
+      <div class="chart" id="webchart">
+        <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Requests over time"></svg>
+        <div class="tip"></div>
+      </div>
+      <div class="legend"><span class="keys" id="webkeys"></span><span class="stat" id="webstat"></span></div>
+      <div class="sect">What is being fetched &middot; 24h</div>
+      <div class="strip" id="webstrip"></div>
+      <div class="legend" id="webcls" style="margin-top:7px"></div>
+      <div class="sect">Top paths &middot; last hour</div>
+      <div class="rows scroll" id="webpaths" tabindex="0" role="group" aria-label="Most requested paths, last hour"></div>
+      <div class="sub" id="webnote" style="margin-top:9px;font-size:.66rem">From Caddy's access log; the dream journal is not logged, by design.</div>
+    </div>
+
     <!-- Temperatures -->
     <div class="card">
       <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;C</span></div>
       <div id="temps"></div>
     </div>
 
-    <!-- Storage -->
-    <div class="card">
-      <div class="h5"><span>Storage</span><span class="note" id="iometa"></span></div>
-      <div id="disks"></div>
-      <div class="tiles" style="margin-top:12px">
-        <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
-        <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
-      </div>
-    </div>
-
     <!-- Fans -->
     <div class="card">
       <div class="h5"><span>Fans</span><span class="note" id="fanmeta"></span></div>
       <div class="fans" id="fans"></div>
+      <div class="sub" style="margin-top:9px;font-size:.66rem">BMC readings. The four front-bay fan headers read 0 rpm and are unpopulated.</div>
     </div>
 
     <!-- Users & processes -->
@@ -515,6 +538,12 @@
       <div class="rows" id="byuser"></div>
       <div class="sect">Busiest processes</div>
       <div class="rows" id="topprocs"></div>
+    </div>
+
+    <!-- Containers -->
+    <div class="card">
+      <div class="h5"><span>Containers</span><span class="note" id="ctmeta"></span></div>
+      <div class="rows" id="containers"></div>
     </div>
 
     <!-- SSH -->
@@ -529,23 +558,51 @@
         <div class="row"><span class="k">Failed password</span><span class="v" id="sshfail">&mdash;</span></div>
         <div class="row"><span class="k">Invalid user</span><span class="v" id="sshinv">&mdash;</span></div>
         <div class="row"><span class="k">Sessions / users</span><span class="v" id="sshwho">&mdash;</span></div>
-        <div class="row"><span class="k">fail2ban &middot; banned now / ever</span><span class="v" id="sshban">&mdash;</span></div>
       </div>
+      <div class="sect">Reverse tunnels home</div>
+      <div class="rows" id="tunnels"></div>
       <div class="atk" id="sshatk" hidden></div>
+    </div>
+
+    <!-- System health -->
+    <div class="card">
+      <div class="h5"><span>System</span><span class="note" id="sysmeta"></span></div>
+      <div class="rows" id="sysrows"></div>
+      <div class="sect">Services not running</div>
+      <div class="rows" id="svcrows"></div>
+    </div>
+
+    <!-- External access to hosted data: the same counter the akdeniz page
+         shows, because the data it counts is served from here. Unique IPs,
+         VPN/scanner/bot traffic removed upstream (akdeniz-access-stats.py). -->
+    <div class="card">
+      <div class="h5"><span>Visitors</span><span class="note">all&#8209;time &middot; excl. CMU, VPN, bots</span></div>
+      <div class="big"><span id="axtotal">&mdash;</span><span class="u">unique IPs</span></div>
+      <div class="tiles" style="margin-top:6px">
+        <div class="tile"><div class="k">Countries</div><div class="v" id="axcc">&mdash;</div></div>
+        <div class="tile"><div class="k">Filtered out</div><div class="v" id="axdrop">&mdash;</div></div>
+      </div>
+      <div class="h5" style="margin-top:16px"><span>Where from</span><span class="note">city &middot; state &middot; country</span></div>
+      <div class="rows scroll" id="axcity" tabindex="0" role="group"
+           aria-label="Places, most visitors first, then most recently seen"></div>
+      <div class="sub" id="axdropnote" style="margin-top:10px"></div>
+      <div class="sub" id="axts" style="margin-top:4px"></div>
     </div>
 
   </div>
 
   <footer>
-    Collected on pn04 (wright) every 30s and pushed to
-    <a href="https://photos.proofsandreasons.io/wright/metrics.json">photos.proofsandreasons.io</a>;
-    this page is static and reads that file. Board sensors come from the BMC every two minutes. &nbsp;&middot;&nbsp;
+    Collected on ganesha itself every 30s by the <code>ganesha-monitor</code> service into
+    <a href="https://photos.proofsandreasons.io/ganesha/metrics.json">photos.proofsandreasons.io</a>;
+    this page is static and reads that file. Board sensors from the BMC every two minutes, SMART every ten. &nbsp;&middot;&nbsp;
     <span id="foot"></span>
     <br><a href="/akdeniz.html">akdeniz monitor &rarr;</a>
     &nbsp;&middot;&nbsp;
-    <a href="/ganesha.html">ganesha monitor &rarr;</a>
+    <a href="/wright.html">wright monitor &rarr;</a>
     &nbsp;&middot;&nbsp;
     <a href="/dashboard.html">CMU skyline monitor &rarr;</a>
+    &nbsp;&middot;&nbsp;
+    <a href="/reddit-archive.html">reddit archive &rarr;</a>
     &nbsp;&middot;&nbsp;
     <a href="https://proofsandreasons.io/">proofsandreasons.io</a>
   </footer>
@@ -554,10 +611,10 @@
 <script>
 (function(){
   "use strict";
-  var SRC = "https://photos.proofsandreasons.io/wright/metrics.json";
+  var SRC = "https://photos.proofsandreasons.io/ganesha/metrics.json";
   var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
-  var range = {cpu:"24h", gpu:"24h", net:"24h", pw:"24h"};
+  var range = {cpu:"24h", net:"24h", pw:"24h", web:"24h"};
   // Chart series: the akdeniz palette, snapped into the dark-mode OKLCH band.
   var S1="#c58200", S2="#108bbb", S3="#24a25f";
 
@@ -574,20 +631,31 @@
     while(bits>=1000 && i<u.length-1){ bits/=1000; i++; }
     return (bits>=100?bits.toFixed(0):bits>=10?bits.toFixed(1):bits.toFixed(2))+" "+u[i]+"/s";
   }
+  function fmtBytesPs(b){
+    if(b===null||b===undefined||isNaN(b)) return "—";
+    return fmtBytes(b)+"/s";
+  }
   function fmtDur(s){
     if(s===null||s===undefined) return "—";
     var d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60);
     return d>0 ? d+"d "+h+"h" : h>0 ? h+"h "+m+"m" : m+"m";
   }
   function fmtW(v){ return v===null||v===undefined||isNaN(v) ? "—" : v.toFixed(0)+" W"; }
+  function fmtN(v){ return v===null||v===undefined||isNaN(v) ? "—" : Math.round(v).toLocaleString(); }
   function clock(ts){
     var d=new Date(ts*1000);
     return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
   }
   var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
+  var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
   function dayclock(ts){ return DAYS[new Date(ts*1000).getDay()]+" "+clock(ts); }
+  function dateclock(ts){ var d=new Date(ts*1000); return d.getDate()+" "+MONTHS[d.getMonth()]+" "+clock(ts); }
+  function ago(ts){
+    if(!ts) return "—";
+    var s=Math.max(0,Math.round(Date.now()/1000-ts));
+    return s<90 ? s+"s ago" : fmtDur(s)+" ago";
+  }
   function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  // Process names, user names and geo strings are not fully host-controlled: escape.
   function esc(s){
     return String(s===null||s===undefined?"":s).replace(/[&<>"]/g, function(c){
       return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; });
@@ -599,9 +667,11 @@
   }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
   function pill(v, warn, bad, unit){
+    if(v===null||v===undefined) return "<span class='pill'>—</span>";
     var cls=v>=bad?"bad":v>=warn?"warn":"ok";
-    return "<span class='pill "+cls+"'>"+(v===null||v===undefined?"—":v.toFixed(0)+(unit||"°"))+"</span>";
+    return "<span class='pill "+cls+"'>"+v.toFixed(0)+(unit||"°")+"</span>";
   }
+  function spill(cls, text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
 
   // ---------- charts ----------
   // Shared line-chart renderer, identical to akdeniz.html's. One y-axis.
@@ -676,9 +746,7 @@
   }
 
   // ---------- chart windows ----------
-  // Every series the collector carries, flattened into {times, labels, <key>,
-  // <key>Max} for either the fine (1h) or coarse (24h) history.
-  var KEYS=["cpu","mem","g0","g1","rx","tx","pw"], MAXED={cpu:1,mem:1,g0:1,g1:1};
+  var KEYS=["cpu","mem","rx","tx","pw","kio"], MAXED={cpu:1,mem:1,pw:1};
   function present(a){ return a && a.filter(function(v){ return v!==null; }).length>1; }
   function windowFor(d, r){
     var w={}, times=[], t, x;
@@ -745,7 +813,6 @@
       }).join("");
   }
 
-  // CPU and memory: a percentage line plus dashed within-bucket peak.
   function drawPercentSeries(d, o){
     var w=o.win, key=o.key, maxKey=key+"Max";
     if(w && w[key]) w=trimLead(w, [key], stepOf(d,w));
@@ -775,55 +842,48 @@
     txt(o.stat, stat);
   }
 
-  // Both GPUs on one chart, one colour each. Peaks are kept for the table but
-  // not drawn: two solid and two dashed lines on 96px is noise.
-  function drawGpu(d, w){
-    var keys="", stat="";
-    if(w) w=trimLead(w, ["g0","g1"], stepOf(d,w));
-    var have=w && (w.g0||w.g1);
-    if(have){
-      var series=[], names=["GPU 0","GPU 1"], cols=[S1,S2], tcols=[];
-      ["g0","g1"].forEach(function(k,i){
-        if(!w[k]) return;
-        series.push({name:names[i],color:cols[i],data:w[k],labels:w.labels});
-        var s=stats(w[k]), pk=stats(w[k+"Max"]||w[k]);
-        keys+="<span><i style='background:"+cols[i]+"'></i>"+names[i]+
-              (s?" <span class='stat'>avg "+s.avg.toFixed(1)+"% · peak "+pk.max.toFixed(0)+"%</span>":"")+"</span>";
-        tcols.push(k); if(w[k+"Max"]) tcols.push(k+"Max");
-      });
-      lineChart("gpuchart", series, pctFmt, 100);
-      document.querySelector("#gpuchart svg").setAttribute("aria-label","GPU utilisation, both cards, "+spanText(w.span));
-      stat=spanText(w.span);
-      document.getElementById("gputblcap").innerHTML="Table view &mdash; GPU, "+spanText(w.span);
-      document.getElementById("gputable").innerHTML=
-        "<thead><tr><th>Time</th>"+tcols.map(function(k){
-          return "<th>"+(k.slice(0,2)==="g0"?"GPU 0":"GPU 1")+(/Max$/.test(k)?" peak":"")+"</th>"; }).join("")+
-        "</tr></thead><tbody>"+tableRows(w, tcols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
-    } else {
-      document.getElementById("gputable").innerHTML="<tbody><tr><td>No GPU history yet.</td></tr></tbody>";
-    }
-    document.getElementById("gpukeys").innerHTML=keys;
-    txt("gpustat", stat);
-  }
-
-  // Wall power from the four PSUs' input readings, summed by the collector.
+  // CPU package power: solid mean, dashed within-bucket peak in the day view.
   function drawPower(d, w){
     var keys="", stat="";
     if(w && w.pw) w=trimLead(w, ["pw"], stepOf(d,w));
     if(w && w.pw){
-      lineChart("pwchart", [{name:"Input",color:S3,data:w.pw,labels:w.labels}], fmtW);
-      document.querySelector("#pwchart svg").setAttribute("aria-label","System input power, "+spanText(w.span));
-      var s=stats(w.pw);
-      keys="<span><i style='background:var(--s3)'></i>PSU input &mdash; "+spanText(w.span)+"</span>";
-      if(s) stat="avg "+s.avg.toFixed(0)+" W · peak "+s.max.toFixed(0)+" W";
+      var series=[{name:"Packages",color:S3,data:w.pw,labels:w.labels}], cols=["pw"];
+      keys="<span><i style='background:var(--s3)'></i>CPU package power &mdash; "+spanText(w.span)+"</span>";
+      if(w.pwMax){
+        series.push({name:"Peak",color:S3,dash:true,data:w.pwMax,labels:w.labels});
+        keys+="<span><i class='dash' style='color:var(--s3)'></i>5-min peak</span>";
+        cols.push("pwMax");
+      }
+      lineChart("pwchart", series, fmtW);
+      document.querySelector("#pwchart svg").setAttribute("aria-label","CPU package power, "+spanText(w.span));
+      var s=stats(w.pw), pk=stats(w.pwMax||w.pw);
+      if(s) stat="avg "+s.avg.toFixed(0)+" W · peak "+pk.max.toFixed(0)+" W";
       document.getElementById("pwtblcap").innerHTML="Table view &mdash; power, "+spanText(w.span);
-      document.getElementById("pwtable").innerHTML="<thead><tr><th>Time</th><th>Input</th></tr></thead><tbody>"+
-        tableRows(w, ["pw"], fmtW)+"</tbody>";
+      document.getElementById("pwtable").innerHTML="<thead><tr><th>Time</th><th>Packages</th>"+(w.pwMax?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
+        tableRows(w, cols, fmtW)+"</tbody>";
     } else {
       document.getElementById("pwtable").innerHTML="<tbody><tr><td>No power history yet.</td></tr></tbody>";
     }
     document.getElementById("pwkeys").innerHTML=keys;
     txt("pwstat", stat);
+  }
+
+  // Requests per minute (1h) or per five minutes (24h), from the web buckets.
+  function drawWeb(d){
+    var wb=d.web||{}, rows=(range.web==="24h"?wb.per_5min_24h:wb.per_min_1h)||[];
+    var keys="", stat="";
+    if(rows.length>1){
+      var per=range.web==="24h"?5:1, labels=rows.map(function(r){ return range.web==="24h"?dayclock(r.t):clock(r.t); });
+      var req=rows.map(function(r){ return r.req/per; });
+      lineChart("webchart",[{name:"Requests / min",color:S2,data:req,labels:labels}],
+        function(v){ return v>=10?v.toFixed(0):v.toFixed(1); });
+      document.querySelector("#webchart svg").setAttribute("aria-label","Requests per minute, "+(range.web==="24h"?"last 24 hours":"last hour"));
+      keys="<span><i style='background:var(--s2)'></i>requests per minute &mdash; "+(range.web==="24h"?"last 24 hours":"last hour")+"</span>";
+      var s=stats(req), tot=rows.reduce(function(a,r){ return a+r.req; },0);
+      if(s) stat=tot.toLocaleString()+" requests · peak "+s.max.toFixed(s.max>=10?0:1)+"/min";
+    }
+    document.getElementById("webkeys").innerHTML=keys;
+    txt("webstat", stat);
   }
 
   function setRangeUI(id, cur, has24){
@@ -840,11 +900,11 @@
 
   function drawCharts(d){
     var has24=(d.history_24h||[]).length>=2;
-    if(!has24) Object.keys(range).forEach(function(k){ if(range[k]==="24h") range[k]="1h"; });
+    if(!has24) ["cpu","net","pw"].forEach(function(k){ if(range[k]==="24h") range[k]="1h"; });
     setRangeUI("cpurange", range.cpu, has24);
-    setRangeUI("gpurange", range.gpu, has24);
     setRangeUI("netrange", range.net, has24);
     setRangeUI("pwrange",  range.pw,  has24);
+    setRangeUI("webrange", range.web, true);
 
     drawPercentSeries(d, {win:windowFor(d, range.cpu), key:"cpu",
       chart:"cpuchart", keys:"cpukeys", stat:"cpustat", tbl:"cputable", tblcap:"cputblcap",
@@ -852,8 +912,8 @@
     drawPercentSeries(d, {win:windowFor(d, has24?"24h":"1h"), key:"mem",
       chart:"memchart", keys:"memkeys", stat:"memstat", tbl:"memtable", tblcap:"memtblcap", head:"mempoph",
       legend:"RAM used", tblName:"memory", col:"Used"});
-    drawGpu(d, windowFor(d, range.gpu));
     drawPower(d, windowFor(d, range.pw));
+    drawWeb(d);
 
     var n=windowFor(d, range.net), nstat="";
     if(n && n.rx && n.tx){
@@ -890,7 +950,7 @@
     });
   })();
 
-  [["cpurange","cpu"],["gpurange","gpu"],["netrange","net"],["pwrange","pw"]].forEach(function(p){
+  [["cpurange","cpu"],["netrange","net"],["pwrange","pw"],["webrange","web"]].forEach(function(p){
     document.getElementById(p[0]).addEventListener("click", function(ev){
       var b=ev.target.closest("button");
       if(!b || b.disabled) return;
@@ -899,69 +959,27 @@
     });
   });
 
-  // ---------- GPU panels ----------
-  var GCOL=["var(--s1)","var(--s2)"];
-  function gpuPanel(g, i){
-    var mp=g.mem_total_mb?100*g.mem_used_mb/g.mem_total_mb:0;
-    var procs=(g.procs&&g.procs.length)
-      ? g.procs.map(function(p){
-          return "<div class='row'><span class='k' title='"+esc(p.name)+" pid "+esc(p.pid)+"'>"+esc(p.name)+
-            (p.user?" <span class='u'>"+esc(p.user)+"</span>":"")+"</span>"+
-            "<span class='v'>"+(p.mem_mb===null?"—":(p.mem_mb/1024).toFixed(1)+" GB")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>no compute processes</span><span class='v'>&mdash;</span></div>";
-    return "<div class='g'>"+
-      "<div class='gh'><span><i class='sw' style='background:"+GCOL[i]+"'></i>GPU "+i+"</span>"+
-        "<span class='note'>"+esc(g.pstate||"")+(g.pcie_gen?" · PCIe "+g.pcie_gen+"×"+g.pcie_width:"")+"</span></div>"+
-      "<div class='big'><span>"+(g.util===null?"—":g.util.toFixed(0))+"</span><span class='u'>%</span></div>"+
-      "<div class='meter'><div class='lab'><span class='k'>VRAM</span><span class='v'>"+
-        (g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB</span></div>"+
-        "<div class='track'><div class='fill' style='width:"+mp+"%;background:"+heat(mp)+"'></div></div></div>"+
-      "<div class='tiles' style='margin-top:10px'>"+
-        "<div class='tile'><div class='k'>Temp</div><div class='v'>"+(g.temp===null?"—":g.temp.toFixed(0)+"°")+"</div></div>"+
-        "<div class='tile'><div class='k'>Power</div><div class='v'>"+(g.power===null?"—":g.power.toFixed(0))+
-          "<small> / "+(g.power_limit===null?"—":g.power_limit.toFixed(0))+" W</small></div></div>"+
-        "<div class='tile'><div class='k'>SM clock</div><div class='v'>"+(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+"<small> MHz</small></div></div>"+
-        "<div class='tile'><div class='k'>Mem util</div><div class='v'>"+(g.util_mem===null?"—":g.util_mem.toFixed(0)+"%")+"</div></div>"+
-      "</div>"+
-      "<div class='rows' style='margin-top:10px'>"+procs+"</div>"+
-    "</div>";
-  }
-
   // ---------- temperatures ----------
-  // hwmon gives the silicon; the BMC gives the board. Grouped so the eye lands
-  // on the hot parts first and the twelve DIMMs collapse to a range.
+  // k10temp on this generation reads a control value, not a die temperature,
+  // and sits well below ambient when idle; the BMC's socket sensors agree
+  // with it, so both are shown as reported, with the disks from SMART.
   function renderTemps(d){
-    var hw=d.temps||[], ip=(d.ipmi&&d.ipmi.temps)||[], gpus=d.gpu||[];
-    var byN={}; ip.forEach(function(t){ byN[t.n]=t.c; });
+    var hw=d.temps||[], ip=(d.ipmi&&d.ipmi.temps)||[], disks=d.disk||[];
     function row(label, v, warn, bad){
       return "<div class='row'><span class='k'>"+label+"</span><span class='v'>"+pill(v,warn,bad)+"</span></div>";
     }
-    var h="";
-    // Silicon
-    h+="<div class='sect'>Silicon</div><div class='rows'>";
-    hw.filter(function(t){ return t.group==="cpu"; }).forEach(function(t){ h+=row(esc(t.label), t.temp, 80, 90); });
-    gpus.forEach(function(g,i){ h+=row("GPU"+i+" core", g.temp, 80, 88); });
-    hw.filter(function(t){ return t.group==="nvme"; }).forEach(function(t){ h+=row(esc(t.label)+" composite", t.temp, 60, 70); });
-    hw.filter(function(t){ return t.group==="nic"; }).forEach(function(t){ h+=row(esc(t.label), t.temp, 75, 90); });
+    var h="<div class='sect'>Processors &middot; k10temp</div><div class='rows'>";
+    hw.forEach(function(t){ h+=row(esc(t.label), t.temp, 60, 70); });
     h+="</div>";
     if(ip.length){
       h+="<div class='sect'>Board &middot; BMC</div><div class='rows'>";
-      var order=[["INLET","Inlet air"],["CPU1","CPU1 socket"],["CPU2","CPU2 socket"],["MB1","Mainboard 1"],["MB2","Mainboard 2"],
-                 ["OCP","OCP NIC"],["LAN","LAN"],["M.2_1","M.2 slot 1"],["M.2_2","M.2 slot 2"],["NVME1","NVMe bay"],
-                 ["BPB1","Backplane"],["FB1","Fan board"],["SWB1","Switch board"]];
-      order.forEach(function(p){ if(byN[p[0]]!==undefined) h+=row(p[1], byN[p[0]], 60, 75); });
-      var sides=ip.filter(function(t){ return /^CARD_SIDE/.test(t.n); }).map(function(t){ return t.c; });
-      if(sides.length) h+=row("Card side ×"+sides.length+" (max)", Math.max.apply(null,sides), 60, 75);
-      var slots=ip.filter(function(t){ return /^GPU\d/.test(t.n); }).map(function(t){ return t.c; });
-      if(slots.length) h+=row("GPU slots ×"+slots.length+" (max)", Math.max.apply(null,slots), 60, 75);
-      var psus=ip.filter(function(t){ return /^PSU\d/.test(t.n); }).map(function(t){ return t.c; });
-      if(psus.length) h+=row("PSUs ×"+psus.length+" (max)", Math.max.apply(null,psus), 60, 75);
-      var dimms=ip.filter(function(t){ return /^DDR5_/.test(t.n); }).map(function(t){ return t.c; });
-      if(dimms.length){
-        var lo=Math.min.apply(null,dimms), hi=Math.max.apply(null,dimms);
-        h+="<div class='row'><span class='k'>DDR5 DIMMs ×"+dimms.length+"</span><span class='v'>"+
-           "<span class='pill "+(hi>=85?"bad":hi>=70?"warn":"ok")+"'>"+lo.toFixed(0)+"–"+hi.toFixed(0)+"°</span></span></div>";
-      }
+      ip.forEach(function(t){ h+=row(esc(t.n)+" socket", t.c, 60, 70); });
+      h+="</div>";
+    }
+    var dk=disks.filter(function(k){ return k.temp!==null&&k.temp!==undefined; });
+    if(dk.length){
+      h+="<div class='sect'>Disks &middot; SMART</div><div class='rows'>";
+      dk.forEach(function(k){ h+=row(esc(k.label.split(" · ")[0])+" <span class='u'>"+esc(k.dev)+"</span>", k.temp, 45, 55); });
       h+="</div>";
     }
     document.getElementById("temps").innerHTML=h;
@@ -976,22 +994,21 @@
     var dot=document.getElementById("dot");
     dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
     txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
-    var gname=(d.gpu&&d.gpu[0])?d.gpu[0].name.replace("NVIDIA ","").replace(" Server Edition",""):"no GPU";
-    txt("subline",(d.fqdn||d.host)+"  ·  up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" threads  ·  "+
-        (d.gpu?d.gpu.length+"× ":"")+gname+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
+    txt("subline",(d.fqdn||d.host)+"  ·  up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" cores  ·  no GPU  ·  Gentoo "+
+        (d.kernel||"")+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
     txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+
         d.history.length+" fine points · "+((d.history_24h||[]).length)+" × "+((d.bucket_s||300)/60)+"-min buckets");
 
     // CPU
     txt("cpupct", d.cpu.pct===null?"—":d.cpu.pct.toFixed(0));
-    txt("cpumeta", "2× EPYC 9555 · "+d.ncpu+" threads · "+(d.load.procs||"?")+" procs");
+    txt("cpumeta", (d.cpu.model||"")+" · "+d.ncpu+" cores · "+(d.load.procs||"?")+" procs");
     txt("load1", d.load["1"]!==undefined?d.load["1"].toFixed(2):"—");
     txt("load5", d.load["5"]!==undefined?d.load["5"].toFixed(2):"—");
     txt("load15",d.load["15"]!==undefined?d.load["15"].toFixed(2):"—");
     txt("runq", (d.load.running||0)+" / "+(d.load.procs||0));
     txt("cpuclk", d.cpu.mhz_avg?(d.cpu.mhz_avg/1000).toFixed(2)+" GHz":"—");
-    var socks=d.cpu.sockets||[], spw=socks.filter(function(s){ return s.power_w!==null; }).map(function(s){ return s.power_w; });
-    txt("cpupw", spw.length?spw.reduce(function(a,b){return a+b;},0).toFixed(0)+" W":"—");
+    var socks=d.cpu.sockets||[], pw=d.power||{};
+    txt("cpupw", pw.pkg_total!==null&&pw.pkg_total!==undefined?pw.pkg_total.toFixed(0)+" W":"—");
     var cw=document.getElementById("cores");
     if(cw.childNodes.length!==d.cpu.cores.length){
       cw.innerHTML="";
@@ -1001,48 +1018,34 @@
     d.cpu.cores.forEach(function(v,i){
       var bar=cw.childNodes[i].firstChild, p=(v===null?0:v);
       bar.style.height=p+"%"; bar.style.background=heat(p);
-      cw.childNodes[i].title="cpu "+i+": "+(v===null?"—":p.toFixed(0)+"%");
+      cw.childNodes[i].title="core "+i+" (socket "+Math.floor(i/16)+"): "+(v===null?"—":p.toFixed(0)+"%");
     });
-
-    // GPUs
-    var gpus=d.gpu||[];
-    txt("gpuname", gpus.length?gname:"");
-    document.getElementById("gpu2").innerHTML=gpus.map(gpuPanel).join("");
 
     // Memory
     txt("mempct", d.mem.pct===null?"—":d.mem.pct.toFixed(0));
-    txt("memmeta", fmtBytes(d.mem.total)+" total");
+    txt("memmeta", fmtBytes(d.mem.total)+" ECC");
     txt("memv", fmtBytes(d.mem.used)+" / "+fmtBytes(d.mem.total));
     var mb=document.getElementById("membar"); mb.style.width=(d.mem.pct||0)+"%"; mb.style.background=heat(d.mem.pct||0);
     txt("swapv", d.mem.swap_total?fmtBytes(d.mem.swap_used)+" / "+fmtBytes(d.mem.swap_total):"none");
     var sb=document.getElementById("swapbar"); sb.style.width=(d.mem.swap_pct||0)+"%";
+    sb.style.background=(d.mem.swap_pct||0)>=25?"var(--warn)":"var(--s3)";
     txt("memcached",fmtBytes(d.mem.cached));
     txt("membuf",fmtBytes(d.mem.buffers));
     txt("memshm",fmtBytes(d.mem.shmem));
     txt("memfree",fmtBytes(d.mem.free));
 
     // Power
-    var ip=d.ipmi||{}, pw=ip.power||{};
-    txt("pwtotal", pw.pin_total===null||pw.pin_total===undefined?"—":pw.pin_total.toFixed(0));
-    txt("pwmeta", (ip.age_s!==null&&ip.age_s!==undefined?"BMC · "+(ip.age_s<90?ip.age_s+"s":fmtDur(ip.age_s))+" ago":"")+
-        (d.power&&d.power.pw_24h?" · avg "+d.power.pw_24h.toFixed(0)+" W / 24h":""));
-    txt("pwcpu0", socks[0]&&socks[0].power_w!==null?socks[0].power_w.toFixed(0)+" W":"—");
-    txt("pwcpu1", socks[1]&&socks[1].power_w!==null?socks[1].power_w.toFixed(0)+" W":"—");
-    txt("pwgpu0", gpus[0]&&gpus[0].power!==null?gpus[0].power.toFixed(0)+" W":"—");
-    txt("pwgpu1", gpus[1]&&gpus[1].power!==null?gpus[1].power.toFixed(0)+" W":"—");
-    var vin={}; (ip.volts||[]).forEach(function(v){ var m=/^PSU(\d+)_VIN$/.exec(v.n); if(m) vin[m[1]]=v.v; });
-    document.getElementById("psus").innerHTML=(pw.psu&&pw.psu.length)
-      ? pw.psu.map(function(p){
-          var ok=p.present!==false, eff=(p.pin&&p.pout)?(100*p.pout/p.pin):null;
-          return "<div class='row'><span class='k'>PSU "+p.n+(vin[p.n]?" <span class='u'>"+vin[p.n].toFixed(0)+" V</span>":"")+"</span>"+
-            "<span class='v'>"+(ok?fmtW(p.pin)+" in · "+fmtW(p.pout)+" out"+(eff?" <span class='u'>"+eff.toFixed(0)+"%</span>":"")
-                                :"<span class='pill bad'>absent</span>")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>BMC not read yet</span><span class='v'>&mdash;</span></div>";
-    if(pw.pout_total) txt("pwmeta", document.getElementById("pwmeta").textContent+" · "+pw.pout_total+" W DC");
+    txt("pwtotal", pw.pkg_total===null||pw.pkg_total===undefined?"—":pw.pkg_total.toFixed(0));
+    txt("pwmeta", "fam15h_power"+(pw.pw_24h_max?" · peak "+pw.pw_24h_max.toFixed(0)+" W / 24h":""));
+    function sockTxt(s){ return s&&s.power_w!==null ? s.power_w.toFixed(0)+" W"+(s.cap_w?" / "+s.cap_w:"") : "—"; }
+    txt("pwcpu0", sockTxt(socks[0])); txt("pwcpu1", sockTxt(socks[1]));
+    txt("pwidle", pw.idle_w?pw.idle_w.toFixed(0)+" W":"—");
+    txt("pw24", pw.pw_24h?pw.pw_24h.toFixed(0)+" W":"—");
 
     // Network
     var n=d.net;
-    txt("netmeta", n.iface+(n.link_mbit?" · "+(n.link_mbit>=1000?(n.link_mbit/1000)+" Gb/s":n.link_mbit+" Mb/s")+" campus":""));
+    txt("netmeta", n.iface+(n.link_mbit?" · "+(n.link_mbit>=1000?(n.link_mbit/1000)+" Gb/s":n.link_mbit+" Mb/s"):"")+" campus"+
+        (n.up===false?" · LINK DOWN":""));
     txt("rxnow",fmtBps(n.rx_bps)); txt("txnow",fmtBps(n.tx_bps));
     txt("rx5",fmtBps(n.rx_bps_5m)); txt("tx5",fmtBps(n.tx_bps_5m));
     txt("rx24",fmtBps(n.rx_bps_24h)); txt("tx24",fmtBps(n.tx_bps_24h));
@@ -1051,10 +1054,116 @@
     txt("nettotal", fmtBytes(n.rx_total)+" in / "+fmtBytes(n.tx_total)+" out");
     txt("neterr", n.rx_errors+" / "+n.tx_errors);
     txt("netdrop", n.rx_dropped.toLocaleString());
-    var st=n.storage||{};
-    txt("stmeta", "Storage LAN · "+(st.iface||"")+(st.link_mbit?" · "+(st.link_mbit>=1000?(st.link_mbit/1000)+" Gb/s":st.link_mbit+" Mb/s"):"")+" · NFS home from wrightss");
-    txt("strate", fmtBps(st.rx_bps)+" / "+fmtBps(st.tx_bps));
-    txt("sttotal", fmtBytes(st.rx_total)+" in / "+fmtBytes(st.tx_total)+" out");
+    var wd=(d.health&&d.health.watchdog)||{};
+    var wdEl=document.getElementById("netwd");
+    if(wdEl){
+      if(wd.recoveries_30d===undefined) wdEl.textContent="—";
+      else wdEl.innerHTML=(wd.recoveries_30d?wd.recoveries_30d+" recover"+(wd.recoveries_30d===1?"y":"ies")+" in 30d":"quiet for 30d")+
+        (wd.last_recovery?" <span class='u'>last "+esc(dateclock(wd.last_recovery))+"</span>":"")+
+        (wd.reboots_30d?" "+spill("bad", wd.reboots_30d+" reboot"+(wd.reboots_30d===1?"":"s")):"");
+    }
+
+    // Storage
+    document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
+      var kind="<span class='pill'>"+({ssd:"SSD",hdd:"HDD",usb:"USB"}[k.kind]||k.kind)+"</span>";
+      var sm="";
+      if(k.smart) sm=" "+spill(k.smart==="PASSED"?"ok":"bad", k.smart==="PASSED"?"SMART ok":"SMART "+k.smart);
+      if((k.realloc||0)>0||(k.pending||0)>0) sm+=" "+spill("warn",(k.realloc||0)+" realloc · "+(k.pending||0)+" pending");
+      var lab="<span class='k' title='"+esc(k.mount)+" on "+esc(k.dev)+(k.hours?" · "+Math.round(k.hours/24/365.25*10)/10+" years powered on":"")+"'>"+esc(k.label)+kind+sm+"</span>";
+      if(!k.ok) return "<div class='meter down'><div class='lab'>"+lab+"<span class='v'>"+spill("bad","not mounted")+"</span></div>"+
+        "<div class='track'><div class='fill' style='width:0'></div></div></div>";
+      return "<div class='meter'><div class='lab'>"+lab+
+        "<span class='v'>"+fmtBytes(k.used)+" / "+fmtBytes(k.total)+" · "+k.pct+"%</span></div>"+
+        "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
+    }).join("");
+    txt("ioread",fmtBytesPs(d.diskio.read_bps)); txt("iowrite",fmtBytesPs(d.diskio.write_bps));
+    var kd=(d.diskio.by_dev||{}).sde;
+    txt("kionow", kd?fmtBytesPs(kd.read_bps+kd.write_bps):"—");
+    txt("kio24", fmtBytesPs(d.diskio.kubrick_bps_24h));
+    var sa=d.diskio.smart_age_s;
+    txt("iometa", "I/O now"+(sa!==null&&sa!==undefined?" · SMART "+(sa<90?sa+"s":fmtDur(sa))+" ago":""));
+
+    // Reddit archive
+    var r=d.reddit||{};
+    txt("rdmonths", r.complete_count!==undefined?r.complete_count:"—");
+    txt("rdmonthsu", "months"+(r.planned?" of "+r.planned:"")+(r.plan_range?" · "+r.plan_range[0]+" → "+r.plan_range[1]:""));
+    txt("rdsize", r.complete_gb?(r.complete_gb/1000).toFixed(2)+" TB":"—");
+    txt("rdpub", r.published!==undefined&&r.published!==null?r.published+(r.planned&&r.published<r.planned?" / "+r.planned:""):"—");
+    var ip=(r.in_progress||[]).length, pend=r.pending||0;
+    txt("rddl", (ip||pend)?(ip+" now · "+pend+" queued"+(r.dl_MBps?" · "+r.dl_MBps.toFixed(1)+" MB/s":"")):"idle");
+    txt("rdfree", r.free_gb?(r.free_gb/1000).toFixed(1)+" TB"+(r.floor_gb?" / floor "+(r.floor_gb/1000).toFixed(1):""):"—");
+    txt("rdlatest", r.latest_month||"—");
+    var svcEl=document.getElementById("rdsvc");
+    if(svcEl) svcEl.innerHTML=r.mounted===false?spill("bad","kubrick not mounted"):
+      r.service_up===true?spill("ok","running")+(r.uptime_min?" <span class='u'>"+fmtDur(r.uptime_min*60)+"</span>":""):
+      r.service_up===false?spill("bad","stopped"):"—";
+    txt("rddisc", r.last_discover?ago(r.last_discover):"—");
+    txt("rdnext", r.next_discover?(r.next_discover>Date.now()/1000?"in "+fmtDur(r.next_discover-Date.now()/1000):"due"):"—");
+    txt("rdmeta", r.halted?"HALTED: "+r.halted:(r.ts?"status "+ago(r.ts):""));
+    document.getElementById("rdmeta").className="note"+(r.halted?" bad":"");
+    txt("rdlog", r.last_log?("log · "+r.last_log.replace(/^\d{4}-\d\d-\d\d /,"")):"");
+
+    // Web traffic
+    var wb=d.web||{}, h1=wb.h1||{}, h24=wb.h24||{};
+    txt("webreq", h1.req!==undefined?h1.req.toLocaleString():"—");
+    txt("webreq24", fmtN(h24.req));
+    txt("webby1", fmtBytes(h1.bytes)); txt("webby24", fmtBytes(h24.bytes));
+    txt("webips", (h1.unique_ips!==undefined?h1.unique_ips:"—")+" / "+(h24.unique_ips!==undefined?h24.unique_ips:"—"));
+    txt("weberr", (h24.s4!==undefined?h24.s4+" / "+h24.s5:"—"));
+    var CLS=[["skyline","skyline images","var(--s1)"],["reddit","reddit archive","var(--s2)"],["telemetry","host telemetry","var(--s3)"],
+             ["dunmoyle","Dunmoyle feeds","#8a97b0"],["other","other","#5b6577"]];
+    var cls=h24.classes||{}, tot=0; Object.keys(cls).forEach(function(k){ tot+=cls[k]; });
+    document.getElementById("webstrip").innerHTML=tot?CLS.filter(function(c){ return cls[c[0]]; }).map(function(c){
+      return "<i style='width:"+(100*cls[c[0]]/tot).toFixed(2)+"%;background:"+c[2]+"' title='"+c[1]+": "+cls[c[0]]+"'></i>"; }).join(""):"";
+    document.getElementById("webcls").innerHTML="<span class='keys'>"+CLS.filter(function(c){ return cls[c[0]]; }).map(function(c){
+      return "<span><i style='background:"+c[2]+"'></i>"+c[1]+" <span class='stat'>"+(100*cls[c[0]]/tot).toFixed(0)+"%</span></span>"; }).join("")+"</span>";
+    var paths=h1.top_paths||[];
+    document.getElementById("webpaths").innerHTML=paths.length?paths.map(function(p){
+      return "<div class='row'><span class='k' title='"+esc(p.path)+"'>"+esc(p.path)+"</span><span class='v'>"+p.n.toLocaleString()+"</span></div>"; }).join("")
+      :"<div class='row'><span class='k' style='color:var(--dimmer)'>nothing in the last hour</span><span class='v'>&mdash;</span></div>";
+
+    // Temperatures
+    renderTemps(d);
+
+    // Fans
+    var fans=((d.ipmi||{}).fans||[]);
+    document.getElementById("fans").innerHTML=fans.length
+      ? fans.map(function(f){
+          var cls=f.rpm<=0?" stop":f.rpm<700?" slow":"";
+          return "<div class='tile"+cls+"' title='"+esc(f.n)+"'><div class='k'>"+esc(f.n.replace(/_FAN/," "))+"</div>"+
+            "<div class='v'>"+f.rpm.toLocaleString()+"</div></div>"; }).join("")
+      : "<div class='rows'><div class='row'><span class='k'>BMC not read yet</span><span class='v'>&mdash;</span></div></div>";
+    if(fans.length){
+      var rp=fans.map(function(f){ return f.rpm; });
+      txt("fanmeta", fans.length+" fans · "+Math.min.apply(null,rp).toLocaleString()+"–"+Math.max.apply(null,rp).toLocaleString()+" rpm");
+    }
+
+    // Users & processes. CPU% is of one core, so 3200% would be every core.
+    var pr=d.procs||{}, bu=pr.by_user||[], tp=pr.top||[];
+    txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
+        ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
+    document.getElementById("byuser").innerHTML=bu.length
+      ? bu.map(function(u){
+          return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
+            " <span class='u'>"+u.n+" proc"+(u.n===1?"":"s")+" · "+fmtBytes(u.rss)+"</span></span>"+
+            "<span class='v'>"+(u.cpu>=100?(u.cpu/100).toFixed(1)+" cores":u.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>no data yet</span><span class='v'>&mdash;</span></div>";
+    document.getElementById("topprocs").innerHTML=tp.length
+      ? tp.map(function(p){
+          return "<div class='row' title='pid "+p.pid+"'><span class='k'>"+esc(p.comm)+
+            " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
+            "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
+
+    // Containers
+    var c=d.containers||{};
+    txt("ctmeta",(c.running===null||c.running===undefined?"unavailable":c.running+" running"));
+    document.getElementById("containers").innerHTML=(c.names&&c.names.length)
+      ? c.names.map(function(x){
+          return "<div class='row' title='"+esc(x.image||"")+"'><span class='k'>"+esc(x.name)+
+            (x.image?" <span class='u'>"+esc(x.image)+"</span>":"")+"</span>"+
+            "<span class='v'>"+spill(x.healthy?"ok":"warn", x.status)+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
 
     // SSH
     var s=d.ssh;
@@ -1063,8 +1172,11 @@
     txt("sshfail",s.failed_1h===null?"—":s.failed_1h);
     txt("sshinv",s.invalid_1h===null?"—":s.invalid_1h);
     txt("sshwho",(d.who.sessions||0)+" / "+((d.who.users||[]).join(", ")||"nobody"));
-    txt("sshban",(s.banned_now===null||s.banned_now===undefined?"—":s.banned_now)+" / "+
-        (s.banned_total===null||s.banned_total===undefined?"—":s.banned_total));
+    var tun=(d.health&&d.health.tunnels)||[];
+    document.getElementById("tunnels").innerHTML=tun.length
+      ? tun.map(function(t){ return "<div class='row'><span class='k'>"+esc(t.name)+" <span class='u'>:"+t.port+"</span></span>"+
+          "<span class='v'>"+spill("ok","connected")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>none connected</span><span class='v'>&mdash;</span></div>";
     var atk=document.getElementById("sshatk"), top=s.top_attackers||[];
     if(top.length){
       var a=top[0], parts=[];
@@ -1087,51 +1199,36 @@
       atk.innerHTML=html; atk.hidden=false;
     } else { atk.hidden=true; }
 
-    // Storage
-    document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
-      var kind="<span class='pill'>"+(k.kind==="nfs"?"NFS":"NVMe")+"</span>";
-      if(!k.ok) return "<div class='meter down'><div class='lab'><span class='k'>"+esc(k.label)+kind+"</span>"+
-        "<span class='v'><span class='pill bad'>unreachable</span></span></div>"+
-        "<div class='track'><div class='fill' style='width:0'></div></div></div>";
-      return "<div class='meter'><div class='lab'><span class='k' title='"+esc(k.mount)+"'>"+esc(k.label)+kind+"</span>"+
-        "<span class='v'>"+fmtBytes(k.used)+" / "+fmtBytes(k.total)+" · "+k.pct+"%</span></div>"+
-        "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
-    }).join("");
-    txt("ioread",fmtBps(d.diskio.read_bps)); txt("iowrite",fmtBps(d.diskio.write_bps));
-    txt("iometa","local I/O now");
-
-    // Temperatures
-    renderTemps(d);
-
-    // Fans
-    var fans=(ip.fans||[]);
-    document.getElementById("fans").innerHTML=fans.length
-      ? fans.map(function(f){
-          var cls=f.rpm<=0?" stop":f.rpm<1000?" slow":"";
-          return "<div class='tile"+cls+"' title='"+esc(f.n)+"'><div class='k'>"+esc(f.n.replace(/^FAN/,"F"))+"</div>"+
-            "<div class='v'>"+f.rpm.toLocaleString()+"</div></div>"; }).join("")
-      : "<div class='rows'><div class='row'><span class='k'>BMC not read yet</span><span class='v'>&mdash;</span></div></div>";
-    if(fans.length){
-      var rp=fans.map(function(f){ return f.rpm; });
-      txt("fanmeta", fans.length+" fans · "+Math.min.apply(null,rp).toLocaleString()+"–"+Math.max.apply(null,rp).toLocaleString()+" rpm");
+    // System health
+    var h=d.health||{}, mce=h.mce||{}, em=h.emerge||{}, sv=h.services||{};
+    function hrow(k,v){ return "<div class='row'><span class='k'>"+k+"</span><span class='v wrap'>"+v+"</span></div>"; }
+    var rows="";
+    rows+=hrow("Kernel", esc(d.kernel||"—")+" <span class='u'>Gentoo · OpenRC</span>");
+    rows+=hrow("Uptime", fmtDur(d.uptime_s));
+    if(mce.total!==undefined){
+      var mcls=mce.n_7d?"bad":mce.n_30d?"warn":"ok";
+      rows+=hrow("Machine-check exceptions", spill(mcls, (mce.n_30d||0)+" in 30d")+" <span class='u'>"+(mce.total||0)+" since boot"+
+        (mce.last?" · last "+esc(dateclock(mce.last)):"")+"</span>");
+      rows+=hrow("ECC memory", (mce.memory_errors===false?spill("ok","no errors"):mce.memory_errors===true?spill("bad","errors logged"):"—")+
+        (h.ecc_sensors_ok?" <span class='u'>"+h.ecc_sensors_ok+" BMC sensors ok</span>":""));
     }
-
-    // Users & processes. CPU% is of one core, so 6400% would be every thread.
-    var pr=d.procs||{}, bu=pr.by_user||[], tp=pr.top||[];
-    txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
-        ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
-    document.getElementById("byuser").innerHTML=bu.length
-      ? bu.map(function(u){
-          return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
-            " <span class='u'>"+u.n+" proc"+(u.n===1?"":"s")+" · "+fmtBytes(u.rss)+"</span></span>"+
-            "<span class='v'>"+(u.cpu>=100?(u.cpu/100).toFixed(1)+" cores":u.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>no data yet</span><span class='v'>&mdash;</span></div>";
-    document.getElementById("topprocs").innerHTML=tp.length
-      ? tp.map(function(p){
-          return "<div class='row' title='pid "+p.pid+"'><span class='k'>"+esc(p.comm)+
-            " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
-            "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
+    if(wd.recoveries_30d!==undefined){
+      rows+=hrow("NIC watchdog", spill(wd.recoveries_7d?"warn":"ok", (wd.recoveries_30d||0)+" recover"+(wd.recoveries_30d===1?"y":"ies")+" / 30d")+
+        (wd.last_event?" <span class='u'>"+esc(wd.last_event.msg.split(":")[0].toLowerCase())+" · "+esc(dateclock(wd.last_event.t))+"</span>":""));
+    }
+    if(em.world){
+      var w=em.world;
+      rows+=hrow("Last world update", (w.ok===true?spill("ok","ok"):w.ok===false?spill("bad","failed"):spill("warn","running"))+
+        " <span class='u'>"+esc(dateclock(w.t))+" · "+w.merged+" package"+(w.merged===1?"":"s")+
+        (w.done?" · "+fmtDur(w.done-w.t):"")+"</span>"+(em.running?" "+spill("warn","emerge running now"):""));
+    }
+    document.getElementById("sysrows").innerHTML=rows;
+    var ns=sv.not_started||[];
+    document.getElementById("svcrows").innerHTML=ns.length
+      ? ns.map(function(x){ return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
+          spill(x.status==="crashed"?"bad":"", x.status)+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>everything in the default runlevel is up</span><span class='v'>"+spill("ok", (sv.started||0)+" started")+"</span></div>";
+    txt("sysmeta", sv.started!==undefined?sv.started+" services up":"");
 
     drawCharts(d);
   }
@@ -1170,6 +1267,55 @@
     var dot=document.getElementById("dot");
     dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
   }, 1000);
+})();
+</script>
+<script>
+/* Visitors panel: the same access-stats.json the akdeniz page reads. The data
+   it counts is what this host serves, so it belongs here too. Independent of
+   the telemetry poller above. */
+(function(){
+  var AX ="https://photos.proofsandreasons.io/akdeniz/access-stats.json";
+  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
+  function fill(el,items,labelFn){
+    if(!el) return;
+    if(!items||!items.length){ el.innerHTML='<div class="row"><span class="k" style="color:var(--dimmer)">none yet</span><span class="v">&mdash;</span></div>'; return; }
+    el.innerHTML=items.map(function(it){
+      var lab=labelFn(it);
+      return '<div class="row"><span class="k" title="'+esc(lab)+'">'+esc(lab)+
+             '</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
+    }).join("");
+  }
+  function place(x){
+    var out=[];
+    [x.city,x.region,x.country].forEach(function(p){
+      if(p && p!=="Unknown" && out.indexOf(p)<0) out.push(p);
+    });
+    return out.join(", ") || "Unknown";
+  }
+  function num(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
+  function refreshAx(){
+    fetch(AX,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
+      var ex=d.excluded||{};
+      num("axtotal",(d.unique_ips||0).toLocaleString());
+      num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
+      num("axdrop",(ex.total||0).toLocaleString());
+      fill(document.getElementById("axcity"),(d.by_city||[]),place);
+      var parts=[];
+      if(ex.vpn)    parts.push(ex.vpn+" VPN/relay");
+      if(ex.attack) parts.push(ex.attack+" scanning");
+      if(ex.bot)    parts.push(ex.bot+" bot"+(ex.bot===1?"":"s"));
+      var dn=document.getElementById("axdropnote");
+      if(dn) dn.textContent=parts.length?("filtered: "+parts.join(", ")):"";
+      var t=document.getElementById("axts");
+      if(t){
+        var bits=[];
+        if(d.since) bits.push("since "+d.since);
+        if(d.updated) bits.push("updated "+d.updated);
+        t.textContent=bits.join(" · ");
+      }
+    }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
+  }
+  refreshAx(); setInterval(refreshAx,60000);
 })();
 </script>
 </body>

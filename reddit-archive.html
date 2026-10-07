@@ -18,7 +18,7 @@
 <title>Reddit Archive &middot; Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Reddit Archive">
-<meta property="og:description" content="Every public Reddit comment and submission from 2005 to 2021, archived on ganesha at the Laboratory for Social Minds at CMU.">
+<meta property="og:description" content="Every public Reddit comment and submission from 2005 onward, archived on ganesha at the Laboratory for Social Minds at CMU.">
 <meta property="og:url" content="https://proofsandreasons.io/reddit-archive.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/reddit-archive.html">
@@ -157,6 +157,7 @@
     <a href="/dashboard.html">skyline dashboard &rarr;</a>
     <a href="/akdeniz.html">akdeniz host monitor &rarr;</a>
     <a href="/wright.html">wright host monitor &rarr;</a>
+    <a href="/ganesha.html">ganesha host monitor &rarr;</a>
     <a href="https://proofsandreasons.io/">proofsandreasons.io &rarr;</a>
   </div>
 </header>
@@ -227,15 +228,16 @@
 <section>
   <h2>Using the archive</h2>
 
-  <h3>On ganesha</h3>
+  <h3>On ganesha (kubrick, a 20&nbsp;TB disk at <code>/mnt/kubrick</code>)</h3>
   <div class="scroller">
     <table>
       <thead><tr><th>Path</th><th>Contents</th></tr></thead>
       <tbody>
-        <tr><td><code>/data/reddit-archive/historical/reddit/submissions/</code></td><td>RS_2005-06 &hellip; RS_2021-12</td></tr>
-        <tr><td><code>/data/reddit-archive/historical/reddit/comments/</code></td><td>RC_2005-12 &hellip; RC_2021-12</td></tr>
+        <tr><td><code>/mnt/kubrick/reddit-archive/reddit/submissions/</code></td><td>RS_2005-06 &hellip; the latest month</td></tr>
+        <tr><td><code>/mnt/kubrick/reddit-archive/reddit/comments/</code></td><td>RC_2005-12 &hellip; the latest month</td></tr>
         <tr><td><code>/data2/reddit-archive/curated/public/</code></td><td>the curated datasets above</td></tr>
-        <tr><td><code>/data/reddit-archive/torrents/</code></td><td>every <code>.torrent</code> + download_links.md</td></tr>
+        <tr><td><code>/mnt/kubrick/torrents/</code></td><td>every <code>.torrent</code> + download_links.md</td></tr>
+        <tr><td><code>/mnt/kubrick/README.md</code></td><td>how the archive is held, served and extended</td></tr>
       </tbody>
     </table>
   </div>
@@ -257,7 +259,7 @@
   (<a href="magnet:?xt=urn:btih:3d426c47c767d40f82c7ef0f47c3acacedd2bf44&amp;dn=reddit_2005-06_to_2025-12_zst&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce">magnet</a>).
   A copy of every <code>.torrent</code> in the collection, including the delisted monthly releases
   and the per-subreddit split, is on ganesha under
-  <code>/data/reddit-archive/torrents/</code>.</p>
+  <code>/mnt/kubrick/torrents/</code>. New months are picked up automatically as they are released.</p>
 
   <h3>Documentation</h3>
   <ul class="links">
@@ -278,7 +280,8 @@
   <a href="https://photos.proofsandreasons.io/reddit-archive/">photos.proofsandreasons.io</a> &middot;
   <a href="/dashboard.html">skyline dashboard</a> &middot;
   <a href="/akdeniz.html">akdeniz monitor</a> &middot;
-  <a href="/wright.html">wright monitor</a><br>
+  <a href="/wright.html">wright monitor</a> &middot;
+  <a href="/ganesha.html">ganesha monitor</a><br>
   TiB are binary units, matching <code>df</code>; TB in the cumulative table are decimal, matching
   Academic Torrents.
 </footer>
@@ -286,7 +289,7 @@
 </div>
 <script>
 /* The 2022+ grid is generated, not hardcoded, because those months are still
-   arriving. It reads the public index groth publishes (CORS-enabled; the index
+   arriving. It reads the public index ganesha publishes (CORS-enabled; the index
    is public even though the .zst files behind it are CMU-only) and repaints
    every 60s so a page left open picks up new months on its own. */
 (function () {
@@ -386,9 +389,8 @@
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); })
       .then(render)
       .catch(function () {
-        /* groth is a laptop; if it is off or asleep the index is simply
-           unreachable. Say so plainly rather than leaving "checking..." */
-        sumEl.textContent = "index unreachable \u2014 groth may be offline";
+        /* Say so plainly rather than leaving "checking..." */
+        sumEl.textContent = "index unreachable \u2014 ganesha may be down";
       });
   }
   poll();
