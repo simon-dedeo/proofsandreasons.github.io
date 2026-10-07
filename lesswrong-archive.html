@@ -123,11 +123,11 @@
   <div>
     <h1>The LessWrong Archive</h1>
     <p class="sub">Every post and comment on <a href="https://www.lesswrong.com/">LessWrong</a>, from the
-    2003 essays imported from Overcoming Bias through LessWrong 1.0 to this morning, pulled from the
-    site's public API with every field it exposes: bodies as HTML and Markdown, karma and vote
-    counts, reacts, tags, curation and review state, Alignment Forum flags, legacy identifiers.
-    One zstd-compressed ndjson file per month, posts and comments together, held at the Laboratory
-    for Social Minds, CMU, and extended every fifteen minutes with whatever has just been posted.</p>
+    2003 essays later imported from Overcoming Bias, through LessWrong 1.0, to a quarter of an hour
+    ago. Pulled from the site's public API with every field it exposes: bodies as HTML and Markdown,
+    karma, vote counts and reacts, tags, curation and review state, Alignment Forum flags, the legacy
+    identifiers. One zstd-compressed ndjson file per month, posts and comments together, held at the
+    Laboratory for Social Minds, CMU.</p>
   </div>
   <div class="backlinks">
     <a href="/reddit-archive.html">reddit archive &rarr;</a>
@@ -141,10 +141,10 @@
 
 <div class="access">
   <span class="ico">CMU</span>
-  <p>The monthly files are served <b>only to Carnegie Mellon IP ranges</b> &mdash; on-campus networks
-  and the CMU VPN. From anywhere else they return <code>403</code>. The content is the authors' own,
-  published on LessWrong under its terms; this copy is held for research at CMU and is not a
-  redistribution.</p>
+  <p>The files are served <b>only to Carnegie Mellon IP ranges</b> &mdash; on-campus networks and the
+  CMU VPN; from anywhere else they return <code>403</code>. The index this page reads is public. The
+  writing belongs to its authors and was published on LessWrong under that site's terms; this copy is
+  held for research at CMU, not redistributed.</p>
 </div>
 
 <div class="status" id="status"><span><span class="dot warn"></span>connecting to the archive index&hellip;</span></div>
@@ -152,19 +152,21 @@
 <!-- ============ THE ARCHIVE, BY YEAR ============ -->
 <section>
   <h2>The archive, by year</h2>
-  <p class="lede">One link per month. Hover a month for its counts and size. Dashed months had nothing
-  posted (the pre-2009 years hold only the essays later imported into the site); amber months are
-  being fetched now; the green-edged month is the current one, still growing. The grid is drawn from
-  the archive index and refreshes itself.</p>
+  <p class="lede">One link per month; hover for counts and size. Dashed months have nothing in them
+  &mdash; before 2009 the site holds only the essays it later imported. Amber months are still being
+  fetched, and the green-edged month is the current one, which grows through the month. The grid is
+  drawn from the archive index and redraws itself every minute.</p>
   <div class="yhead" style="border:0;padding:0 2px 6px">
     <b>The whole archive</b><span id="extsum">loading&hellip;</span>
   </div>
   <div id="extyears"></div>
-  <div class="note"><b>Each record is fetched exactly once.</b> A post or comment is downloaded the
-  first time the puller sees it and never requested again, so its karma, reacts, text and flags are
-  those it had at <code>fetched_at</code>: for the backfill that is the state on the day the archive
-  was built; for everything after, roughly fifteen minutes after it was written. Later edits, votes
-  and deletions on the site are not reflected. The index lists each file's SHA-256.</div>
+  <div class="note"><b>Each record is fetched once, and once more if it was young.</b> Everything in
+  the backfill was already settled when it was taken, and is stored as it stood that day. New posts
+  and comments are picked up within fifteen minutes of appearing, when they have few votes; thirty
+  days after posting each is fetched a second and final time, so the archive ends up holding mature
+  karma, reacts and text for everything. Nothing is requested a third time, and edits or deletions
+  after that point are not reflected. <code>fetched_at</code> on each record says when its copy was
+  taken; the index lists each file's SHA-256.</div>
 </section>
 
 <!-- ============ USING IT ============ -->
@@ -189,13 +191,12 @@
   <pre>zstd -dc LW_2012-03.jsonl.zst | head -1 | python3 -m json.tool | head -40
 zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore, voteCount, user: .user.username}'</pre>
   <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">Plain <code>zstd -dc</code> works; no long
-  window is needed. Each line is one JSON object with a <code>type</code> of <code>post</code> or
-  <code>comment</code> and a <code>fetched_at</code> timestamp, followed by the record exactly as the
-  LessWrong API returned it. Records are ordered by <code>postedAt</code>, so a month reads
-  chronologically, posts before the comments made in the same instant. Comments carry
-  <code>postId</code>, <code>parentCommentId</code> and <code>topLevelCommentId</code>, so a thread
-  rebuilds from one month's file when the post is in the same month, or from the SQLite otherwise.
-  Early comments on a thread often precede later ones by months, so for whole threads use the SQLite.</p>
+  window is needed. Each line is one JSON object: a <code>type</code> of <code>post</code> or
+  <code>comment</code>, a <code>fetched_at</code> timestamp, then the record exactly as the LessWrong
+  API returned it. Lines are ordered by <code>postedAt</code>, so a month reads chronologically.
+  Comments carry <code>postId</code>, <code>parentCommentId</code> and <code>topLevelCommentId</code>;
+  a thread whose post and comments fall in one month rebuilds from that file alone, and the SQLite
+  joins across months for the rest.</p>
 
   <h3>What a record holds</h3>
   <div class="scroller">
@@ -211,26 +212,27 @@ zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore
       </tbody>
     </table>
   </div>
-  <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">Fields are present with <code>null</code> when
-  they do not apply, so a reader can rely on the keys. What the API does not expose to an anonymous reader,
-  and so is not here: individual votes (only the aggregates), drafts, private messages, and anything
-  deleted before the 2017 migration to the current site.</p>
+  <p style="margin-top:10px;font-size:.86rem;color:var(--dim)">A field that does not apply is present
+  as <code>null</code>, so readers can rely on the keys. Not here, because the API does not expose it
+  to an anonymous reader: individual votes (only their aggregates), drafts, private messages, and
+  anything deleted before the 2017 move to the current site.</p>
 
   <h3>Source and method</h3>
   <p style="font-size:.9rem;color:var(--dim)">LessWrong's public GraphQL endpoint
   (<code>https://www.lesswrong.com/graphql</code>), read one request per second with an identifying
-  User-Agent, from ganesha, by the <code>lesswrong-pull</code> service. Posts come from the
-  <code>new</code> view and comments from <code>allRecentComments</code>, each walked month by month and
-  page by page on <code>postedAt</code>; posts that the lists leave out but comments refer to (shortform
-  containers, unlisted posts) are fetched by id. New records go into SQLite and the month they belong
-  to is rewritten from it; nothing already held is requested twice. After the backfill the puller asks
-  every fifteen minutes for anything newer than the newest record it has. The site is on the same
-  software as the EA Forum and the Alignment Forum, so the same tool would cover those.</p>
+  User-Agent by the <code>lesswrong-pull</code> service on ganesha. Posts come from the site's
+  <code>new</code> view and comments from <code>allRecentComments</code>, each walked month by month
+  and page by page on <code>postedAt</code>; posts the lists leave out but comments refer to
+  (shortform containers, unlisted posts) are fetched by id. The backfill ran oldest month first.
+  Since then the puller asks every fifteen minutes for anything newer than the newest record it
+  holds, and once a day re-fetches the records that have just turned thirty days old. New records go
+  into SQLite and the month they belong to is rewritten from it. LessWrong shares its software with
+  the EA Forum and the Alignment Forum, so the same tool would cover either.</p>
 
   <h3>Documentation</h3>
   <ul class="links">
     <li><a href="https://www.lesswrong.com/api/SKILL.md">LessWrong API guide</a>
-      <span class="d">The site's own notes on its agent-facing and GraphQL APIs.</span></li>
+      <span class="d">The site's own notes on its Markdown and GraphQL APIs.</span></li>
     <li><a href="https://www.lesswrong.com/graphiql">GraphiQL explorer</a>
       <span class="d">Interactive schema browser for the endpoint the puller reads.</span></li>
     <li><a href="https://github.com/ForumMagnum/ForumMagnum">ForumMagnum</a>
