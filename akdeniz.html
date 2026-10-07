@@ -467,7 +467,7 @@
 
     <!-- Temperatures -->
     <div class="card">
-      <div class="h5"><span>Temperatures</span><span class="note">&deg;C</span></div>
+      <div class="h5"><span>Temperatures</span><span class="note">&deg;F</span></div>
       <div class="rows" id="temps"></div>
     </div>
 
@@ -583,6 +583,8 @@
     return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
   }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
+  // Sensors report Celsius; the pages show Fahrenheit. Thresholds stay in °C.
+  function F(c){ return c*9/5+32; }
 
   // ---------- charts ----------
   // One shared line-chart renderer. Series share a single y-axis by
@@ -1006,7 +1008,7 @@
       var mp=g.mem_total_mb?100*g.mem_used_mb/g.mem_total_mb:0;
       txt("gpumemv",(g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB");
       var gb=document.getElementById("gpumembar"); gb.style.width=mp+"%"; gb.style.background=heat(mp);
-      txt("gputemp",(g.temp||"—")+"°");
+      txt("gputemp",(g.temp===null||g.temp===undefined?"—":F(g.temp).toFixed(0)+"°F"));
       txt("gpupower",(g.power===null?"—":g.power.toFixed(0))+" W");
       txt("gpufan",(g.fan===null?"—":g.fan.toFixed(0))+"%");
       txt("gpuclk",(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+" MHz");
@@ -1088,7 +1090,7 @@
     document.getElementById("temps").innerHTML=(d.temps||[]).map(function(t){
       var cls=t.temp>=85?"bad":t.temp>=70?"warn":"ok";
       return "<div class='row'><span class='k'>"+t.chip+" · "+t.label+"</span>"+
-        "<span class='v'><span class='pill "+cls+"'>"+t.temp.toFixed(1)+"°</span></span></div>";
+        "<span class='v'><span class='pill "+cls+"'>"+F(t.temp).toFixed(0)+"°F</span></span></div>";
     }).join("");
 
     // Containers

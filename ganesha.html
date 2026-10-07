@@ -488,7 +488,7 @@
     <div class="card wide">
       <div class="h5"><span>Web traffic</span>
         <span class="right">
-          <span class="note" id="webmeta">photos.proofsandreasons.io</span>
+          <span class="note" id="webmeta">photos.proofsandreasons.io · outside CMU and Pittsburgh</span>
           <span class="seg" role="group" aria-label="Web chart time range" id="webrange">
             <button type="button" data-range="1h" aria-pressed="false">1H</button>
             <button type="button" data-range="24h" aria-pressed="true">24H</button>
@@ -510,17 +510,15 @@
         <div class="tip"></div>
       </div>
       <div class="legend"><span class="keys" id="webkeys"></span><span class="stat" id="webstat"></span></div>
-      <div class="sect">What is being fetched &middot; 24h</div>
+      <div class="sect">What outside readers fetch &middot; 24h</div>
       <div class="strip" id="webstrip"></div>
       <div class="legend" id="webcls" style="margin-top:7px"></div>
-      <div class="sect">Top paths &middot; last hour</div>
-      <div class="rows scroll" id="webpaths" tabindex="0" role="group" aria-label="Most requested paths, last hour"></div>
       <div class="sub" id="webnote" style="margin-top:9px;font-size:.66rem">From Caddy's access log; the dream journal is not logged, by design.</div>
     </div>
 
     <!-- Temperatures -->
     <div class="card">
-      <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;C</span></div>
+      <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;F</span></div>
       <div id="temps"></div>
     </div>
 
@@ -666,10 +664,12 @@
     return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
   }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
+  // Sensors report Celsius; the pages show Fahrenheit. Thresholds stay in °C.
+  function F(c){ return c*9/5+32; }
   function pill(v, warn, bad, unit){
     if(v===null||v===undefined) return "<span class='pill'>—</span>";
     var cls=v>=bad?"bad":v>=warn?"warn":"ok";
-    return "<span class='pill "+cls+"'>"+v.toFixed(0)+(unit||"°")+"</span>";
+    return "<span class='pill "+cls+"'>"+(unit?v.toFixed(0)+unit:F(v).toFixed(0)+"°F")+"</span>";
   }
   function spill(cls, text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
 
@@ -984,7 +984,7 @@
     }
     document.getElementById("temps").innerHTML=h;
     var age=d.ipmi&&d.ipmi.age_s;
-    txt("tmeta", "°C"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
+    txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
   }
 
   // ---------- render ----------
@@ -1117,10 +1117,10 @@
       return "<i style='width:"+(100*cls[c[0]]/tot).toFixed(2)+"%;background:"+c[2]+"' title='"+c[1]+": "+cls[c[0]]+"'></i>"; }).join(""):"";
     document.getElementById("webcls").innerHTML="<span class='keys'>"+CLS.filter(function(c){ return cls[c[0]]; }).map(function(c){
       return "<span><i style='background:"+c[2]+"'></i>"+c[1]+" <span class='stat'>"+(100*cls[c[0]]/tot).toFixed(0)+"%</span></span>"; }).join("")+"</span>";
-    var paths=h1.top_paths||[];
-    document.getElementById("webpaths").innerHTML=paths.length?paths.map(function(p){
-      return "<div class='row'><span class='k' title='"+esc(p.path)+"'>"+esc(p.path)+"</span><span class='v'>"+p.n.toLocaleString()+"</span></div>"; }).join("")
-      :"<div class='row'><span class='k' style='color:var(--dimmer)'>nothing in the last hour</span><span class='v'>&mdash;</span></div>";
+    txt("webmeta", "photos.proofsandreasons.io · "+(wb.scope||"outside CMU"));
+    txt("webnote", (h24.all?("Counting requests from "+(wb.scope||"outside CMU")+": "+h24.loc.toLocaleString()+" of "+h24.all.toLocaleString()+
+        " requests in 24h came from campus or the city and are left out. "):"")+
+        "From Caddy's access log; the dream journal is not logged, by design.");
 
     // Temperatures
     renderTemps(d);

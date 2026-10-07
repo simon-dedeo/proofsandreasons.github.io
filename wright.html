@@ -488,7 +488,7 @@
 
     <!-- Temperatures -->
     <div class="card">
-      <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;C</span></div>
+      <div class="h5"><span>Temperatures</span><span class="note" id="tmeta">&deg;F</span></div>
       <div id="temps"></div>
     </div>
 
@@ -598,9 +598,11 @@
     return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
   }
   function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
+  // Sensors report Celsius; the pages show Fahrenheit. Thresholds stay in °C.
+  function F(c){ return c*9/5+32; }
   function pill(v, warn, bad, unit){
     var cls=v>=bad?"bad":v>=warn?"warn":"ok";
-    return "<span class='pill "+cls+"'>"+(v===null||v===undefined?"—":v.toFixed(0)+(unit||"°"))+"</span>";
+    return "<span class='pill "+cls+"'>"+(v===null||v===undefined?"—":unit?v.toFixed(0)+unit:F(v).toFixed(0)+"°F")+"</span>";
   }
 
   // ---------- charts ----------
@@ -917,7 +919,7 @@
         (g.mem_used_mb/1024).toFixed(1)+" / "+(g.mem_total_mb/1024).toFixed(0)+" GB</span></div>"+
         "<div class='track'><div class='fill' style='width:"+mp+"%;background:"+heat(mp)+"'></div></div></div>"+
       "<div class='tiles' style='margin-top:10px'>"+
-        "<div class='tile'><div class='k'>Temp</div><div class='v'>"+(g.temp===null?"—":g.temp.toFixed(0)+"°")+"</div></div>"+
+        "<div class='tile'><div class='k'>Temp</div><div class='v'>"+(g.temp===null?"—":F(g.temp).toFixed(0)+"°F")+"</div></div>"+
         "<div class='tile'><div class='k'>Power</div><div class='v'>"+(g.power===null?"—":g.power.toFixed(0))+
           "<small> / "+(g.power_limit===null?"—":g.power_limit.toFixed(0))+" W</small></div></div>"+
         "<div class='tile'><div class='k'>SM clock</div><div class='v'>"+(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+"<small> MHz</small></div></div>"+
@@ -960,13 +962,13 @@
       if(dimms.length){
         var lo=Math.min.apply(null,dimms), hi=Math.max.apply(null,dimms);
         h+="<div class='row'><span class='k'>DDR5 DIMMs ×"+dimms.length+"</span><span class='v'>"+
-           "<span class='pill "+(hi>=85?"bad":hi>=70?"warn":"ok")+"'>"+lo.toFixed(0)+"–"+hi.toFixed(0)+"°</span></span></div>";
+           "<span class='pill "+(hi>=85?"bad":hi>=70?"warn":"ok")+"'>"+F(lo).toFixed(0)+"–"+F(hi).toFixed(0)+"°F</span></span></div>";
       }
       h+="</div>";
     }
     document.getElementById("temps").innerHTML=h;
     var age=d.ipmi&&d.ipmi.age_s;
-    txt("tmeta", "°C"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
+    txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
   }
 
   // ---------- render ----------
