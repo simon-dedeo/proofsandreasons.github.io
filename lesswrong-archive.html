@@ -127,7 +127,7 @@
     site's public API with every field it exposes: bodies as HTML and Markdown, karma and vote
     counts, reacts, tags, curation and review state, Alignment Forum flags, legacy identifiers.
     One zstd-compressed ndjson file per month, posts and comments together, held at the Laboratory
-    for Social Minds, CMU, and refreshed continuously so scores and edits stay current.</p>
+    for Social Minds, CMU, and extended every fifteen minutes with whatever has just been posted.</p>
   </div>
   <div class="backlinks">
     <a href="/reddit-archive.html">reddit archive &rarr;</a>
@@ -154,17 +154,17 @@
   <h2>The archive, by year</h2>
   <p class="lede">One link per month. Hover a month for its counts and size. Dashed months had nothing
   posted (the pre-2009 years hold only the essays later imported into the site); amber months are
-  being fetched now; the green-edged month is the current one, re-pulled every six hours. The grid is
-  drawn from the archive index and refreshes itself.</p>
+  being fetched now; the green-edged month is the current one, still growing. The grid is drawn from
+  the archive index and refreshes itself.</p>
   <div class="yhead" style="border:0;padding:0 2px 6px">
     <b>The whole archive</b><span id="extsum">loading&hellip;</span>
   </div>
   <div id="extyears"></div>
-  <div class="note"><b>Scores move; the archive follows.</b> Karma, reacts, edits and deletions keep
-  changing long after a post goes up, so the files are rewritten from the database, not appended to:
-  the current and previous month every six hours, the last fifteen months weekly, and the whole
-  archive once a month. The <code>fetched_at</code> field on each record says when its copy was taken,
-  and the index below lists each file's SHA-256.</div>
+  <div class="note"><b>Each record is fetched exactly once.</b> A post or comment is downloaded the
+  first time the puller sees it and never requested again, so its karma, reacts, text and flags are
+  those it had at <code>fetched_at</code>: for the backfill that is the state on the day the archive
+  was built; for everything after, roughly fifteen minutes after it was written. Later edits, votes
+  and deletions on the site are not reflected. The index lists each file's SHA-256.</div>
 </section>
 
 <!-- ============ USING IT ============ -->
@@ -194,7 +194,8 @@ zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore
   LessWrong API returned it. Records are ordered by <code>postedAt</code>, so a month reads
   chronologically, posts before the comments made in the same instant. Comments carry
   <code>postId</code>, <code>parentCommentId</code> and <code>topLevelCommentId</code>, so a thread
-  rebuilds from one month's file when the post is in the same month, or from the SQLite otherwise.</p>
+  rebuilds from one month's file when the post is in the same month, or from the SQLite otherwise.
+  Early comments on a thread often precede later ones by months, so for whole threads use the SQLite.</p>
 
   <h3>What a record holds</h3>
   <div class="scroller">
@@ -221,9 +222,10 @@ zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore
   User-Agent, from ganesha, by the <code>lesswrong-pull</code> service. Posts come from the
   <code>new</code> view and comments from <code>allRecentComments</code>, each walked month by month and
   page by page on <code>postedAt</code>; posts that the lists leave out but comments refer to (shortform
-  containers, unlisted posts) are fetched by id. Everything is upserted into SQLite and a month's file is
-  rewritten whenever any record in it changed. The site is on the same software as the EA Forum and the
-  Alignment Forum, so the same tool would cover those.</p>
+  containers, unlisted posts) are fetched by id. New records go into SQLite and the month they belong
+  to is rewritten from it; nothing already held is requested twice. After the backfill the puller asks
+  every fifteen minutes for anything newer than the newest record it has. The site is on the same
+  software as the EA Forum and the Alignment Forum, so the same tool would cover those.</p>
 
   <h3>Documentation</h3>
   <ul class="links">
@@ -303,7 +305,7 @@ zstd -dc LW_2012-03.jsonl.zst | jq -c 'select(.type=="post") | {title, baseScore
     var bits=['<span><span class="dot '+dotCls+'"></span>puller: <b>'+esc(mode)+'</b>'+(cur?" · on <b>"+esc(cur)+"</b>":"")+'</span>'];
     if(st.backfill_done) bits.push('<span>backfill finished <b>'+esc(st.backfill_done.slice(0,10))+'</b></span>');
     bits.push('<span>index written <b>'+ago(d.generated)+'</b></span>');
-    if(st.last_cycle) bits.push('<span>last 6-hourly pass <b>'+ago(st.last_cycle)+'</b></span>');
+    if(st.last_cycle) bits.push('<span>last check for new content <b>'+ago(st.last_cycle)+'</b>'+(st.last_cycle_new?' \u00b7 '+esc(st.last_cycle_new):'')+'</span>');
     if(st.next_cycle&&mode==="continuous") bits.push('<span>next <b>'+esc(st.next_cycle.slice(11,16))+' UTC</b></span>');
     bits.push('<span>requests this run <b>'+n(st.requests)+'</b> at <b>'+(st.rate_rps||0)+'/s</b></span>');
     if(st.errors) bits.push('<span style="color:var(--amber)">errors <b>'+n(st.errors)+'</b>'+(st.last_error?' · '+esc(st.last_error.slice(20,110)):'')+'</span>');
