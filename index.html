@@ -488,14 +488,53 @@
       document.getElementById('g-cap2').textContent = b.join('  ·  ');
       if(g.date && g.which){ var u=SF+'peak_'+g.date+'_'+g.which+'.jpg'; document.getElementById('g-link').href=u; document.getElementById('g-full').href=u; }
     }
+    /* Refresh twice a day, not every 15 minutes. The peak frames change only
+       after each golden hour, and ganesha publishes a new one roughly 90 minutes
+       after the peak. So: learn the recent morning and evening peak times from
+       the index, schedule the next reload for the first expected publish that is
+       still ahead (Pittsburgh clock; the morning frame lands ~95 minutes after its
+       peak, the evening one ~15 minutes after), and if the frame has not changed by then,
+       retry every 20 minutes for up to two hours before scheduling the next one.
+       An open tab used to make ~200 requests a day; now it makes about four. */
+    var lastTs=null, retries=0, timer=null, times={morning:null, evening:null};
+    function parseClock(t){ var m=/(\d+):(\d+)\s*(AM|PM)/i.exec(t||''); if(!m) return null;
+      return (+m[1]%12+(m[3].toUpperCase()==='PM'?12:0))*60+ +m[2]; }
+    function pittsburghMinutes(){
+      var p=new Intl.DateTimeFormat('en-US',{timeZone:'America/New_York',hour:'numeric',minute:'numeric',hour12:false}).formatToParts(new Date());
+      var h=+p.find(function(x){return x.type==='hour';}).value, m=+p.find(function(x){return x.type==='minute';}).value;
+      return (h%24)*60+m;
+    }
+    function learnTimes(){
+      (window.GOLDINDEX||[]).slice(-8).forEach(function(x){ var t=parseClock(x.time); if(t!=null) times[x.which]=t; });
+      if(window.GOLDEN){ var t=parseClock(window.GOLDEN.time); if(t!=null) times[window.GOLDEN.which]=t; }
+      if(times.morning==null) times.morning=7*60+15;
+      if(times.evening==null) times.evening=18*60+45;
+    }
+    function msToNextPublish(){
+      learnTimes();
+      var cur=pittsburghMinutes(), lead={morning:105, evening:30}, best=null;
+      [0,1440].forEach(function(day){ ['morning','evening'].forEach(function(w){
+        var at=times[w]+lead[w]+day; if(at>cur+5 && (best===null||at<best)) best=at; }); });
+      return (best-cur)*60000;
+    }
+    function schedule(ms){ clearTimeout(timer); timer=setTimeout(load, Math.max(60000, ms)); }
     function load(){
       document.getElementById('g-img').src = SF+'golden.jpg?_='+Date.now();
       var s=document.createElement('script'); s.src=SF+'golden.js?_='+Date.now();
-      s.onload=function(){ if(window.GOLDEN) render(window.GOLDEN); s.remove(); };
-      s.onerror=function(){ s.remove(); };
+      s.onload=function(){
+        s.remove();
+        var g=window.GOLDEN; if(g) render(g);
+        var ts=g&&g.ts;
+        if(lastTs!==null && ts===lastTs && retries<6){ retries++; schedule(20*60*1000); return; }   /* frame not out yet: look again in 20 min */
+        lastTs=ts; retries=0; schedule(msToNextPublish());
+      };
+      s.onerror=function(){ s.remove(); schedule(30*60*1000); };
       document.head.appendChild(s);
     }
-    load(); setInterval(load, 15*60*1000);
+    /* The index (both halves' recent peak times) is loaded once, so the schedule
+       knows when the evening peak falls even when the latest frame is a morning. */
+    (function(){ var s=document.createElement('script'); s.src=SF+'goldindex.js?_='+Date.now();
+      s.onload=function(){ s.remove(); load(); }; s.onerror=function(){ s.remove(); load(); }; document.head.appendChild(s); })();
   })();
   </script>
 
