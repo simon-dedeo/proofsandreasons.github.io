@@ -284,11 +284,12 @@ function render(d){
   // the 1 Hz RSSI log is stale ("unknown").
   const dr=d.door||{}, de=$('#door');
   if(de){
+    const sig=dr.ch!=null?`wifi signal strength on channel ${dr.ch}`:'wifi signal strength';
     if(dr.state==='open'&&dr.pct_lo!=null){
-      de.textContent=`wifi signal strength suggests Simon's door is currently ${dr.pct_lo}% – ${dr.pct_hi}% open`;
+      de.textContent=`${sig} suggests Simon's door is currently ${dr.pct_lo}% – ${dr.pct_hi}% open`;
       de.style.display='';
     }else if(dr.state==='closed'){
-      de.textContent="wifi signal strength suggests Simon's door is currently closed";
+      de.textContent=`${sig} suggests Simon's door is currently closed`;
       de.style.display='';
     }else de.style.display='none';
   }
