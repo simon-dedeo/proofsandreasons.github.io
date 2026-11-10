@@ -114,7 +114,6 @@
       <div class="mon"><a href="/reddit-archive.html">reddit archive →</a></div>
       <div class="mon"><a href="/lesswrong-archive.html">lesswrong archive →</a></div>
       <div class="loc" id="loc">Proofs &amp; Reasons @ Carnegie Mellon University • Pittsburgh, PA</div>
-      <div class="loc" id="door" style="display:none"></div>
     </div>
   </header>
   <div class="viewer">
@@ -278,21 +277,10 @@ Object.keys(HKEYS).forEach(id=>{
 function render(d){
   const w=d.weather||{}, c=w.current||{}, s=d.solar||{}, sys=d.system||{};
   if(d.location)$('#loc').textContent=d.location;
-  // Door-openness estimate: pandr maps its connected-AP Wi-Fi RSSI onto a
-  // closed (night median) … fully-open (propped-door calibration) scale; the
-  // lo–hi bounds are the 5-min window's interquartile range. Hidden whenever
-  // the 1 Hz RSSI log is stale ("unknown").
-  const dr=d.door||{}, de=$('#door');
-  if(de){
-    const sig=dr.ch!=null?`wifi signal strength on channel ${dr.ch}`:'wifi signal strength';
-    if(dr.state==='open'&&dr.pct_lo!=null){
-      de.textContent=`${sig} suggests Simon's door is currently ${dr.pct_lo}% – ${dr.pct_hi}% open`;
-      de.style.display='';
-    }else if(dr.state==='closed'){
-      de.textContent=`${sig} suggests Simon's door is currently closed`;
-      de.style.display='';
-    }else de.style.display='none';
-  }
+  // Door-openness display removed 2026-11-10: ground truth showed the RSSI
+  // two-state tracks a reflector that is likely OUTSIDE the office (per-AP
+  // geometry; ch 140 is door-blind), so the dashboard claim was unsupported.
+  // update.py still emits the `door` block in data.js for research.
   $('#nowTemp').textContent=(c.tempF!=null?c.tempF:'--')+'°';
   $('#nowDesc').textContent=c.text||'—';
   const b=[];
