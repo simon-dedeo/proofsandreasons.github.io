@@ -261,6 +261,16 @@
   .hright .mon a{color:var(--sky);text-decoration:none}
   .hright .mon a:hover{text-decoration:underline}
   .hright .mon:last-of-type{margin-bottom:9px}
+  /* ---------- additions shared with wright.html and ganesha.html ---------- */
+  /* Sub-headings inside a card (who-is-using-it groups, health sections). */
+  .sect{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+    font-weight:700;margin:13px 0 3px}
+  .sect:first-child{margin-top:0}
+  .rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
+  .rows .k .pill{margin-left:.6em;vertical-align:.08em}
+  .rows .v.wrap{white-space:normal;text-align:right}
+  /* Health rows: the label stays whole and the value wraps under it if it must. */
+  .row.hx .k{flex:none;overflow:visible}
 </style>
 </head>
 <body>
@@ -305,6 +315,8 @@
           <div class="tile"><div class="k">Load 5m</div><div class="v" id="load5">&mdash;</div></div>
           <div class="tile"><div class="k">Load 15m</div><div class="v" id="load15">&mdash;</div></div>
           <div class="tile"><div class="k">Runnable</div><div class="v" id="runq">&mdash;</div></div>
+          <div class="tile" title="Mean current clock across all logical CPUs"><div class="k">Clock</div><div class="v" id="cpuclk">&mdash;</div></div>
+          <div class="tile" title="CPU package power (RAPL). The GPU's draw is on its own card."><div class="k">Pkg power</div><div class="v" id="cpupw">&mdash;</div></div>
         </div>
       </div>
       <div class="cores" id="cores"></div>
@@ -464,6 +476,10 @@
         <div class="tile"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
         <div class="tile"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
       </div>
+      <div id="diskhealthwrap" style="margin-top:13px" hidden>
+        <div class="sect">Disk health &middot; SMART</div>
+        <div class="rows" id="diskhealth"></div>
+      </div>
     </div>
 
     <!-- Temperatures -->
@@ -476,6 +492,23 @@
     <div class="card">
       <div class="h5"><span>Containers</span><span class="note" id="ctmeta"></span></div>
       <div class="rows" id="containers"></div>
+    </div>
+
+    <!-- Users & processes -->
+    <div class="card">
+      <div class="h5"><span>Who is using it</span><span class="note" id="whometa"></span></div>
+      <div class="sect">By user &middot; CPU over the last sample</div>
+      <div class="rows" id="byuser"></div>
+      <div class="sect">Busiest processes</div>
+      <div class="rows" id="topprocs"></div>
+    </div>
+
+    <!-- System health -->
+    <div class="card">
+      <div class="h5"><span>System</span><span class="note" id="sysmeta"></span></div>
+      <div class="rows" id="sysrows"></div>
+      <div class="sect">Failed units</div>
+      <div class="rows" id="failrows"></div>
     </div>
 
     <!-- Server-room camera (grothendieck) -->
@@ -911,8 +944,9 @@
     if(n===null||n===undefined) return "<td class='hrs z'>&mdash;</td>";
     return "<td class='hrs'>"+n.toLocaleString()+"</td>";
   }
-  // ORCHARD first, then PSC, then anything new alphabetically.
-  var CLUSTER_ORDER={ORCHARD:0, PSC:1};
+  // NCSA DeltaAI is the only cluster polled now (ORCHARD and PSC were retired
+  // on 2026-11-14); anything added later sorts after it, alphabetically.
+  var CLUSTER_ORDER={NCSA:0};
   function clusterRank(n){
     return CLUSTER_ORDER[n]!==undefined ? CLUSTER_ORDER[n] : 99;
   }
@@ -937,6 +971,7 @@
 
       rows+="<tr class='top"+sc+"'>"+
         "<th class='nm' rowspan='2'>"+esc(c.name)+
+          (c.label?"<span class='ago'>"+esc(c.label)+"</span>":"")+
           "<span class='ago"+(stale?" old":"")+"'>"+agetxt+"</span></th>"+
         "<th class='kind'>CPU</th>"+
         jobCell(w?w.cpu:null,"wait")+jobCell(r?r.cpu:null,"run")+
@@ -958,9 +993,38 @@
         if(jb.other) bits.push("<b>other states</b> "+jb.other);
       }
       if(bits.length) note.push("<div>"+esc(c.name)+" &mdash; "+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
-      // A failed poll is not spelled out here on purpose: the dimmed rows and
-      // the amber age already say it, and the raw scheduler/gcloud text was
-      // noise. c.err is still in jobs.json for anyone debugging.
+      // When queued jobs might start, and why they are waiting.
+      var qb=[];
+      if(w&&(w.cpu||w.gpu)){
+        if(c.next_start) qb.push("<b>next start</b> "+(c.next_start<=now?"due":
+          esc(DAYS[new Date(c.next_start*1000).getDay()]+" "+clock(c.next_start))+" (est.)"));
+        var rs=Object.keys(c.reasons||{});
+        if(rs.length) qb.push("<b>waiting on</b> "+esc(rs.map(function(k){ return k.toLowerCase(); }).join(", ")));
+        if(c.fairshare!==null&&c.fairshare!==undefined) qb.push("<b>fair-share</b> "+c.fairshare.toFixed(2));
+      }
+      (c.running||[]).slice(0,3).forEach(function(r){
+        if(r.node) qb.push("<b>"+esc(r.node)+"</b> "+(r.left_s!==null&&r.left_s!==undefined?fmtDur(r.left_s)+" left":"running"));
+      });
+      if(qb.length) note.push("<div>"+qb.join(" &nbsp;&middot;&nbsp; ")+"</div>");
+      // The allocation: what is left of what was granted.
+      var al=c.alloc;
+      if(al&&al.deposited){
+        var pct=100*al.balance/al.deposited;
+        note.push("<div><b>allocation</b> "+al.balance.toLocaleString()+" of "+al.deposited.toLocaleString()+" "+
+          esc(al.unit||"hours")+" left &nbsp;&middot;&nbsp; "+pct.toFixed(0)+"%</div>"+
+          "<div class='track' style='margin:5px 0 3px'><div class='fill' style='width:"+Math.max(0,Math.min(100,pct)).toFixed(1)+
+          "%;background:"+(pct<10?"var(--bad)":pct<25?"var(--warn)":"var(--s3)")+"'></div></div>");
+      }
+      // A failed poll: the raw ssh text stays in jobs.json (c.err), but the
+      // one case a person has to act on is named. NCSA takes no ssh keys, so
+      // the poll rides a logged-in connection held on wright; when that
+      // lapses, nothing recovers until someone logs in again with Duo.
+      if(c.ok===false){
+        note.push("<div style='color:var(--warn)'>"+(c.err_kind==="session"
+          ? "NCSA login on wright has lapsed &mdash; run <b>ncsa-login --on wright</b> and approve the Duo push"
+          : c.err_kind==="jump"||c.err_kind==="timeout" ? "wright did not answer, so NCSA could not be asked"
+          : "last poll failed; showing the previous numbers")+"</div>");
+      }
     });
 
     tbl.innerHTML="<thead><tr><th class='l'>Cluster</th><th class='l'></th>"+
@@ -974,6 +1038,115 @@
     // not the clusters' whole queues.
     txt("jobsmeta", "our jobs"+
         (age===null?"":" · polled "+(age<90?age+"s":fmtDur(age))+" ago"));
+  }
+
+  // ---------- host health ----------
+  // Shared verbatim by akdeniz.html, wright.html and ganesha.html: rows built
+  // from the os / events / psi blocks of metrics.json and the per-disk SMART
+  // records. Each helper returns "" when its block is absent, so a page keeps
+  // working against an older collector.
+  var HXM=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function hxPill(cls,text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
+  function hxU(text){ return " <span class='u'>"+esc(text)+"</span>"; }
+  function hxRow(k,v,title){
+    return "<div class='row hx'"+(title?" title=\""+esc(title)+"\"":"")+"><span class='k'>"+k+
+      "</span><span class='v wrap'>"+v+"</span></div>";
+  }
+  function hxDate(ts){ var d=new Date(ts*1000); return d.getDate()+" "+HXM[d.getMonth()]; }
+  function hxWhen(ts){
+    var d=new Date(ts*1000);
+    return hxDate(ts)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function hxPlural(n,w){ return n.toLocaleString()+" "+w+(n===1?"":"s"); }
+  function hxGB(b){
+    return b>=1073741824 ? (b/1073741824).toFixed(b>=10737418240?0:1)+" GB" : Math.round(b/1048576)+" MB";
+  }
+  // Kernel, boot date and pending updates (Ubuntu hosts: metrics.os).
+  function hxOsRows(d){
+    var o=d.os; if(!o) return "";
+    var rows=hxRow("Kernel", esc(o.kernel||"—")+(o.reboot_required?" "+hxPill("warn","reboot needed"):"")+
+        (o.kernel_newest?hxU(o.kernel_newest.replace(/-generic$/,"")+" installed"):""),
+      o.reboot_required?(o.reboot_pkgs+" packages are waiting for a restart"):"");
+    rows+=hxRow("Up since", esc(hxDate(o.boot_ts))+hxU(fmtDur(d.uptime_s)));
+    if(o.updates!==null&&o.updates!==undefined)
+      rows+=hxRow("Updates pending",
+        (o.updates?hxPill(o.security?"warn":"", hxPlural(o.updates,"package")):hxPill("ok","up to date"))+
+        (o.security?hxU(o.security.toLocaleString()+" security"):"")+
+        (o.lists_at?hxU("lists "+hxDate(o.lists_at)):""),
+        "Packages with a newer version in the configured apt sources");
+    return rows;
+  }
+  // OOM kills, GPU faults, hardware and I/O errors since boot (metrics.events).
+  function hxEventRows(d){
+    var ev=d.events; if(!ev) return "";
+    var rows="", o=ev.oom||{}, x=ev.xid||{}, hw=ev.hw||{}, io=ev.io||{}, l=o.last;
+    // Normally the whole boot; later than that when the collector first read a
+    // kernel log that no longer reached back to it.
+    var since=(ev.since&&ev.since-(d.ts-d.uptime_s)>3600)?"since "+hxDate(ev.since):"since boot";
+    rows+=hxRow("Out-of-memory kills",
+      (o.n ? hxPill(o.n_24h?"bad":o.n_7d?"warn":"", o.n_7d?hxPlural(o.n_7d,"kill")+" / 7d":o.n+" "+since)
+           : hxPill("ok","none "+since))+
+      (l ? hxU("last "+hxWhen(l.t)+" · "+l.comm+(l.rss?" at "+hxGB(l.rss):"")+
+               (l.where?" in "+l.where:l.cg?" · container limit":"")+(l.user?" · "+l.user:"")) : ""),
+      "Processes the kernel killed for memory, "+since+(o.n?": "+o.n:""));
+    if((d.gpu||[]).length){
+      var xl=x.last, codes=x.codes?Object.keys(x.codes).map(function(c){ return "Xid "+c+" ×"+x.codes[c]; }).join(", "):"";
+      rows+=hxRow("GPU faults",
+        (x.n ? hxPill(x.n_24h?"bad":x.n_7d?"warn":"", hxPlural(x.n,"Xid")+" "+since) : hxPill("ok","none "+since))+
+        (xl ? hxU("last "+hxWhen(xl.t)+" · "+codes+(xl.comm?" · "+xl.comm:"")) : ""),
+        "NVIDIA Xid events in the kernel log, "+since);
+    }
+    var bad=(hw.n||0)+(io.n||0), bl=(io.last&&(!hw.last||io.last.t>hw.last.t))?io.last:hw.last;
+    rows+=hxRow("Hardware / I/O errors",
+      (bad ? hxPill((hw.n_24h||io.n_24h)?"bad":"warn", (hw.n?hw.n+" hardware":"")+(hw.n&&io.n?" · ":"")+(io.n?io.n+" I/O":""))
+           : hxPill("ok","none logged"))+
+      (bl ? hxU("last "+hxWhen(bl.t)) : ""),
+      bl ? bl.msg : "Kernel log lines reporting a hardware or I/O error, "+since);
+    return rows;
+  }
+  // Pressure-stall: share of the last minute some task waited on each resource.
+  function hxPressureRow(d){
+    var p=d.psi; if(!p) return "";
+    function v(r){ var s=p[r]&&p[r].some; return s&&s[1]!==null&&s[1]!==undefined?s[1]:null; }
+    function f(x){ return x===null?"—":(x<0.05?"0":x<10?x.toFixed(1):x.toFixed(0))+"%"; }
+    var c=v("cpu"), i=v("io"), m=v("memory"), worst=Math.max(c||0,i||0,m||0);
+    return hxRow("Stalled · CPU / I/O / memory",
+      hxPill(worst>=40?"bad":worst>=10?"warn":"ok", f(c)+" / "+f(i)+" / "+f(m))+hxU("last minute"),
+      "Pressure-stall information: share of the last minute in which at least one task was waiting for CPU time, for disk I/O, or for memory");
+  }
+  function hxFailedUnits(d){
+    var f=d.os?d.os.failed:null;
+    if(f===null||f===undefined) return hxRow("not read yet","&mdash;");
+    if(!f.length) return hxRow("no failed units", hxPill("ok","all clear"));
+    return f.map(function(u){
+      return "<div class='row' title=\""+esc(u.desc||u.unit)+"\"><span class='k'>"+esc(u.unit.replace(/\.service$/,""))+
+        (u.desc&&u.desc!==u.unit?hxU(u.desc):"")+"</span><span class='v'>"+
+        hxPill(u.missing?"":"bad", u.missing?"unit gone":"failed")+"</span></div>"; }).join("");
+  }
+  // One row per physical disk from the SMART records riding on metrics.disk[].
+  // Several mounts can share a disk, so rows are keyed by device.
+  function hxDiskHealth(d){
+    var seen={}, rows="";
+    (d.disk||[]).forEach(function(k){
+      var sm=k.smart; if(!sm||typeof sm!=="object"||seen[k.dev]) return; seen[k.dev]=1;
+      var bits=[];
+      if(sm.wear_pct!==null&&sm.wear_pct!==undefined) bits.push(sm.wear_pct+"% worn");
+      if(sm.hours) bits.push(sm.hours.toLocaleString()+" h");
+      if(sm.written) bits.push(fmtBytes(sm.written)+" written");
+      var tip=[];
+      if(sm.spare_pct!==null&&sm.spare_pct!==undefined) tip.push(sm.spare_pct+"% spare blocks");
+      if(sm.unsafe_shutdowns!==null&&sm.unsafe_shutdowns!==undefined) tip.push(sm.unsafe_shutdowns+" unsafe shutdowns");
+      if(sm.temp) tip.push(sm.temp+" °C");
+      var warn="";
+      if((sm.realloc||0)>0||(sm.pending||0)>0) warn+=" "+hxPill("warn",(sm.realloc||0)+" realloc · "+(sm.pending||0)+" pending");
+      if((sm.media_errors||0)>0) warn+=" "+hxPill("bad",sm.media_errors+" media errors");
+      if((sm.crc||0)>0) warn+=" "+hxPill("warn",sm.crc+" link CRC");
+      if(sm.wear_pct>=90) warn+=" "+hxPill("bad","worn out");
+      rows+=hxRow(esc(k.dev)+(sm.model?hxU(sm.model):""),
+        hxPill(sm.health==="PASSED"?"ok":"bad", sm.health==="PASSED"?"SMART ok":"SMART "+sm.health)+warn+
+        (bits.length?hxU(bits.join(" · ")):""), tip.join(" · "));
+    });
+    return rows;
   }
 
   // ---------- render ----------
@@ -996,6 +1169,12 @@
     txt("load5", d.load["5"]!==undefined?d.load["5"].toFixed(2):"—");
     txt("load15",d.load["15"]!==undefined?d.load["15"].toFixed(2):"—");
     txt("runq", (d.load.running||0)+" / "+(d.load.procs||0));
+    txt("cpuclk", d.cpu.mhz_avg?(d.cpu.mhz_avg/1000).toFixed(2)+" GHz":"—");
+    var pw=d.power||{};
+    txt("cpupw", pw.pkg_w!==null&&pw.pkg_w!==undefined?pw.pkg_w.toFixed(0)+" W":"—");
+    var pwt=document.getElementById("cpupw").parentNode;
+    pwt.title="CPU package power (RAPL). The GPU's draw is on its own card."+
+      (pw.pw_24h?" 24h mean "+pw.pw_24h.toFixed(0)+" W"+(pw.pw_24h_max?", peak "+pw.pw_24h_max.toFixed(0)+" W.":"."):"");
 
     var cw=document.getElementById("cores");
     if(cw.childNodes.length!==d.cpu.cores.length){
@@ -1023,7 +1202,8 @@
       txt("gpuclk",(g.clock_sm===null?"—":g.clock_sm.toFixed(0))+" MHz");
       var gp=document.getElementById("gpuprocs");
       gp.innerHTML=(g.procs&&g.procs.length)
-        ? g.procs.map(function(p){ return "<div class='row'><span class='k'>"+p.name+" ("+p.pid+")</span>"+
+        ? g.procs.map(function(p){ return "<div class='row' title='pid "+esc(p.pid)+"'><span class='k'>"+esc(p.cmd||p.name)+
+            " <span class='u'>"+esc(p.user||("pid "+p.pid))+"</span></span>"+
             "<span class='v'>"+(p.mem_mb/1024).toFixed(1)+" GB</span></div>"; }).join("")
         : "<div class='row'><span class='k'>no compute processes</span><span class='v'>&mdash;</span></div>";
     }
@@ -1093,7 +1273,11 @@
         "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
     }).join("");
     txt("ioread",fmtBps(d.diskio.read_bps)); txt("iowrite",fmtBps(d.diskio.write_bps));
-    txt("iometa","I/O now");
+    var sa=d.diskio.smart_age_s;
+    txt("iometa","I/O now"+(sa!==null&&sa!==undefined?" · SMART "+(sa<90?sa+"s":fmtDur(sa))+" ago":""));
+    var dh=hxDiskHealth(d);
+    document.getElementById("diskhealth").innerHTML=dh;
+    document.getElementById("diskhealthwrap").hidden=!dh;
 
     // Temperatures
     document.getElementById("temps").innerHTML=(d.temps||[]).map(function(t){
@@ -1104,7 +1288,9 @@
 
     // Containers
     var c=d.containers||{};
-    txt("ctmeta",(c.running===null?"unavailable":c.running+" running"));
+    var ctm=(c.running===null||c.running===undefined?"unavailable":c.running+" running")+
+        (c.stopped?" · "+c.stopped+" stopped":"");
+    txt("ctmeta",ctm);
     // Container names share a long run prefix; strip the longest common one so
     // the part that actually distinguishes them survives truncation.
     var names=(c.names||[]).map(function(x){ return x.name; }), pre="";
@@ -1119,7 +1305,31 @@
           return "<div class='row' title='"+x.name+"'><span class='k'>"+(short||x.name)+"</span>"+
             "<span class='v'><span class='pill "+(x.healthy?"ok":"warn")+"'>"+x.status+"</span></span></div>"; }).join("")
       : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
-    if(pre) txt("ctmeta", c.running+" running · "+pre+"*");
+    if(pre) txt("ctmeta", ctm+" · "+pre+"*");
+
+    // Users & processes. CPU% is of one core, so 3200% would be every core.
+    var pr=d.procs||{}, bu=pr.by_user||[], tp=pr.top||[];
+    txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
+        ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
+    document.getElementById("byuser").innerHTML=bu.length
+      ? bu.map(function(u){
+          return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
+            " <span class='u'>"+u.n+" proc"+(u.n===1?"":"s")+" · "+fmtBytes(u.rss)+"</span></span>"+
+            "<span class='v'>"+(u.cpu>=100?(u.cpu/100).toFixed(1)+" cores":u.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>no data yet</span><span class='v'>&mdash;</span></div>";
+    document.getElementById("topprocs").innerHTML=tp.length
+      ? tp.map(function(p){
+          return "<div class='row' title='pid "+p.pid+"'><span class='k'>"+esc(p.comm)+
+            " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
+            "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
+
+    // System health
+    var sys=hxOsRows(d)+hxEventRows(d)+hxPressureRow(d);
+    document.getElementById("sysrows").innerHTML=sys||hxRow("no data yet","&mdash;");
+    document.getElementById("failrows").innerHTML=hxFailedUnits(d);
+    var oa=d.os?d.os.age_s:null;
+    txt("sysmeta", "Ubuntu"+(oa!==null&&oa!==undefined?" · checked "+(oa<90?oa+"s":fmtDur(oa))+" ago":""));
 
     drawCharts(d);
   }

@@ -281,6 +281,9 @@
   .sect:first-child{margin-top:0}
   .rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
   .rows .k .pill{margin-left:.6em;vertical-align:.08em}
+  .rows .v.wrap{white-space:normal;text-align:right}
+  /* Health rows: the label stays whole and the value wraps under it if it must. */
+  .row.hx .k{flex:none;overflow:visible}
   /* A dead NFS mount: the bar has nothing to fill, so the label carries it. */
   .meter.down .lab .k{color:var(--warn)}
   /* Fan tiles: many small numbers, so a denser grid than the stat tiles. */
@@ -500,6 +503,10 @@
         <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Read</div><div class="v" id="ioread">&mdash;</div></div>
         <div class="tile" title="Local NVMe only; NFS traffic shows on the storage LAN"><div class="k">Write</div><div class="v" id="iowrite">&mdash;</div></div>
       </div>
+      <div id="diskhealthwrap" style="margin-top:13px" hidden>
+        <div class="sect">Disk health &middot; SMART</div>
+        <div class="rows" id="diskhealth"></div>
+      </div>
     </div>
 
     <!-- Fans -->
@@ -532,6 +539,18 @@
         <div class="row"><span class="k">fail2ban &middot; banned now / ever</span><span class="v" id="sshban">&mdash;</span></div>
       </div>
       <div class="atk" id="sshatk" hidden></div>
+    </div>
+
+    <!-- System health -->
+    <div class="card">
+      <div class="h5"><span>System</span><span class="note" id="sysmeta"></span></div>
+      <div class="rows" id="sysrows"></div>
+      <div class="sect">Failed units</div>
+      <div class="rows" id="failrows"></div>
+      <details class="tbl">
+        <summary id="voltscap">Voltage rails &mdash; BMC</summary>
+        <table id="voltstable"></table>
+      </details>
     </div>
 
   </div>
@@ -971,6 +990,115 @@
     txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
   }
 
+  // ---------- host health ----------
+  // Shared verbatim by akdeniz.html, wright.html and ganesha.html: rows built
+  // from the os / events / psi blocks of metrics.json and the per-disk SMART
+  // records. Each helper returns "" when its block is absent, so a page keeps
+  // working against an older collector.
+  var HXM=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function hxPill(cls,text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
+  function hxU(text){ return " <span class='u'>"+esc(text)+"</span>"; }
+  function hxRow(k,v,title){
+    return "<div class='row hx'"+(title?" title=\""+esc(title)+"\"":"")+"><span class='k'>"+k+
+      "</span><span class='v wrap'>"+v+"</span></div>";
+  }
+  function hxDate(ts){ var d=new Date(ts*1000); return d.getDate()+" "+HXM[d.getMonth()]; }
+  function hxWhen(ts){
+    var d=new Date(ts*1000);
+    return hxDate(ts)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function hxPlural(n,w){ return n.toLocaleString()+" "+w+(n===1?"":"s"); }
+  function hxGB(b){
+    return b>=1073741824 ? (b/1073741824).toFixed(b>=10737418240?0:1)+" GB" : Math.round(b/1048576)+" MB";
+  }
+  // Kernel, boot date and pending updates (Ubuntu hosts: metrics.os).
+  function hxOsRows(d){
+    var o=d.os; if(!o) return "";
+    var rows=hxRow("Kernel", esc(o.kernel||"—")+(o.reboot_required?" "+hxPill("warn","reboot needed"):"")+
+        (o.kernel_newest?hxU(o.kernel_newest.replace(/-generic$/,"")+" installed"):""),
+      o.reboot_required?(o.reboot_pkgs+" packages are waiting for a restart"):"");
+    rows+=hxRow("Up since", esc(hxDate(o.boot_ts))+hxU(fmtDur(d.uptime_s)));
+    if(o.updates!==null&&o.updates!==undefined)
+      rows+=hxRow("Updates pending",
+        (o.updates?hxPill(o.security?"warn":"", hxPlural(o.updates,"package")):hxPill("ok","up to date"))+
+        (o.security?hxU(o.security.toLocaleString()+" security"):"")+
+        (o.lists_at?hxU("lists "+hxDate(o.lists_at)):""),
+        "Packages with a newer version in the configured apt sources");
+    return rows;
+  }
+  // OOM kills, GPU faults, hardware and I/O errors since boot (metrics.events).
+  function hxEventRows(d){
+    var ev=d.events; if(!ev) return "";
+    var rows="", o=ev.oom||{}, x=ev.xid||{}, hw=ev.hw||{}, io=ev.io||{}, l=o.last;
+    // Normally the whole boot; later than that when the collector first read a
+    // kernel log that no longer reached back to it.
+    var since=(ev.since&&ev.since-(d.ts-d.uptime_s)>3600)?"since "+hxDate(ev.since):"since boot";
+    rows+=hxRow("Out-of-memory kills",
+      (o.n ? hxPill(o.n_24h?"bad":o.n_7d?"warn":"", o.n_7d?hxPlural(o.n_7d,"kill")+" / 7d":o.n+" "+since)
+           : hxPill("ok","none "+since))+
+      (l ? hxU("last "+hxWhen(l.t)+" · "+l.comm+(l.rss?" at "+hxGB(l.rss):"")+
+               (l.where?" in "+l.where:l.cg?" · container limit":"")+(l.user?" · "+l.user:"")) : ""),
+      "Processes the kernel killed for memory, "+since+(o.n?": "+o.n:""));
+    if((d.gpu||[]).length){
+      var xl=x.last, codes=x.codes?Object.keys(x.codes).map(function(c){ return "Xid "+c+" ×"+x.codes[c]; }).join(", "):"";
+      rows+=hxRow("GPU faults",
+        (x.n ? hxPill(x.n_24h?"bad":x.n_7d?"warn":"", hxPlural(x.n,"Xid")+" "+since) : hxPill("ok","none "+since))+
+        (xl ? hxU("last "+hxWhen(xl.t)+" · "+codes+(xl.comm?" · "+xl.comm:"")) : ""),
+        "NVIDIA Xid events in the kernel log, "+since);
+    }
+    var bad=(hw.n||0)+(io.n||0), bl=(io.last&&(!hw.last||io.last.t>hw.last.t))?io.last:hw.last;
+    rows+=hxRow("Hardware / I/O errors",
+      (bad ? hxPill((hw.n_24h||io.n_24h)?"bad":"warn", (hw.n?hw.n+" hardware":"")+(hw.n&&io.n?" · ":"")+(io.n?io.n+" I/O":""))
+           : hxPill("ok","none logged"))+
+      (bl ? hxU("last "+hxWhen(bl.t)) : ""),
+      bl ? bl.msg : "Kernel log lines reporting a hardware or I/O error, "+since);
+    return rows;
+  }
+  // Pressure-stall: share of the last minute some task waited on each resource.
+  function hxPressureRow(d){
+    var p=d.psi; if(!p) return "";
+    function v(r){ var s=p[r]&&p[r].some; return s&&s[1]!==null&&s[1]!==undefined?s[1]:null; }
+    function f(x){ return x===null?"—":(x<0.05?"0":x<10?x.toFixed(1):x.toFixed(0))+"%"; }
+    var c=v("cpu"), i=v("io"), m=v("memory"), worst=Math.max(c||0,i||0,m||0);
+    return hxRow("Stalled · CPU / I/O / memory",
+      hxPill(worst>=40?"bad":worst>=10?"warn":"ok", f(c)+" / "+f(i)+" / "+f(m))+hxU("last minute"),
+      "Pressure-stall information: share of the last minute in which at least one task was waiting for CPU time, for disk I/O, or for memory");
+  }
+  function hxFailedUnits(d){
+    var f=d.os?d.os.failed:null;
+    if(f===null||f===undefined) return hxRow("not read yet","&mdash;");
+    if(!f.length) return hxRow("no failed units", hxPill("ok","all clear"));
+    return f.map(function(u){
+      return "<div class='row' title=\""+esc(u.desc||u.unit)+"\"><span class='k'>"+esc(u.unit.replace(/\.service$/,""))+
+        (u.desc&&u.desc!==u.unit?hxU(u.desc):"")+"</span><span class='v'>"+
+        hxPill(u.missing?"":"bad", u.missing?"unit gone":"failed")+"</span></div>"; }).join("");
+  }
+  // One row per physical disk from the SMART records riding on metrics.disk[].
+  // Several mounts can share a disk, so rows are keyed by device.
+  function hxDiskHealth(d){
+    var seen={}, rows="";
+    (d.disk||[]).forEach(function(k){
+      var sm=k.smart; if(!sm||typeof sm!=="object"||seen[k.dev]) return; seen[k.dev]=1;
+      var bits=[];
+      if(sm.wear_pct!==null&&sm.wear_pct!==undefined) bits.push(sm.wear_pct+"% worn");
+      if(sm.hours) bits.push(sm.hours.toLocaleString()+" h");
+      if(sm.written) bits.push(fmtBytes(sm.written)+" written");
+      var tip=[];
+      if(sm.spare_pct!==null&&sm.spare_pct!==undefined) tip.push(sm.spare_pct+"% spare blocks");
+      if(sm.unsafe_shutdowns!==null&&sm.unsafe_shutdowns!==undefined) tip.push(sm.unsafe_shutdowns+" unsafe shutdowns");
+      if(sm.temp) tip.push(sm.temp+" °C");
+      var warn="";
+      if((sm.realloc||0)>0||(sm.pending||0)>0) warn+=" "+hxPill("warn",(sm.realloc||0)+" realloc · "+(sm.pending||0)+" pending");
+      if((sm.media_errors||0)>0) warn+=" "+hxPill("bad",sm.media_errors+" media errors");
+      if((sm.crc||0)>0) warn+=" "+hxPill("warn",sm.crc+" link CRC");
+      if(sm.wear_pct>=90) warn+=" "+hxPill("bad","worn out");
+      rows+=hxRow(esc(k.dev)+(sm.model?hxU(sm.model):""),
+        hxPill(sm.health==="PASSED"?"ok":"bad", sm.health==="PASSED"?"SMART ok":"SMART "+sm.health)+warn+
+        (bits.length?hxU(bits.join(" · ")):""), tip.join(" · "));
+    });
+    return rows;
+  }
+
   // ---------- render ----------
   function render(d){
     last=d;
@@ -1100,7 +1228,11 @@
         "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
     }).join("");
     txt("ioread",fmtBps(d.diskio.read_bps)); txt("iowrite",fmtBps(d.diskio.write_bps));
-    txt("iometa","local I/O now");
+    var sa=d.diskio.smart_age_s;
+    txt("iometa","local I/O now"+(sa!==null&&sa!==undefined?" · SMART "+(sa<90?sa+"s":fmtDur(sa))+" ago":""));
+    var dh=hxDiskHealth(d);
+    document.getElementById("diskhealth").innerHTML=dh;
+    document.getElementById("diskhealthwrap").hidden=!dh;
 
     // Temperatures
     renderTemps(d);
@@ -1134,6 +1266,32 @@
             " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
             "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
+
+    // System health
+    var hl=d.health||{}, sysr=hxOsRows(d)+hxEventRows(d);
+    var ge=(d.gpu||[]).filter(function(g){ return g.ecc_ce!==null&&g.ecc_ce!==undefined; });
+    if(ge.length){
+      var gce=0, gue=0; ge.forEach(function(g){ gce+=g.ecc_ce||0; gue+=g.ecc_ue||0; });
+      sysr+=hxRow("GPU memory ECC",
+        hxPill(gue?"bad":gce?"warn":"ok", (gce||gue)?gce+" corrected · "+gue+" uncorrected":"no errors")+
+        hxU(ge.length+" cards · lifetime"), "Error-corrected and uncorrectable faults in the GPUs' own memory, over each card's life");
+    }
+    if(hl.edac) sysr+=hxRow("ECC memory",
+      hxPill(hl.edac.ue?"bad":hl.edac.ce?"warn":"ok", (hl.edac.ce||hl.edac.ue)?hl.edac.ce+" corrected · "+hl.edac.ue+" uncorrected":"no errors")+
+      hxU("since boot"), "Corrected and uncorrected main-memory errors counted by the kernel's EDAC driver");
+    if(hl.sel&&hl.sel.entries!==null&&hl.sel.entries!==undefined) sysr+=hxRow("BMC event log",
+      hxPill(hl.sel.overflow||hl.sel.pct>=80?"warn":"", hl.sel.entries+(hl.sel.entries===1?" entry":" entries"))+
+      (hl.sel.last_add?hxU("last "+hxDate(hl.sel.last_add)):"")+(hl.sel.pct?hxU(hl.sel.pct+"% full"):""),
+      hl.sel.last?"Most recent: "+hl.sel.last:"");
+    sysr+=hxPressureRow(d);
+    document.getElementById("sysrows").innerHTML=sysr||hxRow("no data yet","&mdash;");
+    document.getElementById("failrows").innerHTML=hxFailedUnits(d);
+    var oa=d.os?d.os.age_s:null;
+    txt("sysmeta", "Ubuntu"+(oa!==null&&oa!==undefined?" · checked "+(oa<90?oa+"s":fmtDur(oa))+" ago":""));
+    var vl=((d.ipmi||{}).volts||[]);
+    document.getElementById("voltstable").innerHTML="<thead><tr><th>Rail</th><th>Volts</th></tr></thead><tbody>"+
+      vl.map(function(v){ return "<tr><td>"+esc(v.n)+"</td><td>"+v.v.toFixed(2)+"</td></tr>"; }).join("")+"</tbody>";
+    txt("voltscap", "Voltage rails — BMC"+(vl.length?" · "+vl.length+" in range":""));
 
     drawCharts(d);
   }

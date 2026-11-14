@@ -278,6 +278,8 @@
   .strip{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#0a0d14;border:1px solid var(--line);margin-top:8px}
   .strip i{display:block;height:100%}
   .rows .v.wrap{white-space:normal;text-align:right}
+  /* Health rows: the label stays whole and the value wraps under it if it must. */
+  .row.hx .k{flex:none;overflow:visible}
   .note.ok{color:var(--good)} .note.warn{color:var(--warn)} .note.bad{color:var(--bad)}
 </style>
 </head>
@@ -569,6 +571,12 @@
       <div class="rows" id="sysrows"></div>
       <div class="sect">Services not running</div>
       <div class="rows" id="svcrows"></div>
+      <div class="sect">TLS certificates &middot; Caddy</div>
+      <div class="rows" id="certrows"></div>
+      <details class="tbl">
+        <summary id="voltscap">Voltage rails &mdash; BMC</summary>
+        <table id="voltstable"></table>
+      </details>
     </div>
 
     <!-- External access to hosted data: the same counter the akdeniz page
@@ -992,6 +1000,115 @@
     txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
   }
 
+  // ---------- host health ----------
+  // Shared verbatim by akdeniz.html, wright.html and ganesha.html: rows built
+  // from the os / events / psi blocks of metrics.json and the per-disk SMART
+  // records. Each helper returns "" when its block is absent, so a page keeps
+  // working against an older collector.
+  var HXM=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
+  function hxPill(cls,text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
+  function hxU(text){ return " <span class='u'>"+esc(text)+"</span>"; }
+  function hxRow(k,v,title){
+    return "<div class='row hx'"+(title?" title=\""+esc(title)+"\"":"")+"><span class='k'>"+k+
+      "</span><span class='v wrap'>"+v+"</span></div>";
+  }
+  function hxDate(ts){ var d=new Date(ts*1000); return d.getDate()+" "+HXM[d.getMonth()]; }
+  function hxWhen(ts){
+    var d=new Date(ts*1000);
+    return hxDate(ts)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
+  }
+  function hxPlural(n,w){ return n.toLocaleString()+" "+w+(n===1?"":"s"); }
+  function hxGB(b){
+    return b>=1073741824 ? (b/1073741824).toFixed(b>=10737418240?0:1)+" GB" : Math.round(b/1048576)+" MB";
+  }
+  // Kernel, boot date and pending updates (Ubuntu hosts: metrics.os).
+  function hxOsRows(d){
+    var o=d.os; if(!o) return "";
+    var rows=hxRow("Kernel", esc(o.kernel||"—")+(o.reboot_required?" "+hxPill("warn","reboot needed"):"")+
+        (o.kernel_newest?hxU(o.kernel_newest.replace(/-generic$/,"")+" installed"):""),
+      o.reboot_required?(o.reboot_pkgs+" packages are waiting for a restart"):"");
+    rows+=hxRow("Up since", esc(hxDate(o.boot_ts))+hxU(fmtDur(d.uptime_s)));
+    if(o.updates!==null&&o.updates!==undefined)
+      rows+=hxRow("Updates pending",
+        (o.updates?hxPill(o.security?"warn":"", hxPlural(o.updates,"package")):hxPill("ok","up to date"))+
+        (o.security?hxU(o.security.toLocaleString()+" security"):"")+
+        (o.lists_at?hxU("lists "+hxDate(o.lists_at)):""),
+        "Packages with a newer version in the configured apt sources");
+    return rows;
+  }
+  // OOM kills, GPU faults, hardware and I/O errors since boot (metrics.events).
+  function hxEventRows(d){
+    var ev=d.events; if(!ev) return "";
+    var rows="", o=ev.oom||{}, x=ev.xid||{}, hw=ev.hw||{}, io=ev.io||{}, l=o.last;
+    // Normally the whole boot; later than that when the collector first read a
+    // kernel log that no longer reached back to it.
+    var since=(ev.since&&ev.since-(d.ts-d.uptime_s)>3600)?"since "+hxDate(ev.since):"since boot";
+    rows+=hxRow("Out-of-memory kills",
+      (o.n ? hxPill(o.n_24h?"bad":o.n_7d?"warn":"", o.n_7d?hxPlural(o.n_7d,"kill")+" / 7d":o.n+" "+since)
+           : hxPill("ok","none "+since))+
+      (l ? hxU("last "+hxWhen(l.t)+" · "+l.comm+(l.rss?" at "+hxGB(l.rss):"")+
+               (l.where?" in "+l.where:l.cg?" · container limit":"")+(l.user?" · "+l.user:"")) : ""),
+      "Processes the kernel killed for memory, "+since+(o.n?": "+o.n:""));
+    if((d.gpu||[]).length){
+      var xl=x.last, codes=x.codes?Object.keys(x.codes).map(function(c){ return "Xid "+c+" ×"+x.codes[c]; }).join(", "):"";
+      rows+=hxRow("GPU faults",
+        (x.n ? hxPill(x.n_24h?"bad":x.n_7d?"warn":"", hxPlural(x.n,"Xid")+" "+since) : hxPill("ok","none "+since))+
+        (xl ? hxU("last "+hxWhen(xl.t)+" · "+codes+(xl.comm?" · "+xl.comm:"")) : ""),
+        "NVIDIA Xid events in the kernel log, "+since);
+    }
+    var bad=(hw.n||0)+(io.n||0), bl=(io.last&&(!hw.last||io.last.t>hw.last.t))?io.last:hw.last;
+    rows+=hxRow("Hardware / I/O errors",
+      (bad ? hxPill((hw.n_24h||io.n_24h)?"bad":"warn", (hw.n?hw.n+" hardware":"")+(hw.n&&io.n?" · ":"")+(io.n?io.n+" I/O":""))
+           : hxPill("ok","none logged"))+
+      (bl ? hxU("last "+hxWhen(bl.t)) : ""),
+      bl ? bl.msg : "Kernel log lines reporting a hardware or I/O error, "+since);
+    return rows;
+  }
+  // Pressure-stall: share of the last minute some task waited on each resource.
+  function hxPressureRow(d){
+    var p=d.psi; if(!p) return "";
+    function v(r){ var s=p[r]&&p[r].some; return s&&s[1]!==null&&s[1]!==undefined?s[1]:null; }
+    function f(x){ return x===null?"—":(x<0.05?"0":x<10?x.toFixed(1):x.toFixed(0))+"%"; }
+    var c=v("cpu"), i=v("io"), m=v("memory"), worst=Math.max(c||0,i||0,m||0);
+    return hxRow("Stalled · CPU / I/O / memory",
+      hxPill(worst>=40?"bad":worst>=10?"warn":"ok", f(c)+" / "+f(i)+" / "+f(m))+hxU("last minute"),
+      "Pressure-stall information: share of the last minute in which at least one task was waiting for CPU time, for disk I/O, or for memory");
+  }
+  function hxFailedUnits(d){
+    var f=d.os?d.os.failed:null;
+    if(f===null||f===undefined) return hxRow("not read yet","&mdash;");
+    if(!f.length) return hxRow("no failed units", hxPill("ok","all clear"));
+    return f.map(function(u){
+      return "<div class='row' title=\""+esc(u.desc||u.unit)+"\"><span class='k'>"+esc(u.unit.replace(/\.service$/,""))+
+        (u.desc&&u.desc!==u.unit?hxU(u.desc):"")+"</span><span class='v'>"+
+        hxPill(u.missing?"":"bad", u.missing?"unit gone":"failed")+"</span></div>"; }).join("");
+  }
+  // One row per physical disk from the SMART records riding on metrics.disk[].
+  // Several mounts can share a disk, so rows are keyed by device.
+  function hxDiskHealth(d){
+    var seen={}, rows="";
+    (d.disk||[]).forEach(function(k){
+      var sm=k.smart; if(!sm||typeof sm!=="object"||seen[k.dev]) return; seen[k.dev]=1;
+      var bits=[];
+      if(sm.wear_pct!==null&&sm.wear_pct!==undefined) bits.push(sm.wear_pct+"% worn");
+      if(sm.hours) bits.push(sm.hours.toLocaleString()+" h");
+      if(sm.written) bits.push(fmtBytes(sm.written)+" written");
+      var tip=[];
+      if(sm.spare_pct!==null&&sm.spare_pct!==undefined) tip.push(sm.spare_pct+"% spare blocks");
+      if(sm.unsafe_shutdowns!==null&&sm.unsafe_shutdowns!==undefined) tip.push(sm.unsafe_shutdowns+" unsafe shutdowns");
+      if(sm.temp) tip.push(sm.temp+" °C");
+      var warn="";
+      if((sm.realloc||0)>0||(sm.pending||0)>0) warn+=" "+hxPill("warn",(sm.realloc||0)+" realloc · "+(sm.pending||0)+" pending");
+      if((sm.media_errors||0)>0) warn+=" "+hxPill("bad",sm.media_errors+" media errors");
+      if((sm.crc||0)>0) warn+=" "+hxPill("warn",sm.crc+" link CRC");
+      if(sm.wear_pct>=90) warn+=" "+hxPill("bad","worn out");
+      rows+=hxRow(esc(k.dev)+(sm.model?hxU(sm.model):""),
+        hxPill(sm.health==="PASSED"?"ok":"bad", sm.health==="PASSED"?"SMART ok":"SMART "+sm.health)+warn+
+        (bits.length?hxU(bits.join(" · ")):""), tip.join(" · "));
+    });
+    return rows;
+  }
+
   // ---------- render ----------
   function render(d){
     last=d;
@@ -1074,6 +1191,7 @@
       var sm="";
       if(k.smart) sm=" "+spill(k.smart==="PASSED"?"ok":"bad", k.smart==="PASSED"?"SMART ok":"SMART "+k.smart);
       if((k.realloc||0)>0||(k.pending||0)>0) sm+=" "+spill("warn",(k.realloc||0)+" realloc · "+(k.pending||0)+" pending");
+      if((k.crc||0)>0) sm+=" "+spill("warn", k.crc+" link CRC");
       var lab="<span class='k' title='"+esc(k.mount)+" on "+esc(k.dev)+(k.hours?" · "+Math.round(k.hours/24/365.25*10)/10+" years powered on":"")+"'>"+esc(k.label)+kind+sm+"</span>";
       if(!k.ok) return "<div class='meter down'><div class='lab'>"+lab+"<span class='v'>"+spill("bad","not mounted")+"</span></div>"+
         "<div class='track'><div class='fill' style='width:0'></div></div></div>";
@@ -1162,13 +1280,37 @@
 
     // Containers
     var c=d.containers||{};
-    txt("ctmeta",(c.running===null||c.running===undefined?"unavailable":c.running+" running"));
+    // Memory and CPU come from each container's cgroup; CPU% is of one core.
+    var ctMem=0, ctCpu=0, ctOom=0, ctHave=false;
+    (c.names||[]).forEach(function(x){
+      if(x.mem!==undefined&&x.mem!==null){ ctMem+=x.mem; ctHave=true; }
+      ctCpu+=x.cpu||0; ctOom+=x.oom_kills||0;
+    });
+    txt("ctmeta",(c.running===null||c.running===undefined?"unavailable":c.running+" running")+
+        (ctHave?" · "+fmtBytes(ctMem)+" · "+(ctCpu>=100?(ctCpu/100).toFixed(1)+" cores":ctCpu.toFixed(1)+"% CPU"):"")+
+        (ctOom?" · "+ctOom+" OOM kill"+(ctOom===1?"":"s"):""));
+    // Names in one compose project share a long prefix; strip the longest
+    // common one so the part that tells them apart survives truncation.
+    var ctNames=(c.names||[]).map(function(x){ return x.name; }), ctPre="";
+    if(ctNames.length>1){
+      ctPre=ctNames[0];
+      ctNames.forEach(function(n){ while(ctPre && n.indexOf(ctPre)!==0) ctPre=ctPre.slice(0,-1); });
+      if(ctPre.length<4) ctPre="";
+    }
     document.getElementById("containers").innerHTML=(c.names&&c.names.length)
       ? c.names.map(function(x){
-          return "<div class='row' title='"+esc(x.image||"")+"'><span class='k'>"+esc(x.name)+
-            (x.image?" <span class='u'>"+esc(x.image)+"</span>":"")+"</span>"+
+          var use="";
+          if(x.mem!==undefined&&x.mem!==null){
+            var mp=x.mem_max?100*x.mem/x.mem_max:null;
+            use=" <span class='u'"+(mp!==null&&mp>=90?" style='color:var(--warn)'":"")+">"+fmtBytes(x.mem)+
+              (x.mem_max?" of "+fmtBytes(x.mem_max):"")+(x.cpu!==undefined&&x.cpu!==null?" · "+x.cpu.toFixed(1)+"%":"")+"</span>";
+          }
+          return "<div class='row' title='"+esc(x.name)+(x.image?" · image "+esc(x.image):"")+"'><span class='k'>"+
+            esc(ctPre?(x.name.slice(ctPre.length)||x.name):x.name)+
+            (x.oom_kills?" "+spill("bad", x.oom_kills+" OOM kill"+(x.oom_kills===1?"":"s")):"")+use+"</span>"+
             "<span class='v'>"+spill(x.healthy?"ok":"warn", x.status)+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>none running</span><span class='v'>&mdash;</span></div>";
+    if(ctPre) txt("ctmeta", document.getElementById("ctmeta").textContent+" · "+ctPre+"*");
 
     // SSH
     var s=d.ssh;
@@ -1206,7 +1348,7 @@
 
     // System health
     var h=d.health||{}, mce=h.mce||{}, em=h.emerge||{}, sv=h.services||{};
-    function hrow(k,v){ return "<div class='row'><span class='k'>"+k+"</span><span class='v wrap'>"+v+"</span></div>"; }
+    function hrow(k,v){ return "<div class='row hx'><span class='k'>"+k+"</span><span class='v wrap'>"+v+"</span></div>"; }
     var rows="";
     rows+=hrow("Kernel", esc(d.kernel||"—")+" <span class='u'>Gentoo · OpenRC</span>");
     rows+=hrow("Uptime", fmtDur(d.uptime_s));
@@ -1234,7 +1376,37 @@
         " <span class='u'>"+esc(dateclock(w.t))+" · "+w.merged+" package"+(w.merged===1?"":"s")+
         (w.done?" · took "+fmtDur(w.done-w.t):"")+"</span>"+(em.running?" "+spill("warn","emerge running now"):""));
     }
+    rows+=hxEventRows(d)+hxPressureRow(d);
+    var sel=h.sel;
+    if(sel&&sel.entries!==null&&sel.entries!==undefined) rows+=hxRow("BMC event log",
+      hxPill(sel.overflow||sel.pct>=80?"warn":"", sel.entries+(sel.entries===1?" entry":" entries"))+
+      (sel.pct!==null&&sel.pct!==undefined?hxU(sel.pct+"% full"):"")+(sel.grew_at?hxU("new entry "+hxWhen(sel.grew_at)):""),
+      (sel.last?"Most recent: "+sel.last+". ":"")+"The BMC clock was never set, so its own timestamps are not shown.");
+    (d.disk||[]).forEach(function(k){
+      if(k.wear_pct===null||k.wear_pct===undefined) return;
+      rows+=hxRow(esc(k.label.split(" · ")[0])+" SSD wear",
+        hxPill(k.wear_pct>=90?"bad":k.wear_pct>=70?"warn":"", k.wear_pct+"% of rated life used")+
+        (k.hours?hxU((k.hours/24/365.25).toFixed(1)+" years powered on"):""),
+        "From the drive's own SMART wear counter ("+k.dev+")");
+    });
+    var volts=((d.ipmi||{}).volts||[]), vbat=null;
+    volts.forEach(function(v){ if(v.n==="VBAT") vbat=v.v; });
+    if(vbat!==null) rows+=hxRow("CMOS battery",
+      hxPill(vbat<2.5?"bad":vbat<2.8?"warn":"ok", vbat.toFixed(2)+" V")+hxU("3.0 V cell"),
+      "The coin cell that keeps the BIOS settings and clock; below about 2.5 V it needs replacing");
     document.getElementById("sysrows").innerHTML=rows;
+    document.getElementById("voltstable").innerHTML="<thead><tr><th>Rail</th><th>Volts</th></tr></thead><tbody>"+
+      volts.map(function(v){ return "<tr><td>"+esc(v.n)+"</td><td>"+v.v.toFixed(2)+"</td></tr>"; }).join("")+"</tbody>";
+    txt("voltscap", "Voltage rails — BMC"+(volts.length?" · "+volts.length+" in range":""));
+    // Caddy renews about 30 days before expiry, so under two weeks left means
+    // renewal has been failing for a fortnight.
+    var crt=h.certs||[], nowS=Date.now()/1000;
+    document.getElementById("certrows").innerHTML=crt.length
+      ? crt.slice().sort(function(a,b){ return a.not_after-b.not_after; }).map(function(x){
+          var days=Math.floor((x.not_after-nowS)/86400);
+          return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
+            hxPill(days<7?"bad":days<14?"warn":"ok", days<0?"expired":days+" days")+hxU("until "+hxDate(x.not_after))+"</span></div>"; }).join("")
+      : "<div class='row'><span class='k'>not read yet</span><span class='v'>&mdash;</span></div>";
     var ns=sv.not_started||[];
     document.getElementById("svcrows").innerHTML=ns.length
       ? ns.map(function(x){ return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
