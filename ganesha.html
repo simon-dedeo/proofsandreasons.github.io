@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://proofsandreasons.io/ganesha.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/ganesha.html">
-<link rel="stylesheet" href="monitor.css?v=20261114">
+<link rel="stylesheet" href="monitor.css?v=20261114b">
 <style>
   .meter .lab .k .pill{margin-left:.5em;vertical-align:.08em}
   /* Web-traffic class bars: a stacked strip, one colour per class, with a key. */
@@ -382,7 +382,7 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261114"></script>
+<script src="monitor.js?v=20261114b"></script>
 <script>
 (function(){
   "use strict";
@@ -410,6 +410,7 @@
       document.getElementById("pwtable").innerHTML="<thead><tr><th>Time</th><th>Packages</th>"+(w.pwMax?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
         tableRows(w, cols, fmtW)+"</tbody>";
     } else {
+      clearChart("pwchart");
       document.getElementById("pwtable").innerHTML="<tbody><tr><td>No power history yet.</td></tr></tbody>";
     }
     document.getElementById("pwkeys").innerHTML=keys;
@@ -430,6 +431,7 @@
       var s=stats(req), tot=rows.reduce(function(a,r){ return a+r.req; },0);
       if(s) stat=tot.toLocaleString()+" requests · peak "+s.max.toFixed(s.max>=10?0:1)+"/min";
     }
+    if(!keys) clearChart("webchart");
     document.getElementById("webkeys").innerHTML=keys;
     txt("webstat", stat);
   }
@@ -562,8 +564,7 @@
         "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
     }).join("");
     txt("ioread",fmtBytesPs(d.diskio.read_bps)); txt("iowrite",fmtBytesPs(d.diskio.write_bps));
-    var kd=(d.diskio.by_dev||{}).sde;
-    txt("kionow", kd?fmtBytesPs(kd.read_bps+kd.write_bps):"—");
+    txt("kionow", fmtBytesPs(d.diskio.kubrick_bps));
     txt("kio24", fmtBytesPs(d.diskio.kubrick_bps_24h));
     var sa=d.diskio.smart_age_s;
     txt("iometa", "I/O now"+(sa!==null&&sa!==undefined?" · SMART "+fmtAge(sa)+" ago":""));
@@ -676,12 +677,13 @@
     // System health
     var h=d.health||{}, mce=h.mce||{}, em=h.emerge||{}, sv=h.services||{};
     var rows="";
+    rows+=hxBmcAlerts(d);
     rows+=hxRow("Kernel", esc(d.kernel||"—")+" <span class='u'>Gentoo · OpenRC</span>");
     rows+=hxRow("Uptime", fmtDur(d.uptime_s));
     if(mce.total!==undefined){
       var mcls=mce.n_7d?"bad":mce.n_30d?"warn":"ok";
       rows+=hxRow("Machine-check exceptions", spill(mcls, (mce.n_30d||0)+" in 30d")+" <span class='u'>"+(mce.total||0)+" since boot"+
-        (mce.last?" · last "+esc(dateclock(mce.last)):"")+"</span>",
+        (mce.last?" · last "+esc(dateclock(mce.last)):"")+"</span>"+hxStale(mce, 3600),
         hxLines("Machine-check exceptions the CPUs have logged: "+(mce.total||0), mce.recent, mce.total));
       rows+=hxRow("ECC memory", (mce.memory_errors===false?spill("ok","no errors"):mce.memory_errors===true?spill("bad","errors logged"):"—")+
         (h.ecc_sensors_ok?" <span class='u'>"+h.ecc_sensors_ok+" BMC sensors ok</span>":""));
@@ -729,8 +731,14 @@
           return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
             spill(days<7?"bad":days<14?"warn":"ok", days<0?"expired":days+" days")+hxU("until "+daymonth(x.not_after))+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>not read yet</span><span class='v'>&mdash;</span></div>";
+    var cs=hxStale({age_s:h.certs_age_s}, 3*3600);
+    if(cs) document.getElementById("certrows").innerHTML+="<div class='row'><span class='k'>certificate check</span><span class='v'>"+cs+"</span></div>";
     var ns=sv.not_started||[];
-    document.getElementById("svcrows").innerHTML=ns.length
+    document.getElementById("svcrows").innerHTML=sv.started===undefined
+      ? "<div class='row'><span class='k'>rc-status has not been read</span><span class='v'>"+spill("warn","unknown")+"</span></div>"
+      : hxStale(sv, 600)
+      ? "<div class='row'><span class='k'>service list</span><span class='v'>"+hxStale(sv, 600)+"</span></div>"
+      : ns.length
       ? ns.map(function(x){ return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
           spill(x.status==="crashed"?"bad":"", x.status)+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>everything in the default runlevel is up</span><span class='v'>"+spill("ok", (sv.started||0)+" started")+"</span></div>";

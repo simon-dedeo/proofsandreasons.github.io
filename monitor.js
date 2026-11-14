@@ -191,7 +191,14 @@ function windowFor(d, r){
     for(var t=start;t<=end;t+=src.step) push(t, byT[t]||null);
     w.span=end-start+src.step;
   } else {
-    rows.forEach(function(x){ push(x.t, x); });
+    // Every sample of the last hour, by the clock. Where the collector missed
+    // some, a null is put in so the line breaks rather than bridging the hole.
+    var every=d.interval_s||30, newest=rows[rows.length-1].t, before=null;
+    rows.forEach(function(x){
+      if(newest-x.t>3600) return;
+      if(before!==null && x.t-before>3*every) push(before+every, null);
+      push(x.t, x); before=x.t;
+    });
     w.span=w.times[w.times.length-1]-w.times[0];
   }
   w.step=src.step||d.interval_s||30;
@@ -229,6 +236,12 @@ function stats(vals){
   return {avg:v.reduce(function(a,b){return a+b;},0)/v.length, max:Math.max.apply(null,v)};
 }
 function pctFmt(v){ return v.toFixed(0)+"%"; }
+// Empty a chart whose series is not in this payload, so the last drawing does
+// not sit there looking current.
+function clearChart(id){
+  var svg=document.querySelector("#"+id+" svg");
+  while(svg && svg.firstChild) svg.removeChild(svg.firstChild);
+}
 // Newest-first rows for a chart's table view (the accessible fallback).
 function tableRows(w, keys, fmt){
   return w.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
@@ -265,6 +278,7 @@ function drawPercentSeries(o){
       "<thead><tr><th>Time</th><th>"+o.col+"</th>"+(w[maxKey]?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
       tableRows(w, cols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
   } else {
+    clearChart(o.chart);
     document.getElementById(o.tbl).innerHTML="<tbody><tr><td>No "+o.tblName+" history yet.</td></tr></tbody>";
   }
   document.getElementById(o.keys).innerHTML=keys;
@@ -289,6 +303,8 @@ function drawNet(w){
     stat=spanText(w.span)+(rs&&ts ? " · avg "+fmtBps(rs.avg)+" in / "+fmtBps(ts.avg)+" out" : "");
     document.getElementById("nettblcap").innerHTML="Table view &mdash; network, "+spanText(w.span);
     document.getElementById("nettbl").innerHTML=tableRows(w, ["rx","tx"], fmtBps);
+  } else {
+    clearChart("netchart");
   }
   txt("netstat", stat);
 }
@@ -350,6 +366,17 @@ function wireMemPeek(){
 // ---------- host health ----------
 // Rows built from the os / events / psi blocks of metrics.json and the
 // per-disk SMART records. Each helper returns "" when its block is absent.
+//
+// A block the collector reads on its own slow cadence carries `age_s` (seconds
+// since that probe last succeeded; null if it never has) and, when the last
+// attempt failed, `error`. hxStale() turns those into a visible amber note:
+// a probe that could not look must never read as a green "nothing found".
+function hxStale(b, limit){
+  if(!b || (b.age_s===undefined && !b.error)) return "";            // an older collector: no claim either way
+  if(b.age_s===null) return " "+spill("warn","not read"+(b.error?": "+b.error:""));
+  if(b.error || b.age_s>limit) return " "+spill("warn", "stale · read "+fmtAge(b.age_s)+" ago");
+  return "";
+}
 function hxU(text){ return " <span class='u'>"+esc(text)+"</span>"; }
 // A label / value row whose value may wrap; `title` is the hover text and may
 // run to several lines.
@@ -377,6 +404,8 @@ function hxOsRows(d){
       (o.security?hxU(o.security.toLocaleString()+" security"):"")+
       (o.lists_at?hxU("lists "+daymonth(o.lists_at)):""),
       "Packages with a newer version in the configured apt sources");
+  var st=hxStale(o, 3600);
+  if(st) rows+=hxRow("Update / unit checks", st, o.error||"");
   return rows;
 }
 // OOM kills, GPU faults, hardware and I/O errors (metrics.events). Hovering a
@@ -386,19 +415,25 @@ function hxEventRows(d){
   // Normally the whole boot; later than that when the collector first read a
   // kernel log that no longer reached back to it.
   var since=(ev.since-(d.ts-d.uptime_s)>3600) ? "since "+daymonth(ev.since) : "since boot";
+  // The kernel log could not be read (or has not been for half an hour): a
+  // zero then means nothing, and is shown as unknown rather than as clear.
+  var stale=hxStale(ev, 1800), gaps=ev.gaps?" The log was lost track of "+ev.gaps+" time"+(ev.gaps===1?"":"s")+
+      " in that span; events in those gaps are not counted.":"";
   function row(label, e, what, detail){
     e=e||{};
     var l=(e.recent||[])[0], more=l&&detail?detail(l):"";
     return hxRow(label,
-      (e.n ? spill(e.n_24h?"bad":e.n_7d?"warn":"", e.n.toLocaleString()+" "+since) : spill("ok","none "+since))+
+      (e.n ? spill(e.n_24h?"bad":e.n_7d?"warn":"", e.n.toLocaleString()+" "+since)
+           : stale ? spill("warn","unknown") : spill("ok","none "+since))+
       (l ? hxU("last "+dateclock(l.t)+(more?" · "+more:"")) : ""),
-      hxLines(what+", "+since+": "+(e.n||0), e.recent, e.n));
+      hxLines(what+", "+since+": "+(e.n||0)+"."+gaps+(ev.error?" Last read failed: "+ev.error:""), e.recent, e.n));
   }
   var rows=row("Out-of-memory kills", ev.oom, "Processes the kernel killed for memory", function(l){
     return l.comm+(l.rss?" at "+fmtBytes(l.rss):"")+(l.where?" in "+l.where:l.cg?" · container limit":"")+(l.user?" · "+l.user:""); });
   if((d.gpu||[]).length) rows+=row("GPU faults", ev.xid, "NVIDIA Xid events in the kernel log", function(l){
     return "Xid "+l.code+(l.comm?" · "+l.comm:""); });
-  return rows+row("Hardware / I/O errors", ev.err, "Kernel log lines reporting a hardware or I/O error");
+  rows+=row("Hardware / I/O errors", ev.err, "Kernel log lines reporting a hardware or I/O error");
+  return stale ? rows+hxRow("Kernel log", stale, ev.error||"") : rows;
 }
 // Pressure-stall: share of the last minute some task waited on each resource.
 function hxPressureRow(d){
@@ -425,8 +460,19 @@ function hxSelRow(sel, when, note){
   if(!sel||sel.entries===null||sel.entries===undefined) return "";
   return hxRow("BMC event log",
     spill(sel.overflow||sel.pct>=80?"warn":"", sel.entries+(sel.entries===1?" entry":" entries"))+
-    (sel.pct?hxU(sel.pct+"% full"):"")+(when?hxU(when):""),
+    (sel.pct?hxU(sel.pct+"% full"):"")+(when?hxU(when):"")+hxStale(sel, 7200),
     (sel.last?"Most recent entry: "+sel.last:"")+(note?"\n"+note:""));
+}
+// BMC sensors that used to read "ok" and no longer do (metrics.ipmi.alerts):
+// gone past a threshold, or stopped answering. Sensors that were never ok
+// (empty slots, unwired rails) are not in the list.
+function hxBmcAlerts(d){
+  return ((d.ipmi||{}).alerts||[]).map(function(a){
+    var what=/cr$/.test(a.status)?"critical":/nr$/.test(a.status)?"non-recoverable":/nc$/.test(a.status)?"warning":
+             a.status==="ns"?"no reading":a.status;
+    return hxRow("BMC · "+esc(a.n), spill(/nc$/.test(a.status)?"warn":"bad", what)+hxU(a.reading),
+      "This sensor has read ok before and does not now (BMC status \""+a.status+"\")");
+  }).join("");
 }
 // Voltage rails the BMC rates as in range (metrics.ipmi.volts), as a table.
 function hxVolts(d){
@@ -449,6 +495,11 @@ function hxDiskHealth(d){
     if(sm.spare_pct!==null&&sm.spare_pct!==undefined) tip.push(sm.spare_pct+"% spare blocks");
     if(sm.unsafe_shutdowns!==null&&sm.unsafe_shutdowns!==undefined) tip.push(sm.unsafe_shutdowns+" unsafe shutdowns");
     if(sm.temp) tip.push(sm.temp+" °C");
+    // A reading that could not be refreshed keeps its age: an old PASSED is
+    // not a current one. (A disk left asleep is expected to be old.)
+    if(sm.failed) warn+=" "+spill("warn","unreadable");
+    if(sm.asleep) bits.push("asleep");
+    if(sm.age_s>3600 || ((sm.failed||sm.asleep) && sm.age_s!==null && sm.age_s!==undefined)) bits.push("read "+fmtAge(sm.age_s)+" ago");
     if(sm.realloc>0||sm.pending>0) warn+=" "+spill("warn",(sm.realloc||0)+" realloc · "+(sm.pending||0)+" pending");
     if(sm.media_errors>0) warn+=" "+spill("bad",sm.media_errors+" media errors");
     if(sm.crc>0) warn+=" "+spill("warn",sm.crc+" link CRC");
@@ -467,6 +518,9 @@ function hxWho(d){
   function cpu(v){ return v>=100 ? (v/100).toFixed(1)+" cores" : v.toFixed(1)+"%"; }
   txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
       ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
+  document.getElementById("byuser").title=document.getElementById("topprocs").title=
+    "Measured between two samples 30 s apart: a process that starts and ends in between is not seen, "+
+    "and memory is resident size summed per process, so shared pages are counted more than once.";
   document.getElementById("byuser").innerHTML=bu.length
     ? bu.map(function(u){
         return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
@@ -500,28 +554,45 @@ function hxAttackers(s){
 }
 
 // ---------- polling ----------
-// Fetch `src` every 30 s and hand each document to render(). A failed fetch
-// raises the banner and leaves the last good sample on screen; between polls
-// the header's age and status dot keep counting.
+// Fetch `src` every 30 s and hand each document to render(). The banner goes
+// up, and the dot red, both when the fetch fails and when a document arrives
+// that cannot be drawn; either way the last good sample stays on screen and is
+// said to be so. A sample only becomes "the last good one" once render() has
+// returned. One request at a time, each with a deadline, and a response older
+// than what is already shown is dropped.
 function startMonitor(src, render){
-  var last=null, STALE_S=120, DEAD_S=600;
+  var last=null, broken=false, busy=false, STALE_S=120, DEAD_S=600;
   function mark(){
-    if(!last) return;
+    if(!last || broken) return;
     var age=Math.max(0,Math.round(Date.now()/1000-last.ts));
     txt("age", fmtAge(age)+" ago");
     document.getElementById("dot").className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
   }
   function tick(){
-    fetch(src,{cache:"no-store"})
+    if(busy) return;
+    busy=true;
+    var ctl=new AbortController(), timer=setTimeout(function(){ ctl.abort(); }, 20000), drawing=false;
+    fetch(src,{cache:"no-store", signal:ctl.signal})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(d){ document.getElementById("err").style.display="none"; last=d; render(d); mark(); })
+      .then(function(d){
+        if(!d || typeof d.ts!=="number" || !Array.isArray(d.history)) throw new Error("not a metrics document");
+        if(last && d.ts<last.ts) return;
+        drawing=true;
+        render(d);
+        last=d; broken=false;
+        document.getElementById("err").style.display="none";
+        mark();
+      })
       .catch(function(e){
+        broken=true;
         var el=document.getElementById("err");
         el.style.display="block";
-        el.textContent="Cannot reach telemetry endpoint ("+e.message+"). "+
-          (last ? "Showing the last good sample." : "No data yet.");
+        el.textContent=(drawing ? "The latest sample could not be drawn ("+e.message+"). The page may be partly out of date."
+                                : "Cannot reach telemetry endpoint ("+(e.name==="AbortError"?"timed out":e.message)+"). "+
+                                  (last ? "Showing the last good sample." : "No data yet."));
         document.getElementById("dot").className="dot dead";
-      });
+      })
+      .then(function(){ clearTimeout(timer); busy=false; });
   }
   tick();
   setInterval(tick, 30000);
@@ -591,17 +662,22 @@ function startVisitors(){
 }
 
 // ---------- server room ----------
-// The camera on grothendieck: a frame every 15 s or so, plus the list of
-// frames its change detector flagged (worker.py there compares each frame
-// with a slow-moving background and saves one when more than 1.5% of it
-// differs). Only the list is public; the flagged frames stay on groth's page,
-// which the card links to (CMU network only).
+// The camera on grothendieck: a frame every 15 s or so, plus the record of its
+// change detector (worker.py there compares each frame with a slow-moving
+// background and saves one when more than 1.5% of it differs; it keeps the
+// last 50). Only the record is public; the flagged frames stay on groth's
+// page, which the card links to (CMU network only).
+//
+// How fresh the picture is comes from the record's `ts`, the moment the frame
+// was captured and compared -- not from whether a JPEG could be downloaded,
+// which stays true for a camera that froze an hour ago.
 //
 // "New" means newer than the last one this browser acknowledged, kept in
 // localStorage; following the link to groth, or clicking the pill, clears it.
 function startCamera(){
   var BASE="https://photos.proofsandreasons.io/akdeniz/";
-  var img=document.getElementById("camimg"), row=document.getElementById("camev"), newest="";
+  var img=document.getElementById("camimg"), row=document.getElementById("camev");
+  var newest="", captured=null, imgOk=true;
   function seen(){ try{ return localStorage.getItem("camSeen")||""; }catch(e){ return ""; } }
   function acknowledge(){ try{ localStorage.setItem("camSeen", newest); }catch(e){} events(); }
   // "2026-11-14 03:12:40" -> "14 Nov 03:12", in the camera's own clock.
@@ -609,16 +685,27 @@ function startCamera(){
     var m=/^\d{4}-(\d\d)-(\d\d) (\d\d:\d\d)/.exec(s||"");
     return m ? (+m[2])+" "+MONTHS[(+m[1])-1]+" "+m[3] : (s||"");
   }
+  function status(){
+    var age=captured?Math.max(0,Math.round(Date.now()/1000-captured)):null, el=document.getElementById("camts");
+    var stalled=!imgOk || (age!==null && age>180);
+    el.style.color=stalled?"var(--warn)":"";
+    el.textContent=!imgOk ? "camera image unavailable"
+      : age===null ? "frame loaded; capture time not published"
+      : stalled ? "camera stalled: last frame captured "+fmtAge(age)+" ago"
+      : "frame captured "+fmtAge(age)+" ago";
+  }
   function frame(){
     var u=BASE+"camera.jpg?t="+Date.now(), probe=new Image();
-    probe.onload=function(){ img.src=u; txt("camts","updated "+new Date().toLocaleTimeString()); };
-    probe.onerror=function(){ txt("camts","camera offline"); };
+    probe.onload=function(){ img.src=u; imgOk=true; status(); };
+    probe.onerror=function(){ imgOk=false; status(); };
     probe.src=u;
   }
   function events(){
     fetch(BASE+"camera-events.json",{cache:"no-store"}).then(function(r){ return r.json(); }).then(function(d){
       var ev=d.events||[], last=ev[ev.length-1];
       newest=last?last.time:"";
+      captured=d.ts||null;
+      status();
       var fresh=ev.filter(function(e){ return e.time>seen(); }).length;
       row.innerHTML=hxRow("Change detection",
         (fresh ? "<button type='button' class='pill bad' id='camack' style='cursor:pointer;background:none' "+
@@ -627,16 +714,16 @@ function startCamera(){
                      hxU("last "+when(last.time)+" · "+last.score+"% of the frame changed")
                    : spill("ok","nothing flagged"))+
         hxU("now "+(d.last_score||0)+"%"),
-        ["Frames the detector saved (more than 1.5% of the picture differing from its running background); "+
-         "it last looked at "+when(d.updated)]
+        ["The frames the detector has kept (the latest "+(d.kept||50)+" at most; each is one where more than 1.5% of "+
+         "the picture differed from its running background). It last looked at "+when(d.updated)+"."]
           .concat(ev.slice(-8).reverse().map(function(e){ return when(e.time)+"  "+e.score+"% changed"; })).join("\n"));
       var b=document.getElementById("camack");
       if(b) b.addEventListener("click", acknowledge);
-    }).catch(function(){ row.innerHTML=hxRow("Change detection", spill("","not available")); });
+    }).catch(function(){ row.innerHTML=hxRow("Change detection", spill("warn","record not available")); });
   }
   [].forEach.call(document.querySelectorAll("a[href*='groth.lan.cmu.edu/camera']"), function(a){
     a.addEventListener("click", acknowledge);
   });
   frame(); events();
-  setInterval(frame,15000); setInterval(events,15000);
+  setInterval(frame,15000); setInterval(events,15000); setInterval(status,5000);
 }

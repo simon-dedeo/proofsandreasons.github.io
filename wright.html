@@ -21,7 +21,7 @@
 <meta property="og:url" content="https://proofsandreasons.io/wright.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/wright.html">
-<link rel="stylesheet" href="monitor.css?v=20261114">
+<link rel="stylesheet" href="monitor.css?v=20261114b">
 <style>
   /* 256 logical CPUs: 32 across, half the height, so the strip stays a strip. */
   .cores{grid-template-columns:repeat(32,1fr)}
@@ -320,7 +320,7 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261114"></script>
+<script src="monitor.js?v=20261114b"></script>
 <script>
 (function(){
   "use strict";
@@ -354,6 +354,7 @@
           return "<th>"+(k.slice(0,2)==="g0"?"GPU 0":"GPU 1")+(/Max$/.test(k)?" peak":"")+"</th>"; }).join("")+
         "</tr></thead><tbody>"+tableRows(w, tcols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
     } else {
+      clearChart("gpuchart");
       document.getElementById("gputable").innerHTML="<tbody><tr><td>No GPU history yet.</td></tr></tbody>";
     }
     document.getElementById("gpukeys").innerHTML=keys;
@@ -374,6 +375,7 @@
       document.getElementById("pwtable").innerHTML="<thead><tr><th>Time</th><th>Input</th></tr></thead><tbody>"+
         tableRows(w, ["pw"], fmtW)+"</tbody>";
     } else {
+      clearChart("pwchart");
       document.getElementById("pwtable").innerHTML="<tbody><tr><td>No power history yet.</td></tr></tbody>";
     }
     document.getElementById("pwkeys").innerHTML=keys;
@@ -496,7 +498,9 @@
 
     // GPUs
     var gpus=d.gpu||[];
-    txt("gpuname", gpus.length?gname:"");
+    // The two cards this account's group may use (0 and 1). The box has four;
+    // the other pair belongs to another group and is not visible from here.
+    txt("gpuname", d.gpu_ok===false ? "GPUs not answering" : gpus.length ? gname+" · cards 0–1 of 4" : "");
     document.getElementById("gpu2").innerHTML=gpus.map(gpuPanel).join("");
 
     // Memory
@@ -591,7 +595,7 @@
     hxWho(d);
 
     // System health
-    var hl=d.health||{}, sysr=hxOsRows(d)+hxEventRows(d);
+    var hl=d.health||{}, sysr=hxBmcAlerts(d)+hxOsRows(d)+hxEventRows(d);
     function eccRow(label, ce, ue, note, tip){
       return hxRow(label, spill(ue?"bad":ce?"warn":"ok", (ce||ue)?ce+" corrected · "+ue+" uncorrected":"no errors")+hxU(note), tip);
     }

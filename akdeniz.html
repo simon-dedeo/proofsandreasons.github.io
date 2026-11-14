@@ -23,7 +23,7 @@
 <meta property="og:url" content="https://proofsandreasons.io/akdeniz.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/akdeniz.html">
-<link rel="stylesheet" href="monitor.css?v=20261114">
+<link rel="stylesheet" href="monitor.css?v=20261114b">
 </head>
 <body>
 <div class="wrap">
@@ -325,7 +325,7 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261114"></script>
+<script src="monitor.js?v=20261114b"></script>
 <script>
 (function(){
   "use strict";
@@ -492,6 +492,13 @@
 
     // GPU
     var g=d.gpu&&d.gpu[0];
+    if(!g){
+      // No card, or (gpu_ok false) a card whose driver did not answer: say
+      // which, and do not leave the last readings standing.
+      txt("gpuname", d.gpu_ok===false?"not answering":"no GPU");
+      ["gpupct","gpumemv","gputemp","gpupower","gpufan","gpuclk"].forEach(function(id){ txt(id,"—"); });
+      document.getElementById("gpuprocs").innerHTML="";
+    }
     if(g){
       txt("gpuname", g.pstate||"");
       txt("gpupct", g.util===null?"—":g.util.toFixed(0));
@@ -545,6 +552,9 @@
 
     // Storage
     document.getElementById("disks").innerHTML=(d.disk||[]).map(function(k){
+      if(k.ok===false) return "<div class='meter down'><div class='lab'><span class='k'>"+esc(k.mount)+"</span>"+
+        "<span class='v'>"+spill("bad","not mounted")+"</span></div>"+
+        "<div class='track'><div class='fill' style='width:0'></div></div></div>";
       return "<div class='meter'><div class='lab'><span class='k'>"+k.mount+"</span>"+
         "<span class='v'>"+fmtBytes(k.used)+" / "+fmtBytes(k.total)+" · "+k.pct+"%</span></div>"+
         "<div class='track'><div class='fill' style='width:"+k.pct+"%;background:"+heat(k.pct)+"'></div></div></div>";
