@@ -145,20 +145,21 @@
 <header class="top">
   <div>
     <h1>The Reddit Archive</h1>
-    <p class="sub">Every public Reddit comment and submission from June 2005 to July 2026, as
-    zstd-compressed ndjson &mdash; 254 consecutive months, about 4.3&nbsp;TB, held at the
-    Laboratory for Social Minds, CMU. Everything through December 2021 is on disk now; the
-    later months are still arriving and appear in the grid below as each one lands. The first
-    two thirds of it, to the end of 2021, is the corpus as it stood before language models
+    <!-- The three figures here are filled in from the archive index by the script
+         at the foot of the page, so they stay true as months are added; what is
+         written in is their value on 2026-11-14. -->
+    <p class="sub">Every public Reddit comment and submission from June 2005 to
+    <span id="ledeend">September 2026</span>, as zstd-compressed ndjson &mdash;
+    <span id="ledemonths">256</span> consecutive months, about <span id="ledetb">4.4</span>&nbsp;TB, held at the
+    Laboratory for Social Minds, CMU. All of it is on disk, and each new month is added as it
+    is released. The 199 months to the end of 2021 &mdash; most of the span, though only about a
+    third of the bytes &mdash; are the corpus as it stood before language models
     began writing into it. Four <a href="#curated">curated r/math and r/askphilosophy
     datasets</a> are drawn from it, small enough to download in a minute and open to anyone.</p>
   </div>
   <div class="backlinks">
     <a href="/lesswrong-archive.html">lesswrong archive &rarr;</a>
     <a href="/dashboard.html">skyline dashboard &rarr;</a>
-    <a href="/akdeniz.html">akdeniz host monitor &rarr;</a>
-    <a href="/wright.html">wright host monitor &rarr;</a>
-    <a href="/ganesha.html">ganesha host monitor &rarr;</a>
     <a href="https://proofsandreasons.io/">proofsandreasons.io &rarr;</a>
   </div>
 </header>
@@ -173,12 +174,12 @@
 <!-- ============ THE ARCHIVE, BY YEAR ============ -->
 <section>
   <h2>The archive, by year</h2>
-  <p class="lede">One link per monthly file, June 2005 to July 2026, continuous. Sizes are
+  <p class="lede">One link per monthly file, June 2005 to <span id="gridend">September 2026</span>, continuous. Sizes are
   on-disk and appear on hover; downloads support range requests, so a dropped transfer resumes
   rather than restarting. Comments begin in December 2005, six months after submissions,
   because that is where the upstream dumps begin &mdash; the dashed months are absent from the
-  source, not missing here. Amber months are still downloading. The grid is drawn from the
-  archive index and refreshes itself, so months appear as they land.</p>
+  source, not missing here. A month that is still downloading shows in amber. The grid is drawn
+  from the archive index and refreshes itself, so months appear as they land.</p>
 
   <!-- Summary bar, then one .ybox per year injected by the script below.
        Deliberately NOT a .ybox itself: the year blocks are already boxes, and
@@ -188,7 +189,7 @@
   </div>
   <div id="extyears"></div>
 
-  <div class="note"><b>All 392 files of the 2005&ndash;2021 set decode cleanly.</b> Every dump was decompressed end to end and every one succeeded, which is a stronger statement than a size check: zstd verifies an XXH64 checksum over each frame&rsquo;s contents. An earlier pass found 11 damaged files; the bad pieces were re-fetched from the swarm and re-verified. Months arriving now are verified as they land: every piece is checked against the torrent before it is written, and a month is only linked here once all of its bytes are present.</div>
+  <div class="note"><b>All 392 files of the 2005&ndash;2021 set decode cleanly.</b> Every dump was decompressed end to end and every one succeeded, which is a stronger statement than a size check: zstd verifies an XXH64 checksum over each frame&rsquo;s contents. An earlier pass found 11 damaged files; the bad pieces were re-fetched from the swarm and re-verified. When the archive moved onto a single disk in September 2026, all 255 months then held, June 2005 through August 2026, were hashed again against their torrents&rsquo; SHA-1 piece lists, and none failed. Months arriving since are verified as they land: every piece is checked against the torrent before it is written, and a month is only linked here once all of its bytes are present.</div>
 </section>
 
 
@@ -196,7 +197,7 @@
 <!-- ============ CURATED DATASETS ============ -->
 <section id="curated">
   <h2>Curated datasets</h2>
-  <p class="lede">Single-subreddit extracts, built by one pass over all 392 monthly files.
+  <p class="lede">Single-subreddit extracts, built by one pass over the 392 monthly files of 2005&ndash;2021.
   These are small enough to download over a coffee break and are served to everyone, with no IP
   restriction. Each is newline-delimited JSON, zstd-compressed, one record per line &mdash; and
   unlike the dumps they need no <code>--long=31</code>, so a plain <code>zstd -dc</code> works.</p>
@@ -253,11 +254,12 @@
   <a href="https://github.com/Watchful1/PushshiftDumps">PushshiftDumps</a> for iteration helpers.</p>
 
   <h3>Source</h3>
-  <p style="font-size:.9rem;color:var(--dim)">One torrent covers 2005-06 through 2025-12; only the
-  files through 2021-12 were taken. It is delisted from Academic Torrents &mdash; the details page
+  <p style="font-size:.9rem;color:var(--dim)">The months through 2021-12 come from one torrent,
+  which covers 2005-06 through 2025-12; only its files through 2021-12 were taken. It is delisted from Academic Torrents &mdash; the details page
   404s &mdash; but the swarm is alive and was observed with 34 seeds. Infohash
   <code>3d426c47c767d40f82c7ef0f47c3acacedd2bf44</code>
   (<a href="magnet:?xt=urn:btih:3d426c47c767d40f82c7ef0f47c3acacedd2bf44&amp;dn=reddit_2005-06_to_2025-12_zst&amp;tr=https%3A%2F%2Facademictorrents.com%2Fannounce.php&amp;tr=udp%3A%2F%2Ftracker.opentrackr.org%3A1337%2Fannounce">magnet</a>).
+  Everything from 2022-01 on comes from the separate releases that followed, most of them a single month each.
   A copy of every <code>.torrent</code> in the collection, including the delisted monthly releases
   and the per-subreddit split, is on ganesha under
   <code>/mnt/kubrick/torrents/</code>. New months are picked up automatically as they are released.</p>
@@ -280,18 +282,15 @@
   archive and datasets served from
   <a href="https://photos.proofsandreasons.io/reddit-archive/">photos.proofsandreasons.io</a> &middot;
   <a href="/dashboard.html">skyline dashboard</a> &middot;
-  <a href="/akdeniz.html">akdeniz monitor</a> &middot;
-  <a href="/wright.html">wright monitor</a> &middot;
-  <a href="/ganesha.html">ganesha monitor</a> &middot;
   <a href="/lesswrong-archive.html">lesswrong archive</a><br>
-  TiB are binary units, matching <code>df</code>; TB in the cumulative table are decimal, matching
+  GiB in the grid are binary units, matching <code>df</code>; TB in the text are decimal, matching
   Academic Torrents.
 </footer>
 
 </div>
 <script>
-/* The 2022+ grid is generated, not hardcoded, because those months are still
-   arriving. It reads the public index ganesha publishes (CORS-enabled; the index
+/* The grid is generated, not hardcoded, because months keep being added. It
+   reads the public index ganesha publishes (CORS-enabled; the index
    is public even though the .zst files behind it are CMU-only) and repaints
    every 60s so a page left open picks up new months on its own. */
 (function () {
@@ -384,6 +383,19 @@
     }, 0);
     sumEl.textContent = (d.count || 0) + " of " + planned.length + " months held \u00b7 " +
                         gib(d.bytes || 0) + " of " + gib(plannedBytes);
+
+    // The prose quotes the archive's extent; keep those figures true as months
+    // are added. "2026-09" -> "September 2026".
+    var NAMES = ["January", "February", "March", "April", "May", "June", "July",
+                 "August", "September", "October", "November", "December"];
+    function put(id, v) { var e = document.getElementById(id); if (e) e.textContent = v; }
+    var end = (d.range || [])[1];
+    if (end) {
+      end = NAMES[+end.slice(5) - 1] + " " + end.slice(0, 4);
+      put("ledeend", end); put("gridend", end);
+    }
+    if (d.count) put("ledemonths", d.count);
+    if (d.bytes) put("ledetb", (d.bytes / 1e12).toFixed(1));
   }
 
   function poll() {
