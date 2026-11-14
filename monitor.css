@@ -1,0 +1,258 @@
+/* monitor.css -- the look shared by the three host-monitor pages (akdeniz.html,
+   wright.html, ganesha.html). Anything only one page needs stays in that page. */
+:root{
+  /* Surfaces + ink: shared with dashboard.html so the two pages read as one site. */
+  --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+  --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+  /* UI accents (text, rules, highlights) -- the site's existing tokens. */
+  --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --warn:#ffc46b; --bad:#ff6b6b;
+  /* Chart series. Snapped into the dark-mode OKLCH lightness band (0.48-0.67)
+     from the accents above, holding hue, and validated for CVD separation
+     against the --panel surface. Do not swap these for the UI accents:
+     those sit at L~0.80 and fail the band. */
+  --s1:#c58200;  /* amber  -- CPU / primary */
+  --s2:#108bbb;  /* sky    -- network in */
+  --s3:#24a25f;  /* green  -- network out */
+  --shadow:0 10px 34px rgba(0,0,0,.5);
+  --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+  color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;padding:22px}
+.wrap{max-width:1500px;margin:0 auto}
+
+/* ---------- header ---------- */
+header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
+.host{font-weight:700;font-size:clamp(30px,3.6vw,52px);line-height:1;letter-spacing:-.025em}
+.host .dot{display:inline-block;width:.42em;height:.42em;border-radius:50%;background:var(--good);
+  margin-right:.3em;vertical-align:.06em;box-shadow:0 0 14px var(--good)}
+.host .dot.stale{background:var(--warn);box-shadow:0 0 14px var(--warn)}
+.host .dot.dead{background:var(--bad);box-shadow:0 0 14px var(--bad)}
+.sub{color:var(--dim);font-size:.92rem;margin-top:8px;font-family:var(--mono)}
+.hright{text-align:right;font-family:var(--mono)}
+.hright .age{font-size:1.02rem;font-weight:600;color:var(--sky)}
+.hright .proj{color:var(--amber);font-size:.68rem;margin-top:7px;letter-spacing:.16em}
+
+/* ---------- layout ---------- */
+/* min() keeps the track from exceeding the viewport on narrow phones,
+   where a bare 330px minimum would force a horizontal scroll. */
+.grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr));gap:16px;align-items:start}
+/* Masonry packing. CSS Grid still has no masonry of its own (grid-template
+   -rows:masonry has not shipped in Chrome), so each card is given a row span
+   proportional to its own height against a fine row unit: a short card then
+   ends early and the next card in that column starts right after it, rather
+   than every card in a row being stretched to match the tallest.
+   The class is applied by script on purpose -- with these fine rows and no
+   spans every card would collapse to 4px and overlap, so no-JS and
+   no-ResizeObserver fall back to the plain row grid above. */
+.grid.masonry{grid-auto-rows:4px;row-gap:0}
+.grid.masonry>.card{margin-bottom:16px}
+.card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+  border-radius:18px;padding:17px 19px;box-shadow:var(--shadow);min-width:0}
+.card{position:relative}
+.card.wide{grid-column:span 2}
+@media(max-width:760px){.card.wide{grid-column:span 1}}
+.h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.63rem;
+  margin-bottom:13px;font-weight:700;font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;gap:8px}
+.h5 .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
+.h5 .right{display:flex;align-items:center;gap:10px;min-width:0}
+
+/* ---------- range toggle ---------- */
+/* Segmented control: the selected state is carried by aria-pressed, which
+   both the styling and a screen reader read from -- never colour alone. */
+.seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
+.seg button{background:transparent;border:0;color:var(--dim);cursor:pointer;
+  font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;line-height:1.5}
+.seg button:hover{color:var(--ink)}
+.seg button[aria-pressed="true"]{background:var(--line);color:var(--ink);font-weight:700}
+.seg button:focus-visible{outline:2px solid var(--sky);outline-offset:-2px}
+
+/* ---------- hover-revealed chart ---------- */
+/* The memory card deliberately carries no standing chart: the history is a
+   glance-when-you-want-it thing, so it lives in a popover on the header
+   control (hover, or focus/click to pin) with the table as the fallback. */
+.peek{background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--dim);
+  cursor:pointer;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;
+  line-height:1.5;flex:none;display:inline-flex;align-items:center;gap:5px}
+.peek:hover,.peek[aria-expanded="true"]{color:var(--ink);border-color:var(--dimmer)}
+.peek:focus-visible{outline:2px solid var(--sky);outline-offset:1px}
+.peek .caret{font-size:.85em;opacity:.7}
+/* Fully opaque, not near-opaque: the card's 2.5rem hero number sits directly
+   behind this, and even a couple of percent of white ghosts through. */
+.pop{position:absolute;z-index:30;top:44px;right:17px;left:17px;
+  background:#0d1119;border:1px solid var(--line);border-radius:14px;
+  padding:13px 15px 11px;box-shadow:var(--shadow)}
+.pop[hidden]{display:none}
+.pop .poph{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
+  text-transform:uppercase;font-weight:700;margin-bottom:4px}
+.pop .legend{margin-top:7px}
+@media(hover:none){ .peek .caret{display:none} }
+
+/* ---------- hero numbers + tiles ---------- */
+.big{font-size:2.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
+.big .u{font-size:.4em;color:var(--dim);font-weight:600;margin-left:.15em;letter-spacing:0}
+.tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(96px,100%),1fr));gap:11px}
+@media(max-width:420px){ body{padding:13px} }
+.tile{background:#0d1119;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
+.tile .k{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.tile .v{font-size:1.18rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;font-family:var(--mono)}
+.tile .v small{font-size:.62em;color:var(--dim);font-weight:600}
+
+/* ---------- meters ---------- */
+.meter{margin:9px 0}
+.meter .lab{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.72rem;margin-bottom:5px}
+.meter .lab .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.meter .lab .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
+.track{height:8px;border-radius:4px;background:#0a0d14;border:1px solid var(--line);overflow:hidden}
+/* 4px rounded data-end, anchored to the baseline (left edge) */
+.track .fill{height:100%;border-radius:0 4px 4px 0;transition:width .45s ease}
+
+/* per-core strip: 2px surface gap between adjacent bars */
+.cores{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin-top:4px}
+@media(max-width:520px){.cores{grid-template-columns:repeat(8,1fr)}}
+.core{height:26px;background:#0a0d14;border-radius:3px;position:relative;overflow:hidden}
+.core i{position:absolute;left:0;right:0;bottom:0;background:var(--s1);border-radius:3px 3px 0 0;transition:height .45s ease}
+
+/* ---------- charts ---------- */
+.chart{position:relative;margin-top:6px}
+.chart svg{display:block;width:100%;height:96px;overflow:visible}
+.chart .grid line{stroke:var(--line);stroke-width:1;opacity:.55}
+.chart .ax{fill:var(--dimmer);font-family:var(--mono);font-size:9px}
+.series{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
+.cross{stroke:var(--dimmer);stroke-width:1;stroke-dasharray:3 3;display:none}
+.mk{display:none}
+/* 2px surface ring so overlapping markers stay separable */
+.mk circle{r:4;stroke:var(--panel);stroke-width:2}
+.tip{position:absolute;pointer-events:none;display:none;z-index:20;background:rgba(10,13,20,.97);
+  border:1px solid var(--line);border-radius:9px;padding:8px 10px;box-shadow:var(--shadow);
+  font-family:var(--mono);font-size:.68rem;white-space:nowrap}
+.tip .tt{color:var(--dimmer);margin-bottom:4px}
+.tip .tr{display:flex;align-items:center;gap:7px;margin-top:3px}
+.tip .sw{width:9px;height:9px;border-radius:2px;flex:none}
+.tip .tv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
+/* legend: identity is never colour-alone -- swatch + text label, always present for >=2 series */
+.legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.66rem;color:var(--dim);margin-top:9px}
+.legend{justify-content:space-between}
+.legend .keys{display:flex;gap:14px;flex-wrap:wrap}
+.legend span{display:flex;align-items:center;gap:6px}
+.legend i{width:11px;height:3px;border-radius:2px;display:inline-block}
+/* dashed swatch mirrors the dashed stroke of the peak series */
+.legend i.dash{height:0;border-top:3px dashed currentColor;border-radius:0;background:none!important}
+.legend .stat{color:var(--dimmer);font-variant-numeric:tabular-nums;white-space:nowrap}
+
+/* ---------- lists ---------- */
+.rows{font-family:var(--mono);font-size:.74rem}
+.row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}
+.row:last-child{border-bottom:0}
+.row .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.row .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
+/* Scrollable list. The access feed carries 25 places and the card should not
+   grow to three times the height of its neighbours to show them. The cap is
+   set just shy of a whole number of rows so the next one is visibly clipped:
+   a list ending flush with the bottom edge reads as a list that has ended. */
+.rows.scroll{max-height:14.4rem;overflow-y:auto;overscroll-behavior:contain;
+  scrollbar-width:thin;scrollbar-color:var(--line) transparent}
+.rows.scroll::-webkit-scrollbar{width:6px}
+.rows.scroll::-webkit-scrollbar-track{background:transparent}
+.rows.scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
+/* Focusable, so the rows past the fold are reachable without a mouse --
+   Chrome only makes a scroller keyboard-focusable on its own from 127. */
+.rows.scroll:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
+.pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.62rem;font-family:var(--mono);
+  border:1px solid var(--line);color:var(--dim)}
+.pill.ok{color:var(--good);border-color:rgba(99,214,143,.35)}
+.pill.warn{color:var(--warn);border-color:rgba(255,196,107,.35)}
+.pill.bad{color:var(--bad);border-color:rgba(255,107,107,.35)}
+/* ---------- cluster jobs ---------- */
+/* One table across both clusters, so CPU and GPU line up column-wise and the
+   two are directly comparable. Rows are grouped two-per-cluster. */
+.cx{width:100%;border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
+.cx thead th{color:var(--dimmer);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
+  font-weight:700;text-align:right;padding:0 0 7px;vertical-align:bottom}
+.cx thead th.l{text-align:left}
+.cx thead th small{display:block;font-size:.85em;letter-spacing:.04em;text-transform:none;
+  color:var(--dimmer);opacity:.75;font-weight:400}
+/* The cluster cell spans its two rows; the group's top border is what
+   separates one cluster from the next. */
+/* Left padding on the number cells: at single-column width a long hours
+   figure would otherwise butt straight up against the running count. */
+.cx td{padding:6px 0 6px 12px}
+.cx td,.cx tbody th{border-top:1px solid var(--line)}
+.cx tbody th{padding:6px 0}
+.cx tr.top td,.cx tr.top th{border-top:2px solid var(--line)}
+.cx th.nm{text-align:left;vertical-align:middle;font-size:.82rem;font-weight:700;letter-spacing:.05em;
+  color:var(--ink);padding-right:10px;white-space:nowrap}
+.cx th.nm .ago{display:block;font-size:.6rem;font-weight:400;letter-spacing:.02em;color:var(--dimmer);
+  margin-top:3px}
+.cx th.nm .ago.old{color:var(--warn)}
+.cx th.kind{text-align:left;color:var(--dim);font-size:.66rem;letter-spacing:.08em;font-weight:700;
+  width:14%}
+.cx td{text-align:right;font-size:1.05rem;font-weight:700;width:20%}
+/* Queue counts read left-justified; the hours column stays right-aligned so
+   its digits line up as magnitudes. */
+.cx td.q{text-align:left}
+/* Zero is the common case and should recede; a nonzero count is the signal. */
+.cx td.z{color:var(--dimmer);font-weight:400}
+.cx td.wait{color:var(--warn)}
+.cx td.run{color:var(--good)}
+.cx td.hrs{color:var(--ink);font-size:.92rem}
+.cx tr.stale th.nm,.cx tr.stale td,.cx tr.stale th.kind{opacity:.62}
+.clnotes{margin-top:11px;font-family:var(--mono);font-size:.62rem;color:var(--dimmer);line-height:1.8}
+.clnotes b{font-weight:400;color:var(--dim)}
+.clerr{color:var(--bad);font-family:var(--mono);font-size:.63rem;margin-top:8px;
+  overflow-wrap:break-word}
+
+/* ---------- top attacker ---------- */
+.atk{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono)}
+.atk .cap{color:var(--dimmer);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;margin-bottom:8px}
+.atk .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
+/* Colour emoji ignore the mono stack; give the flag its own line box so it
+   doesn't drag the baseline of the address next to it. */
+.atk .flag{font-size:1.3rem;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif}
+.atk .ip{font-size:.94rem;font-weight:700;color:var(--ink);word-break:break-all}
+.atk .n{color:var(--bad);font-size:.72rem;white-space:nowrap;margin-left:auto}
+.atk .where{color:var(--dim);font-size:.68rem;margin-top:5px}
+.atk .rest{color:var(--dimmer);font-size:.64rem;margin-top:9px;line-height:1.9;
+  overflow-wrap:break-word;word-break:normal}
+.atk .rest span{white-space:nowrap;margin-right:.85em;display:inline-block}
+.atk .tot{color:var(--dimmer);font-size:.63rem;margin-top:8px}
+
+/* ---------- table view (accessibility fallback) ---------- */
+details.tbl{margin-top:14px}
+details.tbl summary{cursor:pointer;color:var(--dimmer);font-family:var(--mono);font-size:.64rem;
+  letter-spacing:.08em;text-transform:uppercase}
+details.tbl table{width:100%;border-collapse:collapse;margin-top:9px;font-family:var(--mono);font-size:.66rem}
+details.tbl th,details.tbl td{text-align:right;padding:3px 6px;border-bottom:1px solid var(--line);color:var(--dim)}
+details.tbl th:first-child,details.tbl td:first-child{text-align:left}
+details.tbl th{color:var(--dimmer);font-weight:700}
+details.tbl td{color:var(--ink);font-variant-numeric:tabular-nums}
+
+footer{margin-top:22px;color:var(--dimmer);font-family:var(--mono);font-size:.66rem;line-height:1.9}
+footer a{color:var(--dim)}
+.err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);color:var(--bad);
+  border-radius:12px;padding:11px 14px;font-family:var(--mono);font-size:.72rem;margin-bottom:16px;display:none}
+.hright .mon{font-family:var(--mono);font-size:.72rem;line-height:1.75}
+.hright .mon a{color:var(--sky);text-decoration:none}
+.hright .mon a:hover{text-decoration:underline}
+.hright .mon:last-of-type{margin-bottom:9px}
+
+/* ---------- used by more than one page ---------- */
+/* Sub-headings inside a card (temperature groups, health sections). */
+.sect{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
+  font-weight:700;margin:13px 0 3px}
+.sect:first-child{margin-top:0}
+.rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
+.rows .k .pill{margin-left:.6em;vertical-align:.08em}
+.rows .v.wrap{white-space:normal;text-align:right}
+/* Health rows: the label stays whole and the value wraps under it if it must. */
+.row.hx .k{flex:none;overflow:visible}
+/* A filesystem that is not mounted: the bar has nothing to fill, so the label carries it. */
+.meter.down .lab .k{color:var(--warn)}
+/* Fan tiles: many small numbers, so a denser grid than the stat tiles. */
+.fans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(78px,100%),1fr));gap:7px}
+.fans .tile{padding:7px 9px}
+.fans .tile .v{font-size:.9rem;margin-top:2px}
+.fans .tile.slow .v{color:var(--warn)}
+.fans .tile.stop .v{color:var(--bad)}

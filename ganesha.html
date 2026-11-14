@@ -21,265 +21,12 @@
 <meta property="og:url" content="https://proofsandreasons.io/ganesha.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/ganesha.html">
+<link rel="stylesheet" href="monitor.css?v=20261114">
 <style>
-  :root{
-    /* Surfaces + ink: shared with dashboard.html so the two pages read as one site. */
-    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
-    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
-    /* UI accents (text, rules, highlights) -- the site's existing tokens. */
-    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --warn:#ffc46b; --bad:#ff6b6b;
-    /* Chart series. Snapped into the dark-mode OKLCH lightness band (0.48-0.67)
-       from the accents above, holding hue, and validated for CVD separation
-       against the --panel surface. Do not swap these for the UI accents:
-       those sit at L~0.80 and fail the band. */
-    --s1:#c58200;  /* amber  -- CPU / primary */
-    --s2:#108bbb;  /* sky    -- network in */
-    --s3:#24a25f;  /* green  -- network out */
-    --shadow:0 10px 34px rgba(0,0,0,.5);
-    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
-    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
-  }
-  *{box-sizing:border-box;margin:0;padding:0}
-  body{background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
-    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;min-height:100vh;padding:22px}
-  .wrap{max-width:1500px;margin:0 auto}
-
-  /* ---------- header ---------- */
-  header{display:flex;justify-content:space-between;align-items:flex-end;gap:20px;flex-wrap:wrap;margin-bottom:20px}
-  .host{font-weight:700;font-size:clamp(30px,3.6vw,52px);line-height:1;letter-spacing:-.025em}
-  .host .dot{display:inline-block;width:.42em;height:.42em;border-radius:50%;background:var(--good);
-    margin-right:.3em;vertical-align:.06em;box-shadow:0 0 14px var(--good)}
-  .host .dot.stale{background:var(--warn);box-shadow:0 0 14px var(--warn)}
-  .host .dot.dead{background:var(--bad);box-shadow:0 0 14px var(--bad)}
-  .sub{color:var(--dim);font-size:.92rem;margin-top:8px;font-family:var(--mono)}
-  .hright{text-align:right;font-family:var(--mono)}
-  .hright .age{font-size:1.02rem;font-weight:600;color:var(--sky)}
-  .hright .proj{color:var(--amber);font-size:.68rem;margin-top:7px;letter-spacing:.16em}
-
-  /* ---------- layout ---------- */
-  /* min() keeps the track from exceeding the viewport on narrow phones,
-     where a bare 330px minimum would force a horizontal scroll. */
-  .grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(330px,100%),1fr));gap:16px;align-items:start}
-  /* Masonry packing. CSS Grid still has no masonry of its own (grid-template
-     -rows:masonry has not shipped in Chrome), so each card is given a row span
-     proportional to its own height against a fine row unit: a short card then
-     ends early and the next card in that column starts right after it, rather
-     than every card in a row being stretched to match the tallest.
-     The class is applied by script on purpose -- with these fine rows and no
-     spans every card would collapse to 4px and overlap, so no-JS and
-     no-ResizeObserver fall back to the plain row grid above. */
-  .grid.masonry{grid-auto-rows:4px;row-gap:0}
-  .grid.masonry>.card{margin-bottom:16px}
-  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
-    border-radius:18px;padding:17px 19px;box-shadow:var(--shadow);min-width:0}
-  .card{position:relative}
-  .card.wide{grid-column:span 2}
-  @media(max-width:760px){.card.wide{grid-column:span 1}}
-  .h5{color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.63rem;
-    margin-bottom:13px;font-weight:700;font-family:var(--mono);display:flex;justify-content:space-between;align-items:center;gap:8px}
-  .h5 .note{letter-spacing:.04em;text-transform:none;color:var(--dimmer);font-weight:400}
-  .h5 .right{display:flex;align-items:center;gap:10px;min-width:0}
-
-  /* ---------- range toggle ---------- */
-  /* Segmented control: the selected state is carried by aria-pressed, which
-     both the styling and a screen reader read from -- never colour alone. */
-  .seg{display:inline-flex;border:1px solid var(--line);border-radius:999px;overflow:hidden;flex:none}
-  .seg button{background:transparent;border:0;color:var(--dim);cursor:pointer;
-    font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;line-height:1.5}
-  .seg button:hover{color:var(--ink)}
-  .seg button[aria-pressed="true"]{background:var(--line);color:var(--ink);font-weight:700}
-  .seg button:focus-visible{outline:2px solid var(--sky);outline-offset:-2px}
-
-  /* ---------- hover-revealed chart ---------- */
-  /* The memory card deliberately carries no standing chart: the history is a
-     glance-when-you-want-it thing, so it lives in a popover on the header
-     control (hover, or focus/click to pin) with the table as the fallback. */
-  .peek{background:transparent;border:1px solid var(--line);border-radius:999px;color:var(--dim);
-    cursor:pointer;font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;padding:3px 10px;
-    line-height:1.5;flex:none;display:inline-flex;align-items:center;gap:5px}
-  .peek:hover,.peek[aria-expanded="true"]{color:var(--ink);border-color:var(--dimmer)}
-  .peek:focus-visible{outline:2px solid var(--sky);outline-offset:1px}
-  .peek .caret{font-size:.85em;opacity:.7}
-  /* Fully opaque, not near-opaque: the card's 2.5rem hero number sits directly
-     behind this, and even a couple of percent of white ghosts through. */
-  .pop{position:absolute;z-index:30;top:44px;right:17px;left:17px;
-    background:#0d1119;border:1px solid var(--line);border-radius:14px;
-    padding:13px 15px 11px;box-shadow:var(--shadow)}
-  .pop[hidden]{display:none}
-  .pop .poph{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;
-    text-transform:uppercase;font-weight:700;margin-bottom:4px}
-  .pop .legend{margin-top:7px}
-  @media(hover:none){ .peek .caret{display:none} }
-
-  /* ---------- hero numbers + tiles ---------- */
-  .big{font-size:2.5rem;font-weight:700;line-height:1;font-variant-numeric:tabular-nums;letter-spacing:-.02em}
-  .big .u{font-size:.4em;color:var(--dim);font-weight:600;margin-left:.15em;letter-spacing:0}
-  .tiles{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(96px,100%),1fr));gap:11px}
-  @media(max-width:420px){ body{padding:13px} }
-  .tile{background:#0d1119;border:1px solid var(--line);border-radius:12px;padding:10px 12px;min-width:0}
-  .tile .k{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-  .tile .v{font-size:1.18rem;font-weight:700;font-variant-numeric:tabular-nums;margin-top:4px;font-family:var(--mono)}
-  .tile .v small{font-size:.62em;color:var(--dim);font-weight:600}
-
-  /* ---------- meters ---------- */
-  .meter{margin:9px 0}
-  .meter .lab{display:flex;justify-content:space-between;gap:10px;font-family:var(--mono);font-size:.72rem;margin-bottom:5px}
-  .meter .lab .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .meter .lab .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap;flex:none}
-  .track{height:8px;border-radius:4px;background:#0a0d14;border:1px solid var(--line);overflow:hidden}
-  /* 4px rounded data-end, anchored to the baseline (left edge) */
-  .track .fill{height:100%;border-radius:0 4px 4px 0;transition:width .45s ease}
-
-  /* per-core strip: 2px surface gap between adjacent bars */
-  .cores{display:grid;grid-template-columns:repeat(16,1fr);gap:2px;margin-top:4px}
-  @media(max-width:520px){.cores{grid-template-columns:repeat(8,1fr)}}
-  .core{height:26px;background:#0a0d14;border-radius:3px;position:relative;overflow:hidden}
-  .core i{position:absolute;left:0;right:0;bottom:0;background:var(--s1);border-radius:3px 3px 0 0;transition:height .45s ease}
-
-  /* ---------- charts ---------- */
-  .chart{position:relative;margin-top:6px}
-  .chart svg{display:block;width:100%;height:96px;overflow:visible}
-  .chart .grid line{stroke:var(--line);stroke-width:1;opacity:.55}
-  .chart .ax{fill:var(--dimmer);font-family:var(--mono);font-size:9px}
-  .series{fill:none;stroke-width:2;stroke-linejoin:round;stroke-linecap:round}
-  .cross{stroke:var(--dimmer);stroke-width:1;stroke-dasharray:3 3;display:none}
-  .mk{display:none}
-  /* 2px surface ring so overlapping markers stay separable */
-  .mk circle{r:4;stroke:var(--panel);stroke-width:2}
-  .tip{position:absolute;pointer-events:none;display:none;z-index:20;background:rgba(10,13,20,.97);
-    border:1px solid var(--line);border-radius:9px;padding:8px 10px;box-shadow:var(--shadow);
-    font-family:var(--mono);font-size:.68rem;white-space:nowrap}
-  .tip .tt{color:var(--dimmer);margin-bottom:4px}
-  .tip .tr{display:flex;align-items:center;gap:7px;margin-top:3px}
-  .tip .sw{width:9px;height:9px;border-radius:2px;flex:none}
-  .tip .tv{margin-left:auto;font-variant-numeric:tabular-nums;color:var(--ink)}
-  /* legend: identity is never colour-alone -- swatch + text label, always present for >=2 series */
-  .legend{display:flex;gap:14px;flex-wrap:wrap;font-family:var(--mono);font-size:.66rem;color:var(--dim);margin-top:9px}
-  .legend{justify-content:space-between}
-  .legend .keys{display:flex;gap:14px;flex-wrap:wrap}
-  .legend span{display:flex;align-items:center;gap:6px}
-  .legend i{width:11px;height:3px;border-radius:2px;display:inline-block}
-  /* dashed swatch mirrors the dashed stroke of the peak series */
-  .legend i.dash{height:0;border-top:3px dashed currentColor;border-radius:0;background:none!important}
-  .legend .stat{color:var(--dimmer);font-variant-numeric:tabular-nums;white-space:nowrap}
-
-  /* ---------- lists ---------- */
-  .rows{font-family:var(--mono);font-size:.74rem}
-  .row{display:flex;justify-content:space-between;gap:12px;padding:5px 0;border-bottom:1px solid var(--line)}
-  .row:last-child{border-bottom:0}
-  .row .k{color:var(--dim);min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
-  .row .v{color:var(--ink);font-variant-numeric:tabular-nums;white-space:nowrap}
-  /* Scrollable list. The access feed carries 25 places and the card should not
-     grow to three times the height of its neighbours to show them. The cap is
-     set just shy of a whole number of rows so the next one is visibly clipped:
-     a list ending flush with the bottom edge reads as a list that has ended. */
-  .rows.scroll{max-height:14.4rem;overflow-y:auto;overscroll-behavior:contain;
-    scrollbar-width:thin;scrollbar-color:var(--line) transparent}
-  .rows.scroll::-webkit-scrollbar{width:6px}
-  .rows.scroll::-webkit-scrollbar-track{background:transparent}
-  .rows.scroll::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px}
-  /* Focusable, so the rows past the fold are reachable without a mouse --
-     Chrome only makes a scroller keyboard-focusable on its own from 127. */
-  .rows.scroll:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:4px}
-  .pill{display:inline-block;padding:2px 7px;border-radius:999px;font-size:.62rem;font-family:var(--mono);
-    border:1px solid var(--line);color:var(--dim)}
-  .pill.ok{color:var(--good);border-color:rgba(99,214,143,.35)}
-  .pill.warn{color:var(--warn);border-color:rgba(255,196,107,.35)}
-  .pill.bad{color:var(--bad);border-color:rgba(255,107,107,.35)}
-  /* ---------- cluster jobs ---------- */
-  /* One table across both clusters, so CPU and GPU line up column-wise and the
-     two are directly comparable. Rows are grouped two-per-cluster. */
-  .cx{width:100%;border-collapse:collapse;font-family:var(--mono);font-variant-numeric:tabular-nums}
-  .cx thead th{color:var(--dimmer);font-size:.6rem;letter-spacing:.1em;text-transform:uppercase;
-    font-weight:700;text-align:right;padding:0 0 7px;vertical-align:bottom}
-  .cx thead th.l{text-align:left}
-  .cx thead th small{display:block;font-size:.85em;letter-spacing:.04em;text-transform:none;
-    color:var(--dimmer);opacity:.75;font-weight:400}
-  /* The cluster cell spans its two rows; the group's top border is what
-     separates one cluster from the next. */
-  /* Left padding on the number cells: at single-column width a long hours
-     figure would otherwise butt straight up against the running count. */
-  .cx td{padding:6px 0 6px 12px}
-  .cx td,.cx tbody th{border-top:1px solid var(--line)}
-  .cx tbody th{padding:6px 0}
-  .cx tr.top td,.cx tr.top th{border-top:2px solid var(--line)}
-  .cx th.nm{text-align:left;vertical-align:middle;font-size:.82rem;font-weight:700;letter-spacing:.05em;
-    color:var(--ink);padding-right:10px;white-space:nowrap}
-  .cx th.nm .ago{display:block;font-size:.6rem;font-weight:400;letter-spacing:.02em;color:var(--dimmer);
-    margin-top:3px}
-  .cx th.nm .ago.old{color:var(--warn)}
-  .cx th.kind{text-align:left;color:var(--dim);font-size:.66rem;letter-spacing:.08em;font-weight:700;
-    width:14%}
-  .cx td{text-align:right;font-size:1.05rem;font-weight:700;width:20%}
-  /* Queue counts read left-justified; the hours column stays right-aligned so
-     its digits line up as magnitudes. */
-  .cx td.q{text-align:left}
-  /* Zero is the common case and should recede; a nonzero count is the signal. */
-  .cx td.z{color:var(--dimmer);font-weight:400}
-  .cx td.wait{color:var(--warn)}
-  .cx td.run{color:var(--good)}
-  .cx td.hrs{color:var(--ink);font-size:.92rem}
-  .cx tr.stale th.nm,.cx tr.stale td,.cx tr.stale th.kind{opacity:.62}
-  .clnotes{margin-top:11px;font-family:var(--mono);font-size:.62rem;color:var(--dimmer);line-height:1.8}
-  .clnotes b{font-weight:400;color:var(--dim)}
-  .clerr{color:var(--bad);font-family:var(--mono);font-size:.63rem;margin-top:8px;
-    overflow-wrap:break-word}
-
-  /* ---------- top attacker ---------- */
-  .atk{margin-top:13px;padding-top:12px;border-top:1px solid var(--line);font-family:var(--mono)}
-  .atk .cap{color:var(--dimmer);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
-    font-weight:700;margin-bottom:8px}
-  .atk .who{display:flex;align-items:center;gap:9px;flex-wrap:wrap}
-  /* Colour emoji ignore the mono stack; give the flag its own line box so it
-     doesn't drag the baseline of the address next to it. */
-  .atk .flag{font-size:1.3rem;line-height:1;font-family:"Apple Color Emoji","Segoe UI Emoji",sans-serif}
-  .atk .ip{font-size:.94rem;font-weight:700;color:var(--ink);word-break:break-all}
-  .atk .n{color:var(--bad);font-size:.72rem;white-space:nowrap;margin-left:auto}
-  .atk .where{color:var(--dim);font-size:.68rem;margin-top:5px}
-  .atk .rest{color:var(--dimmer);font-size:.64rem;margin-top:9px;line-height:1.9;
-    overflow-wrap:break-word;word-break:normal}
-  .atk .rest span{white-space:nowrap;margin-right:.85em;display:inline-block}
-  .atk .tot{color:var(--dimmer);font-size:.63rem;margin-top:8px}
-
-  /* ---------- table view (accessibility fallback) ---------- */
-  details.tbl{margin-top:14px}
-  details.tbl summary{cursor:pointer;color:var(--dimmer);font-family:var(--mono);font-size:.64rem;
-    letter-spacing:.08em;text-transform:uppercase}
-  details.tbl table{width:100%;border-collapse:collapse;margin-top:9px;font-family:var(--mono);font-size:.66rem}
-  details.tbl th,details.tbl td{text-align:right;padding:3px 6px;border-bottom:1px solid var(--line);color:var(--dim)}
-  details.tbl th:first-child,details.tbl td:first-child{text-align:left}
-  details.tbl th{color:var(--dimmer);font-weight:700}
-  details.tbl td{color:var(--ink);font-variant-numeric:tabular-nums}
-
-  footer{margin-top:22px;color:var(--dimmer);font-family:var(--mono);font-size:.66rem;line-height:1.9}
-  footer a{color:var(--dim)}
-  .err{background:rgba(255,107,107,.09);border:1px solid rgba(255,107,107,.35);color:var(--bad);
-    border-radius:12px;padding:11px 14px;font-family:var(--mono);font-size:.72rem;margin-bottom:16px;display:none}
-  .hright .mon{font-family:var(--mono);font-size:.72rem;line-height:1.75}
-  .hright .mon a{color:var(--sky);text-decoration:none}
-  .hright .mon a:hover{text-decoration:underline}
-  .hright .mon:last-of-type{margin-bottom:9px}
-  /* ---------- ganesha-specific additions (the block above is akdeniz.html's, verbatim) ---------- */
-  /* Sub-headings inside a card (temperature groups, health sections). */
-  .sect{color:var(--dimmer);font-family:var(--mono);font-size:.6rem;letter-spacing:.14em;text-transform:uppercase;
-    font-weight:700;margin:13px 0 3px}
-  .sect:first-child{margin-top:0}
-  .rows .u{color:var(--dimmer);margin-left:.5em;font-size:.9em}
-  .rows .k .pill{margin-left:.6em;vertical-align:.08em}
   .meter .lab .k .pill{margin-left:.5em;vertical-align:.08em}
-  .meter.down .lab .k{color:var(--warn)}
-  /* Fan tiles: a few small numbers, denser than the stat tiles. */
-  .fans{display:grid;grid-template-columns:repeat(auto-fill,minmax(min(78px,100%),1fr));gap:7px}
-  .fans .tile{padding:7px 9px}
-  .fans .tile .v{font-size:.9rem;margin-top:2px}
-  .fans .tile.slow .v{color:var(--warn)}
-  .fans .tile.stop .v{color:var(--bad)}
   /* Web-traffic class bars: a stacked strip, one colour per class, with a key. */
   .strip{display:flex;height:8px;border-radius:4px;overflow:hidden;background:#0a0d14;border:1px solid var(--line);margin-top:8px}
   .strip i{display:block;height:100%}
-  .rows .v.wrap{white-space:normal;text-align:right}
-  /* Health rows: the label stays whole and the value wraps under it if it must. */
-  .row.hx .k{flex:none;overflow:visible}
   .note.ok{color:var(--good)} .note.warn{color:var(--warn)} .note.bad{color:var(--bad)}
 </style>
 </head>
@@ -314,6 +61,7 @@
           <span class="seg" role="group" aria-label="CPU chart time range" id="cpurange">
             <button type="button" data-range="1h" aria-pressed="false">1H</button>
             <button type="button" data-range="24h" aria-pressed="true">24H</button>
+            <button type="button" data-range="30d" aria-pressed="false">30D</button>
           </span>
         </span>
       </div>
@@ -390,6 +138,7 @@
           <span class="seg" role="group" aria-label="Power chart time range" id="pwrange">
             <button type="button" data-range="1h" aria-pressed="false">1H</button>
             <button type="button" data-range="24h" aria-pressed="true">24H</button>
+            <button type="button" data-range="30d" aria-pressed="false">30D</button>
           </span>
         </span>
       </div>
@@ -420,6 +169,7 @@
           <span class="seg" role="group" aria-label="Network chart time range" id="netrange">
             <button type="button" data-range="1h" aria-pressed="false">1H</button>
             <button type="button" data-range="24h" aria-pressed="true">24H</button>
+            <button type="button" data-range="30d" aria-pressed="false">30D</button>
           </span>
         </span>
       </div>
@@ -579,6 +329,19 @@
       </details>
     </div>
 
+    <!-- Server-room camera (grothendieck): the same card as on akdeniz.html. -->
+    <div class="card wide">
+      <div class="h5"><span>Server room</span><span class="note">grothendieck &middot; live &middot;
+        <a href="http://groth.lan.cmu.edu/camera/" style="color:var(--sky);text-decoration:none">events &rarr;</a></span></div>
+      <a href="http://groth.lan.cmu.edu/camera/" title="Open the camera page on groth: live frame and flagged events (CMU network only)"
+         style="display:block;border-radius:12px">
+      <img id="camimg" alt="server-room camera (grothendieck); click for the camera page with flagged events" decoding="async"
+           style="width:100%;border-radius:12px;display:block;background:#000;border:1px solid var(--line);cursor:pointer">
+      </a>
+      <div class="sub" id="camts" style="margin-top:8px">connecting&hellip;</div>
+      <div class="rows" id="camev" style="margin-top:8px"></div>
+    </div>
+
     <!-- External access to hosted data: the same counter the akdeniz page
          shows, because the data it counts is served from here. Unique IPs,
          VPN/scanner/bot traffic removed upstream (akdeniz-access-stats.py). -->
@@ -619,252 +382,24 @@
   </footer>
 </div>
 
+<script src="monitor.js?v=20261114"></script>
 <script>
 (function(){
   "use strict";
   var SRC = "https://photos.proofsandreasons.io/ganesha/metrics.json";
-  var POLL_MS = 30000, STALE_S = 120, DEAD_S = 600;
   var last = null;
   var range = {cpu:"24h", net:"24h", pw:"24h", web:"24h"};
-  // Chart series: the akdeniz palette, snapped into the dark-mode OKLCH band.
-  var S1="#c58200", S2="#108bbb", S3="#24a25f";
-
-  // ---------- formatting ----------
-  function fmtBytes(b){
-    if(b===null||b===undefined||isNaN(b)) return "—";
-    var u=["B","KB","MB","GB","TB","PB"], i=0; b=Math.abs(b);
-    while(b>=1024 && i<u.length-1){ b/=1024; i++; }
-    return (b>=100?b.toFixed(0):b>=10?b.toFixed(1):b.toFixed(2))+" "+u[i];
-  }
-  function fmtBps(b){
-    if(b===null||b===undefined||isNaN(b)) return "—";
-    var bits=b*8, u=["bit","Kb","Mb","Gb"], i=0;
-    while(bits>=1000 && i<u.length-1){ bits/=1000; i++; }
-    return (bits>=100?bits.toFixed(0):bits>=10?bits.toFixed(1):bits.toFixed(2))+" "+u[i]+"/s";
-  }
-  function fmtBytesPs(b){
-    if(b===null||b===undefined||isNaN(b)) return "—";
-    return fmtBytes(b)+"/s";
-  }
-  function fmtDur(s){
-    if(s===null||s===undefined) return "—";
-    var d=Math.floor(s/86400), h=Math.floor(s%86400/3600), m=Math.floor(s%3600/60);
-    return d>0 ? d+"d "+h+"h" : h>0 ? h+"h "+m+"m" : m+"m";
-  }
-  function fmtW(v){ return v===null||v===undefined||isNaN(v) ? "—" : v.toFixed(0)+" W"; }
-  function fmtN(v){ return v===null||v===undefined||isNaN(v) ? "—" : Math.round(v).toLocaleString(); }
-  function clock(ts){
-    var d=new Date(ts*1000);
-    return String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-  }
-  var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
-  var MONTHS=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  function dayclock(ts){ return DAYS[new Date(ts*1000).getDay()]+" "+clock(ts); }
-  function dateclock(ts){ var d=new Date(ts*1000); return d.getDate()+" "+MONTHS[d.getMonth()]+" "+clock(ts); }
-  function ago(ts){
-    if(!ts) return "—";
-    var s=Math.max(0,Math.round(Date.now()/1000-ts));
-    return s<90 ? s+"s ago" : fmtDur(s)+" ago";
-  }
-  function txt(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  function esc(s){
-    return String(s===null||s===undefined?"":s).replace(/[&<>"]/g, function(c){
-      return {"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c]; });
-  }
-  function flag(cc){
-    if(!cc || !/^[A-Za-z]{2}$/.test(cc)) return "";
-    var a=cc.toUpperCase();
-    return String.fromCodePoint(0x1F1E6+a.charCodeAt(0)-65, 0x1F1E6+a.charCodeAt(1)-65);
-  }
-  function heat(pct){ return pct>=90?"var(--bad)":pct>=75?"var(--warn)":"var(--s1)"; }
-  // Sensors report Celsius; the pages show Fahrenheit. Thresholds stay in °C.
-  function F(c){ return c*9/5+32; }
-  function pill(v, warn, bad, unit){
-    if(v===null||v===undefined) return "<span class='pill'>—</span>";
-    var cls=v>=bad?"bad":v>=warn?"warn":"ok";
-    return "<span class='pill "+cls+"'>"+(unit?v.toFixed(0)+unit:F(v).toFixed(0)+"°F")+"</span>";
-  }
-  function spill(cls, text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
 
   // ---------- charts ----------
-  // Shared line-chart renderer, identical to akdeniz.html's. One y-axis.
-  function lineChart(wrapId, series, fmt, axisMax){
-    var wrap=document.getElementById(wrapId);
-    var svg=wrap.querySelector("svg"), tip=wrap.querySelector(".tip");
-    var W=600,H=96,PL=4,PR=4,PT=8,PB=14;
-    while(svg.firstChild) svg.removeChild(svg.firstChild);
-    var pts=series[0].data.length;
-    if(pts<2){ return; }
-    var all=[]; series.forEach(function(s){ s.data.forEach(function(v){ if(v!==null&&!isNaN(v)) all.push(v); }); });
-    if(!all.length) return;
-    var max=Math.max.apply(null,all), min=0;
-    if(max<=0) max=1;
-    max = axisMax ? axisMax : max*1.12;
-    var X=function(i){ return PL+(W-PL-PR)*(i/(pts-1)); };
-    var Y=function(v){ return PT+(H-PT-PB)*(1-(v-min)/(max-min)); };
-    var NS="http://www.w3.org/2000/svg";
-    function el(n,a){ var e=document.createElementNS(NS,n); for(var k in a) e.setAttribute(k,a[k]); return e; }
-    var g=el("g",{"class":"grid"});
-    [0,.5,1].forEach(function(f){
-      var y=PT+(H-PT-PB)*f;
-      g.appendChild(el("line",{x1:PL,x2:W-PR,y1:y,y2:y}));
-    });
-    svg.appendChild(g);
-    var lab=el("text",{x:PL+2,y:PT+8,"class":"ax"}); lab.textContent=fmt(max); svg.appendChild(lab);
-    series.forEach(function(s){
-      var d="",open=false;
-      s.data.forEach(function(v,i){
-        if(v===null||isNaN(v)){ open=false; return; }
-        d += (open?" L":" M")+X(i).toFixed(1)+" "+Y(v).toFixed(1); open=true;
-      });
-      var attrs={d:d.trim(),"class":"series",stroke:s.color};
-      if(s.dash){ attrs["stroke-dasharray"]="4 3"; attrs["stroke-opacity"]=".55"; }
-      svg.appendChild(el("path",attrs));
-    });
-    var t0=el("text",{x:PL,y:H-2,"class":"ax"}); t0.textContent=series[0].labels[0];
-    var t1=el("text",{x:W-PR,y:H-2,"class":"ax","text-anchor":"end"});
-    t1.textContent=series[0].labels[series[0].labels.length-1];
-    svg.appendChild(t0); svg.appendChild(t1);
-    var cross=el("line",{"class":"cross",y1:PT,y2:H-PB}); svg.appendChild(cross);
-    var marks=el("g",{"class":"mk"});
-    series.forEach(function(s){ marks.appendChild(el("circle",{fill:s.color,cx:0,cy:0})); });
-    svg.appendChild(marks);
-    var hit=el("rect",{x:0,y:0,width:W,height:H,fill:"transparent",style:"cursor:crosshair"});
-    svg.appendChild(hit);
-    function move(ev){
-      var r=svg.getBoundingClientRect();
-      var cx=(ev.touches?ev.touches[0].clientX:ev.clientX)-r.left;
-      var i=Math.round((cx/r.width*W-PL)/((W-PL-PR)/(pts-1)));
-      i=Math.max(0,Math.min(pts-1,i));
-      cross.setAttribute("x1",X(i)); cross.setAttribute("x2",X(i));
-      cross.style.display="block"; marks.style.display="block";
-      var rows="<div class='tt'>"+series[0].labels[i]+"</div>";
-      series.forEach(function(s,k){
-        var v=s.data[i], c=marks.childNodes[k];
-        if(v===null||isNaN(v)){ c.setAttribute("cy",-99); }
-        else { c.setAttribute("cx",X(i)); c.setAttribute("cy",Y(v)); }
-        rows+="<div class='tr'><span class='sw' style='background:"+s.color+"'></span>"+
-              s.name+"<span class='tv'>"+(v===null||isNaN(v)?"—":fmt(v))+"</span></div>";
-      });
-      tip.innerHTML=rows; tip.style.display="block";
-      var tw=tip.offsetWidth, px=cx-tw/2;
-      px=Math.max(0,Math.min(r.width-tw,px));
-      tip.style.left=px+"px"; tip.style.top="0px";
-    }
-    function leave(){ cross.style.display="none"; marks.style.display="none"; tip.style.display="none"; }
-    hit.addEventListener("mousemove",move);
-    hit.addEventListener("mouseleave",leave);
-    hit.addEventListener("touchmove",function(e){ move(e); e.preventDefault(); },{passive:false});
-    hit.addEventListener("touchend",leave);
-  }
-
-  // ---------- chart windows ----------
-  var KEYS=["cpu","mem","rx","tx","pw","kio"], MAXED={cpu:1,mem:1,pw:1};
-  function present(a){ return a && a.filter(function(v){ return v!==null; }).length>1; }
-  function windowFor(d, r){
-    var w={}, times=[], t, x;
-    KEYS.forEach(function(k){ w[k]=[]; if(MAXED[k]) w[k+"Max"]=[]; });
-    if(r==="24h"){
-      var rows=d.history_24h||[];
-      if(rows.length<2) return null;
-      var step=d.bucket_s||300, byT={};
-      rows.forEach(function(b){ byT[b.t]=b; });
-      var end=rows[rows.length-1].t;
-      var start=Math.max(rows[0].t, end-86400+step);
-      for(t=start;t<=end;t+=step){
-        x=byT[t]||null; times.push(t);
-        KEYS.forEach(function(k){
-          w[k].push(x&&x[k]!==undefined?x[k]:null);
-          if(MAXED[k]) w[k+"Max"].push(x&&x[k+"_max"]!==undefined?x[k+"_max"]:null);
-        });
-      }
-      w.kind="24h"; w.times=times; w.labels=times.map(dayclock); w.span=end-start+step;
-    } else {
-      var hist=d.history||[];
-      if(hist.length<2) return null;
-      hist.forEach(function(h){
-        times.push(h.t);
-        KEYS.forEach(function(k){ w[k].push(h[k]===undefined?null:h[k]); });
-      });
-      KEYS.forEach(function(k){ if(MAXED[k]) w[k+"Max"]=null; });
-      w.kind="1h"; w.times=times; w.labels=times.map(clock); w.span=times[times.length-1]-times[0];
-    }
-    KEYS.forEach(function(k){ if(!present(w[k])){ w[k]=null; w[k+"Max"]=null; } });
-    return w;
-  }
-  function trimLead(w, keys, step){
-    var f=0, n=w.times.length;
-    while(f<n && keys.every(function(k){ return !w[k] || w[k][f]===null; })) f++;
-    if(!f) return w;
-    var out={kind:w.kind, times:w.times.slice(f), labels:w.labels.slice(f)};
-    keys.forEach(function(k){
-      out[k]=w[k]?w[k].slice(f):null;
-      out[k+"Max"]=w[k+"Max"]?w[k+"Max"].slice(f):null;
-    });
-    out.span=out.times.length ? out.times[out.times.length-1]-out.times[0]+step : 0;
-    return out;
-  }
-  function spanText(s){
-    if(s>=82800) return "last 24 hours";
-    if(s>=3400 && s<=3700) return "last hour";
-    return "last "+fmtDur(s);
-  }
-  function stats(vals){
-    var v=(vals||[]).filter(function(x){ return x!==null && !isNaN(x); });
-    if(!v.length) return null;
-    return {avg:v.reduce(function(a,b){return a+b;},0)/v.length, max:Math.max.apply(null,v)};
-  }
-  function pctFmt(v){ return v.toFixed(0)+"%"; }
-  function stepOf(d,w){ return w.kind==="24h" ? (d.bucket_s||300) : (d.interval_s||30); }
-  function tstamp(w,t){ return w.kind==="24h"?dayclock(t):clock(t); }
-  function tableRows(w, keys, fmt){
-    return w.times.map(function(t,i){ return {t:t,i:i}; }).reverse()
-      .filter(function(r){ return keys.some(function(k){ return w[k]&&w[k][r.i]!==null; }); })
-      .slice(0,40).map(function(r){
-        return "<tr><td>"+tstamp(w,r.t)+"</td>"+keys.map(function(k){
-          var v=w[k]?w[k][r.i]:null; return "<td>"+(v===null?"—":fmt(v))+"</td>"; }).join("")+"</tr>";
-      }).join("");
-  }
-
-  function drawPercentSeries(d, o){
-    var w=o.win, key=o.key, maxKey=key+"Max";
-    if(w && w[key]) w=trimLead(w, [key], stepOf(d,w));
-    var keys="", stat="", have=!!(w && w[key] && w[key].length>1);
-    if(have){
-      var series=[{name:o.col,color:S1,data:w[key],labels:w.labels}];
-      keys="<span><i style='background:var(--s1)'></i>"+o.legend+" &mdash; "+spanText(w.span)+"</span>";
-      var cols=[key];
-      if(w[maxKey]){
-        series.push({name:"Peak",color:S1,dash:true,data:w[maxKey],labels:w.labels});
-        keys+="<span><i class='dash' style='color:var(--s1)'></i>5-min peak</span>";
-        cols.push(maxKey);
-      }
-      lineChart(o.chart, series, pctFmt, 100);
-      document.querySelector("#"+o.chart+" svg").setAttribute("aria-label", o.legend+", "+spanText(w.span));
-      var s=stats(w[key]), pk=stats(w[maxKey]||w[key]);
-      if(s) stat="avg "+s.avg.toFixed(1)+"% · peak "+pk.max.toFixed(pk.max>=10?0:1)+"%";
-      if(o.head) txt(o.head, o.legend+" · "+spanText(w.span));
-      document.getElementById(o.tblcap).innerHTML="Table view &mdash; "+o.tblName+", "+spanText(w.span);
-      document.getElementById(o.tbl).innerHTML=
-        "<thead><tr><th>Time</th><th>"+o.col+"</th>"+(w[maxKey]?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
-        tableRows(w, cols, function(v){ return v.toFixed(1)+"%"; })+"</tbody>";
-    } else {
-      document.getElementById(o.tbl).innerHTML="<tbody><tr><td>No "+o.tblName+" history yet.</td></tr></tbody>";
-    }
-    document.getElementById(o.keys).innerHTML=keys;
-    txt(o.stat, stat);
-  }
-
-  // CPU package power: solid mean, dashed within-bucket peak in the day view.
-  function drawPower(d, w){
+  function drawPower(w){
     var keys="", stat="";
-    if(w && w.pw) w=trimLead(w, ["pw"], stepOf(d,w));
+    if(w && w.pw) w=trimLead(w, ["pw"]);
     if(w && w.pw){
       var series=[{name:"Packages",color:S3,data:w.pw,labels:w.labels}], cols=["pw"];
       keys="<span><i style='background:var(--s3)'></i>CPU package power &mdash; "+spanText(w.span)+"</span>";
       if(w.pwMax){
         series.push({name:"Peak",color:S3,dash:true,data:w.pwMax,labels:w.labels});
-        keys+="<span><i class='dash' style='color:var(--s3)'></i>5-min peak</span>";
+        keys+="<span><i class='dash' style='color:var(--s3)'></i>"+w.peak+"</span>";
         cols.push("pwMax");
       }
       lineChart("pwchart", series, fmtW);
@@ -899,78 +434,18 @@
     txt("webstat", stat);
   }
 
-  function setRangeUI(id, cur, has24){
-    var g=document.getElementById(id);
-    [].forEach.call(g.querySelectorAll("button"), function(b){
-      b.setAttribute("aria-pressed", b.dataset.range===cur ? "true" : "false");
-      if(b.dataset.range==="24h"){
-        b.disabled=!has24;
-        b.title=has24?"":"24-hour history not published yet";
-        b.style.opacity=has24?"":".4";
-      }
-    });
-  }
-
   function drawCharts(d){
-    var has24=(d.history_24h||[]).length>=2;
-    if(!has24) ["cpu","net","pw"].forEach(function(k){ if(range[k]==="24h") range[k]="1h"; });
-    setRangeUI("cpurange", range.cpu, has24);
-    setRangeUI("netrange", range.net, has24);
-    setRangeUI("pwrange",  range.pw,  has24);
-    setRangeUI("webrange", range.web, true);
-
-    drawPercentSeries(d, {win:windowFor(d, range.cpu), key:"cpu",
+    syncRanges(range, d, ["web"]);
+    drawPercentSeries({win:windowFor(d, range.cpu), key:"cpu",
       chart:"cpuchart", keys:"cpukeys", stat:"cpustat", tbl:"cputable", tblcap:"cputblcap",
       legend:"CPU utilisation", tblName:"CPU", col:"CPU"});
-    drawPercentSeries(d, {win:windowFor(d, has24?"24h":"1h"), key:"mem",
-      chart:"memchart", keys:"memkeys", stat:"memstat", tbl:"memtable", tblcap:"memtblcap", head:"mempoph",
-      legend:"RAM used", tblName:"memory", col:"Used"});
-    drawPower(d, windowFor(d, range.pw));
+    drawMemory(d);
+    drawPower(windowFor(d, range.pw));
     drawWeb(d);
-
-    var n=windowFor(d, range.net), nstat="";
-    if(n && n.rx && n.tx){
-      lineChart("netchart",[
-        {name:"Inbound", color:S2, data:n.rx, labels:n.labels},
-        {name:"Outbound",color:S3, data:n.tx, labels:n.labels}
-      ], fmtBps);
-      document.querySelector("#netchart svg").setAttribute("aria-label","Network throughput, "+spanText(n.span));
-      var rs=stats(n.rx), ts=stats(n.tx);
-      nstat=spanText(n.span)+(rs&&ts ? " · avg "+fmtBps(rs.avg)+" in / "+fmtBps(ts.avg)+" out" : "");
-      document.getElementById("nettblcap").innerHTML="Table view &mdash; network, "+spanText(n.span);
-      document.getElementById("nettbl").innerHTML=tableRows(n, ["rx","tx"], fmtBps);
-    }
-    txt("netstat", nstat);
+    drawNet(windowFor(d, range.net));
   }
-
-  // Memory popover: hover to peek, click (or focus) to pin. As on akdeniz.
-  (function(){
-    var btn=document.getElementById("mempeek"), pop=document.getElementById("mempop");
-    var pinned=false, timer=null;
-    function open(){ clearTimeout(timer); pop.hidden=false; btn.setAttribute("aria-expanded","true"); }
-    function close(){ clearTimeout(timer); pop.hidden=true; btn.setAttribute("aria-expanded","false"); }
-    function closeSoon(){ if(pinned) return; clearTimeout(timer); timer=setTimeout(close,180); }
-    btn.addEventListener("mouseenter",open);
-    btn.addEventListener("mouseleave",closeSoon);
-    btn.addEventListener("focus",open);
-    btn.addEventListener("blur",closeSoon);
-    pop.addEventListener("mouseenter",function(){ clearTimeout(timer); });
-    pop.addEventListener("mouseleave",closeSoon);
-    btn.addEventListener("click",function(){ pinned=!pinned; if(pinned) open(); else close(); });
-    document.addEventListener("keydown",function(e){ if(e.key==="Escape" && !pop.hidden){ pinned=false; close(); } });
-    document.addEventListener("click",function(e){
-      if(pinned && !pop.contains(e.target) && !btn.contains(e.target)){ pinned=false; close(); }
-    });
-  })();
-
-  [["cpurange","cpu"],["netrange","net"],["pwrange","pw"],["webrange","web"]].forEach(function(p){
-    document.getElementById(p[0]).addEventListener("click", function(ev){
-      var b=ev.target.closest("button");
-      if(!b || b.disabled) return;
-      range[p[1]]=b.dataset.range;
-      if(last) drawCharts(last);
-    });
-  });
+  wireRanges(range, function(){ if(last) drawCharts(last); });
+  wireMemPeek();
 
   // ---------- temperatures ----------
   // k10temp on this generation reads a control value, not a die temperature,
@@ -997,125 +472,12 @@
     }
     document.getElementById("temps").innerHTML=h;
     var age=d.ipmi&&d.ipmi.age_s;
-    txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+(age<90?age+"s":fmtDur(age))+" ago":""));
-  }
-
-  // ---------- host health ----------
-  // Shared verbatim by akdeniz.html, wright.html and ganesha.html: rows built
-  // from the os / events / psi blocks of metrics.json and the per-disk SMART
-  // records. Each helper returns "" when its block is absent, so a page keeps
-  // working against an older collector.
-  var HXM=["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-  function hxPill(cls,text){ return "<span class='pill "+cls+"'>"+esc(text)+"</span>"; }
-  function hxU(text){ return " <span class='u'>"+esc(text)+"</span>"; }
-  function hxRow(k,v,title){
-    return "<div class='row hx'"+(title?" title=\""+esc(title)+"\"":"")+"><span class='k'>"+k+
-      "</span><span class='v wrap'>"+v+"</span></div>";
-  }
-  function hxDate(ts){ var d=new Date(ts*1000); return d.getDate()+" "+HXM[d.getMonth()]; }
-  function hxWhen(ts){
-    var d=new Date(ts*1000);
-    return hxDate(ts)+" "+String(d.getHours()).padStart(2,"0")+":"+String(d.getMinutes()).padStart(2,"0");
-  }
-  function hxPlural(n,w){ return n.toLocaleString()+" "+w+(n===1?"":"s"); }
-  function hxGB(b){
-    return b>=1073741824 ? (b/1073741824).toFixed(b>=10737418240?0:1)+" GB" : Math.round(b/1048576)+" MB";
-  }
-  // Kernel, boot date and pending updates (Ubuntu hosts: metrics.os).
-  function hxOsRows(d){
-    var o=d.os; if(!o) return "";
-    var rows=hxRow("Kernel", esc(o.kernel||"—")+(o.reboot_required?" "+hxPill("warn","reboot needed"):"")+
-        (o.kernel_newest?hxU(o.kernel_newest.replace(/-generic$/,"")+" installed"):""),
-      o.reboot_required?(o.reboot_pkgs+" packages are waiting for a restart"):"");
-    rows+=hxRow("Up since", esc(hxDate(o.boot_ts))+hxU(fmtDur(d.uptime_s)));
-    if(o.updates!==null&&o.updates!==undefined)
-      rows+=hxRow("Updates pending",
-        (o.updates?hxPill(o.security?"warn":"", hxPlural(o.updates,"package")):hxPill("ok","up to date"))+
-        (o.security?hxU(o.security.toLocaleString()+" security"):"")+
-        (o.lists_at?hxU("lists "+hxDate(o.lists_at)):""),
-        "Packages with a newer version in the configured apt sources");
-    return rows;
-  }
-  // OOM kills, GPU faults, hardware and I/O errors since boot (metrics.events).
-  function hxEventRows(d){
-    var ev=d.events; if(!ev) return "";
-    var rows="", o=ev.oom||{}, x=ev.xid||{}, hw=ev.hw||{}, io=ev.io||{}, l=o.last;
-    // Normally the whole boot; later than that when the collector first read a
-    // kernel log that no longer reached back to it.
-    var since=(ev.since&&ev.since-(d.ts-d.uptime_s)>3600)?"since "+hxDate(ev.since):"since boot";
-    rows+=hxRow("Out-of-memory kills",
-      (o.n ? hxPill(o.n_24h?"bad":o.n_7d?"warn":"", o.n_7d?hxPlural(o.n_7d,"kill")+" / 7d":o.n+" "+since)
-           : hxPill("ok","none "+since))+
-      (l ? hxU("last "+hxWhen(l.t)+" · "+l.comm+(l.rss?" at "+hxGB(l.rss):"")+
-               (l.where?" in "+l.where:l.cg?" · container limit":"")+(l.user?" · "+l.user:"")) : ""),
-      "Processes the kernel killed for memory, "+since+(o.n?": "+o.n:""));
-    if((d.gpu||[]).length){
-      var xl=x.last, codes=x.codes?Object.keys(x.codes).map(function(c){ return "Xid "+c+" ×"+x.codes[c]; }).join(", "):"";
-      rows+=hxRow("GPU faults",
-        (x.n ? hxPill(x.n_24h?"bad":x.n_7d?"warn":"", hxPlural(x.n,"Xid")+" "+since) : hxPill("ok","none "+since))+
-        (xl ? hxU("last "+hxWhen(xl.t)+" · "+codes+(xl.comm?" · "+xl.comm:"")) : ""),
-        "NVIDIA Xid events in the kernel log, "+since);
-    }
-    var bad=(hw.n||0)+(io.n||0), bl=(io.last&&(!hw.last||io.last.t>hw.last.t))?io.last:hw.last;
-    rows+=hxRow("Hardware / I/O errors",
-      (bad ? hxPill((hw.n_24h||io.n_24h)?"bad":"warn", (hw.n?hw.n+" hardware":"")+(hw.n&&io.n?" · ":"")+(io.n?io.n+" I/O":""))
-           : hxPill("ok","none logged"))+
-      (bl ? hxU("last "+hxWhen(bl.t)) : ""),
-      bl ? bl.msg : "Kernel log lines reporting a hardware or I/O error, "+since);
-    return rows;
-  }
-  // Pressure-stall: share of the last minute some task waited on each resource.
-  function hxPressureRow(d){
-    var p=d.psi; if(!p) return "";
-    function v(r){ var s=p[r]&&p[r].some; return s&&s[1]!==null&&s[1]!==undefined?s[1]:null; }
-    function f(x){ return x===null?"—":(x<0.05?"0":x<10?x.toFixed(1):x.toFixed(0))+"%"; }
-    var c=v("cpu"), i=v("io"), m=v("memory"), worst=Math.max(c||0,i||0,m||0);
-    return hxRow("Stalled · CPU / I/O / memory",
-      hxPill(worst>=40?"bad":worst>=10?"warn":"ok", f(c)+" / "+f(i)+" / "+f(m))+hxU("last minute"),
-      "Pressure-stall information: share of the last minute in which at least one task was waiting for CPU time, for disk I/O, or for memory");
-  }
-  function hxFailedUnits(d){
-    var f=d.os?d.os.failed:null;
-    if(f===null||f===undefined) return hxRow("not read yet","&mdash;");
-    if(!f.length) return hxRow("no failed units", hxPill("ok","all clear"));
-    return f.map(function(u){
-      return "<div class='row' title=\""+esc(u.desc||u.unit)+"\"><span class='k'>"+esc(u.unit.replace(/\.service$/,""))+
-        (u.desc&&u.desc!==u.unit?hxU(u.desc):"")+"</span><span class='v'>"+
-        hxPill(u.missing?"":"bad", u.missing?"unit gone":"failed")+"</span></div>"; }).join("");
-  }
-  // One row per physical disk from the SMART records riding on metrics.disk[].
-  // Several mounts can share a disk, so rows are keyed by device.
-  function hxDiskHealth(d){
-    var seen={}, rows="";
-    (d.disk||[]).forEach(function(k){
-      var sm=k.smart; if(!sm||typeof sm!=="object"||seen[k.dev]) return; seen[k.dev]=1;
-      var bits=[];
-      if(sm.wear_pct!==null&&sm.wear_pct!==undefined) bits.push(sm.wear_pct+"% worn");
-      if(sm.hours) bits.push(sm.hours.toLocaleString()+" h");
-      if(sm.written) bits.push(fmtBytes(sm.written)+" written");
-      var tip=[];
-      if(sm.spare_pct!==null&&sm.spare_pct!==undefined) tip.push(sm.spare_pct+"% spare blocks");
-      if(sm.unsafe_shutdowns!==null&&sm.unsafe_shutdowns!==undefined) tip.push(sm.unsafe_shutdowns+" unsafe shutdowns");
-      if(sm.temp) tip.push(sm.temp+" °C");
-      var warn="";
-      if((sm.realloc||0)>0||(sm.pending||0)>0) warn+=" "+hxPill("warn",(sm.realloc||0)+" realloc · "+(sm.pending||0)+" pending");
-      if((sm.media_errors||0)>0) warn+=" "+hxPill("bad",sm.media_errors+" media errors");
-      if((sm.crc||0)>0) warn+=" "+hxPill("warn",sm.crc+" link CRC");
-      if(sm.wear_pct>=90) warn+=" "+hxPill("bad","worn out");
-      rows+=hxRow(esc(k.dev)+(sm.model?hxU(sm.model):""),
-        hxPill(sm.health==="PASSED"?"ok":"bad", sm.health==="PASSED"?"SMART ok":"SMART "+sm.health)+warn+
-        (bits.length?hxU(bits.join(" · ")):""), tip.join(" · "));
-    });
-    return rows;
+    txt("tmeta", "°F"+(age!==null&&age!==undefined?" · BMC "+fmtAge(age)+" ago":""));
   }
 
   // ---------- render ----------
   function render(d){
     last=d;
-    var age=Math.max(0,Math.round(Date.now()/1000-d.ts));
-    var dot=document.getElementById("dot");
-    dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
-    txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
     txt("subline",(d.fqdn||d.host)+"  ·  up "+fmtDur(d.uptime_s)+"  ·  "+d.ncpu+" cores  ·  no GPU  ·  Gentoo "+
         (d.kernel||"")+"  ·  sampled "+d.iso.replace("T"," ").slice(0,19));
     txt("foot","schema v"+d.schema+" · sample interval "+(d.interval_s||"?")+"s · "+
@@ -1204,7 +566,7 @@
     txt("kionow", kd?fmtBytesPs(kd.read_bps+kd.write_bps):"—");
     txt("kio24", fmtBytesPs(d.diskio.kubrick_bps_24h));
     var sa=d.diskio.smart_age_s;
-    txt("iometa", "I/O now"+(sa!==null&&sa!==undefined?" · SMART "+(sa<90?sa+"s":fmtDur(sa))+" ago":""));
+    txt("iometa", "I/O now"+(sa!==null&&sa!==undefined?" · SMART "+fmtAge(sa)+" ago":""));
 
     // Reddit archive
     var r=d.reddit||{};
@@ -1261,22 +623,7 @@
       txt("fanmeta", fans.length+" fans · "+Math.min.apply(null,rp).toLocaleString()+"–"+Math.max.apply(null,rp).toLocaleString()+" rpm");
     }
 
-    // Users & processes. CPU% is of one core, so 3200% would be every core.
-    var pr=d.procs||{}, bu=pr.by_user||[], tp=pr.top||[];
-    txt("whometa", (d.who.sessions||0)+" session"+(d.who.sessions===1?"":"s")+
-        ((d.who.users||[]).length?" · "+d.who.users.join(", "):""));
-    document.getElementById("byuser").innerHTML=bu.length
-      ? bu.map(function(u){
-          return "<div class='row'><span class='k'>"+(u.system?"<span style='color:var(--dimmer)'>system</span>":esc(u.user))+
-            " <span class='u'>"+u.n+" proc"+(u.n===1?"":"s")+" · "+fmtBytes(u.rss)+"</span></span>"+
-            "<span class='v'>"+(u.cpu>=100?(u.cpu/100).toFixed(1)+" cores":u.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>no data yet</span><span class='v'>&mdash;</span></div>";
-    document.getElementById("topprocs").innerHTML=tp.length
-      ? tp.map(function(p){
-          return "<div class='row' title='pid "+p.pid+"'><span class='k'>"+esc(p.comm)+
-            " <span class='u'>"+esc(p.user||"?")+" · "+fmtBytes(p.rss)+"</span></span>"+
-            "<span class='v'>"+(p.cpu>=100?(p.cpu/100).toFixed(1)+" cores":p.cpu.toFixed(1)+"%")+"</span></div>"; }).join("")
-      : "<div class='row'><span class='k'>nothing above 0.5% of a core</span><span class='v'>&mdash;</span></div>";
+    hxWho(d);
 
     // Containers
     var c=d.containers||{};
@@ -1324,43 +671,23 @@
       ? tun.map(function(t){ return "<div class='row'><span class='k'>"+esc(t.name)+" <span class='u'>:"+t.port+"</span></span>"+
           "<span class='v'>"+spill("ok","connected")+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>none connected</span><span class='v'>&mdash;</span></div>";
-    var atk=document.getElementById("sshatk"), top=s.top_attackers||[];
-    if(top.length){
-      var a=top[0], parts=[];
-      [a.city,a.region,a.country].forEach(function(p){ if(p && parts.indexOf(p)<0) parts.push(p); });
-      var fl=flag(a.cc);
-      var html="<div class='cap'>Most persistent failed login &middot; 24h</div>"+
-        "<div class='who'>"+(fl?"<span class='flag'>"+fl+"</span>":"")+
-        "<span class='ip'>"+esc(a.ip)+"</span>"+
-        "<span class='n'>"+a.n.toLocaleString()+" failed login"+(a.n===1?"":"s")+"</span></div>"+
-        "<div class='where'>"+(parts.length?esc(parts.join(", ")):(/^(10\.|172\.(1[6-9]|2\d|3[01])\.|192\.168\.)/.test(a.ip)?"private address":"locating&hellip;"))+"</div>";
-      var rest=top.slice(1);
-      if(rest.length){
-        html+="<div class='rest'>then "+rest.map(function(r){
-          return "<span>"+(flag(r.cc)||"&middot;")+" "+esc(r.ip)+" ("+r.n+")</span>"; }).join("")+"</div>";
-      }
-      if(s.failed_24h!==null&&s.failed_24h!==undefined){
-        html+="<div class='tot'>"+s.failed_24h.toLocaleString()+" failed attempt"+(s.failed_24h===1?"":"s")+" from "+
-              s.attackers_24h+" address"+(s.attackers_24h===1?"":"es")+" in 24h</div>";
-      }
-      atk.innerHTML=html; atk.hidden=false;
-    } else { atk.hidden=true; }
+    hxAttackers(s);
 
     // System health
     var h=d.health||{}, mce=h.mce||{}, em=h.emerge||{}, sv=h.services||{};
-    function hrow(k,v){ return "<div class='row hx'><span class='k'>"+k+"</span><span class='v wrap'>"+v+"</span></div>"; }
     var rows="";
-    rows+=hrow("Kernel", esc(d.kernel||"—")+" <span class='u'>Gentoo · OpenRC</span>");
-    rows+=hrow("Uptime", fmtDur(d.uptime_s));
+    rows+=hxRow("Kernel", esc(d.kernel||"—")+" <span class='u'>Gentoo · OpenRC</span>");
+    rows+=hxRow("Uptime", fmtDur(d.uptime_s));
     if(mce.total!==undefined){
       var mcls=mce.n_7d?"bad":mce.n_30d?"warn":"ok";
-      rows+=hrow("Machine-check exceptions", spill(mcls, (mce.n_30d||0)+" in 30d")+" <span class='u'>"+(mce.total||0)+" since boot"+
-        (mce.last?" · last "+esc(dateclock(mce.last)):"")+"</span>");
-      rows+=hrow("ECC memory", (mce.memory_errors===false?spill("ok","no errors"):mce.memory_errors===true?spill("bad","errors logged"):"—")+
+      rows+=hxRow("Machine-check exceptions", spill(mcls, (mce.n_30d||0)+" in 30d")+" <span class='u'>"+(mce.total||0)+" since boot"+
+        (mce.last?" · last "+esc(dateclock(mce.last)):"")+"</span>",
+        hxLines("Machine-check exceptions the CPUs have logged: "+(mce.total||0), mce.recent, mce.total));
+      rows+=hxRow("ECC memory", (mce.memory_errors===false?spill("ok","no errors"):mce.memory_errors===true?spill("bad","errors logged"):"—")+
         (h.ecc_sensors_ok?" <span class='u'>"+h.ecc_sensors_ok+" BMC sensors ok</span>":""));
     }
     if(wd.recoveries_30d!==undefined){
-      rows+=hrow("NIC watchdog", spill(wd.recoveries_7d?"warn":"ok", (wd.recoveries_30d||0)+" recover"+(wd.recoveries_30d===1?"y":"ies")+" / 30d")+
+      rows+=hxRow("NIC watchdog", spill(wd.recoveries_7d?"warn":"ok", (wd.recoveries_30d||0)+" recover"+(wd.recoveries_30d===1?"y":"ies")+" / 30d")+
         (wd.last_event?" <span class='u'>"+esc(wd.last_event.msg.split(":")[0].toLowerCase())+" · "+esc(dateclock(wd.last_event.t))+"</span>":""));
     }
     var sinceEm="";
@@ -1371,41 +698,36 @@
       d0.setHours(0,0,0,0); d1.setHours(0,0,0,0);
       var days=Math.round((d1-d0)/86400000);
       sinceEm=days<=0?"today":days===1?"yesterday":days+" days ago";
-      rows+=hrow("Last emerge update", "<b style='font-weight:700;color:var(--ink)'>"+sinceEm+"</b> "+
+      rows+=hxRow("Last emerge update", "<b style='font-weight:700;color:var(--ink)'>"+sinceEm+"</b> "+
         (w.ok===true?spill("ok","ok"):w.ok===false?spill("bad","failed"):spill("warn","running"))+
         " <span class='u'>"+esc(dateclock(w.t))+" · "+w.merged+" package"+(w.merged===1?"":"s")+
         (w.done?" · took "+fmtDur(w.done-w.t):"")+"</span>"+(em.running?" "+spill("warn","emerge running now"):""));
     }
     rows+=hxEventRows(d)+hxPressureRow(d);
-    var sel=h.sel;
-    if(sel&&sel.entries!==null&&sel.entries!==undefined) rows+=hxRow("BMC event log",
-      hxPill(sel.overflow||sel.pct>=80?"warn":"", sel.entries+(sel.entries===1?" entry":" entries"))+
-      (sel.pct!==null&&sel.pct!==undefined?hxU(sel.pct+"% full"):"")+(sel.grew_at?hxU("new entry "+hxWhen(sel.grew_at)):""),
-      (sel.last?"Most recent: "+sel.last+". ":"")+"The BMC clock was never set, so its own timestamps are not shown.");
+    rows+=hxSelRow(h.sel, h.sel&&h.sel.grew_at?"new entry "+dateclock(h.sel.grew_at):"",
+      "The BMC clock was never set, so its own timestamps are not shown.");
     (d.disk||[]).forEach(function(k){
       if(k.wear_pct===null||k.wear_pct===undefined) return;
       rows+=hxRow(esc(k.label.split(" · ")[0])+" SSD wear",
-        hxPill(k.wear_pct>=90?"bad":k.wear_pct>=70?"warn":"", k.wear_pct+"% of rated life used")+
+        spill(k.wear_pct>=90?"bad":k.wear_pct>=70?"warn":"", k.wear_pct+"% of rated life used")+
         (k.hours?hxU((k.hours/24/365.25).toFixed(1)+" years powered on"):""),
         "From the drive's own SMART wear counter ("+k.dev+")");
     });
-    var volts=((d.ipmi||{}).volts||[]), vbat=null;
-    volts.forEach(function(v){ if(v.n==="VBAT") vbat=v.v; });
-    if(vbat!==null) rows+=hxRow("CMOS battery",
-      hxPill(vbat<2.5?"bad":vbat<2.8?"warn":"ok", vbat.toFixed(2)+" V")+hxU("3.0 V cell"),
-      "The coin cell that keeps the BIOS settings and clock; below about 2.5 V it needs replacing");
+    ((d.ipmi||{}).volts||[]).forEach(function(v){
+      if(v.n==="VBAT") rows+=hxRow("CMOS battery",
+        spill(v.v<2.5?"bad":v.v<2.8?"warn":"ok", v.v.toFixed(2)+" V")+hxU("3.0 V cell"),
+        "The coin cell that keeps the BIOS settings and clock; below about 2.5 V it needs replacing");
+    });
     document.getElementById("sysrows").innerHTML=rows;
-    document.getElementById("voltstable").innerHTML="<thead><tr><th>Rail</th><th>Volts</th></tr></thead><tbody>"+
-      volts.map(function(v){ return "<tr><td>"+esc(v.n)+"</td><td>"+v.v.toFixed(2)+"</td></tr>"; }).join("")+"</tbody>";
-    txt("voltscap", "Voltage rails — BMC"+(volts.length?" · "+volts.length+" in range":""));
+    hxVolts(d);
     // Caddy renews about 30 days before expiry, so under two weeks left means
     // renewal has been failing for a fortnight.
-    var crt=h.certs||[], nowS=Date.now()/1000;
+    var crt=h.certs||[];
     document.getElementById("certrows").innerHTML=crt.length
       ? crt.slice().sort(function(a,b){ return a.not_after-b.not_after; }).map(function(x){
-          var days=Math.floor((x.not_after-nowS)/86400);
+          var days=Math.floor((x.not_after-Date.now()/1000)/86400);
           return "<div class='row'><span class='k'>"+esc(x.name)+"</span><span class='v'>"+
-            hxPill(days<7?"bad":days<14?"warn":"ok", days<0?"expired":days+" days")+hxU("until "+hxDate(x.not_after))+"</span></div>"; }).join("")
+            spill(days<7?"bad":days<14?"warn":"ok", days<0?"expired":days+" days")+hxU("until "+daymonth(x.not_after))+"</span></div>"; }).join("")
       : "<div class='row'><span class='k'>not read yet</span><span class='v'>&mdash;</span></div>";
     var ns=sv.not_started||[];
     document.getElementById("svcrows").innerHTML=ns.length
@@ -1417,89 +739,10 @@
     drawCharts(d);
   }
 
-  // ---------- polling ----------
-  function tick(){
-    fetch(SRC,{cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(d){ document.getElementById("err").style.display="none"; render(d); })
-      .catch(function(e){
-        var el=document.getElementById("err");
-        el.style.display="block";
-        el.textContent="Cannot reach telemetry endpoint ("+e.message+"). "+
-          (last? "Showing the last good sample." : "No data yet.");
-        document.getElementById("dot").className="dot dead";
-      });
-  }
-
-  // ---------- masonry ----------
-  (function(){
-    var grid=document.querySelector(".grid");
-    if(!grid || !window.ResizeObserver) return;
-    var ROW=4, GAP=16;
-    function fit(card){ card.style.gridRowEnd="span "+Math.ceil((card.offsetHeight+GAP)/ROW); }
-    grid.classList.add("masonry");
-    var ro=new ResizeObserver(function(entries){ entries.forEach(function(e){ fit(e.target); }); });
-    [].forEach.call(grid.children, function(c){ fit(c); ro.observe(c); });
-  })();
-
-  tick();
-  setInterval(tick, POLL_MS);
-  setInterval(function(){
-    if(!last) return;
-    var age=Math.max(0,Math.round(Date.now()/1000-last.ts));
-    txt("age", age<90 ? age+"s ago" : fmtDur(age)+" ago");
-    var dot=document.getElementById("dot");
-    dot.className="dot"+(age>DEAD_S?" dead":age>STALE_S?" stale":"");
-  }, 1000);
-})();
-</script>
-<script>
-/* Visitors panel: the same access-stats.json the akdeniz page reads. The data
-   it counts is what this host serves, so it belongs here too. Independent of
-   the telemetry poller above. */
-(function(){
-  var AX ="https://photos.proofsandreasons.io/akdeniz/access-stats.json";
-  function esc(s){ return String(s).replace(/[&<>"]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;"}[c];}); }
-  function fill(el,items,labelFn){
-    if(!el) return;
-    if(!items||!items.length){ el.innerHTML='<div class="row"><span class="k" style="color:var(--dimmer)">none yet</span><span class="v">&mdash;</span></div>'; return; }
-    el.innerHTML=items.map(function(it){
-      var lab=labelFn(it);
-      return '<div class="row"><span class="k" title="'+esc(lab)+'">'+esc(lab)+
-             '</span><span class="v">'+it.count.toLocaleString()+'</span></div>';
-    }).join("");
-  }
-  function place(x){
-    var out=[];
-    [x.city,x.region,x.country].forEach(function(p){
-      if(p && p!=="Unknown" && out.indexOf(p)<0) out.push(p);
-    });
-    return out.join(", ") || "Unknown";
-  }
-  function num(id,v){ var e=document.getElementById(id); if(e) e.textContent=v; }
-  function refreshAx(){
-    fetch(AX,{cache:"no-store"}).then(function(r){return r.json();}).then(function(d){
-      var ex=d.excluded||{};
-      num("axtotal",(d.unique_ips||0).toLocaleString());
-      num("axcc",(d.countries!=null?d.countries:(d.by_country||[]).length).toLocaleString());
-      num("axdrop",(ex.total||0).toLocaleString());
-      fill(document.getElementById("axcity"),(d.by_city||[]),place);
-      var parts=[];
-      if(ex.vpn)    parts.push(ex.vpn+" VPN/relay");
-      if(ex.attack) parts.push(ex.attack+" scanning");
-      if(ex.bot)    parts.push(ex.bot+" bot"+(ex.bot===1?"":"s"));
-      var dn=document.getElementById("axdropnote");
-      if(dn) dn.textContent=parts.length?("filtered: "+parts.join(", ")):"";
-      var t=document.getElementById("axts");
-      if(t){
-        var bits=[];
-        if(d.since) bits.push("since "+d.since);
-        if(d.updated) bits.push("updated "+d.updated);
-        t.textContent=bits.join(" · ");
-      }
-    }).catch(function(){ var t=document.getElementById("axts"); if(t) t.textContent="stats unavailable"; });
-  }
-  refreshAx(); setInterval(refreshAx,60000);
+  startMonitor(SRC, render);
+  masonry();
+  startVisitors();
+  startCamera();
 })();
 </script>
 </body>
