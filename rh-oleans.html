@@ -52,6 +52,8 @@
   .sub{color:var(--dim);max-width:68ch;margin-top:11px;font-size:1.02rem}
   .credit{max-width:68ch;margin-top:14px;font-size:1.02rem;border-left:3px solid var(--sky);padding-left:14px}
   .credit b{font-weight:650}
+  .funding{color:var(--dimmer);max-width:68ch;margin-top:11px;font-size:.86rem}
+  .funding a{color:var(--dim)}
 
   section{margin-top:42px}
   h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
@@ -87,9 +89,6 @@
   pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);
     border-radius:12px;padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink);margin-top:14px}
 
-  footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
-    color:var(--dimmer);font-size:.79rem;max-width:80ch}
-  footer a{color:var(--dim)}
 </style>
 </head>
 <body>
@@ -114,6 +113,10 @@
   posted at <code>alpo.ge/lean.tar.gz.part01&nbsp;&hellip;&nbsp;part14</code>, which states a proof of the Riemann
   Hypothesis, together with the Mathlib <code>.olean</code>s it was compiled against. They are here so that
   independent kernels and checkers can be run on it without first spending about 530 CPU-hours compiling.</p>
+  <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
+  <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
+  Additional support from research funds of the Laboratory for Social Minds and from the Survival and
+  Flourishing Fund.</p>
 </header>
 
 <div class="note"><b>These are build products of someone else&rsquo;s code, which we have not reviewed.</b>
@@ -244,13 +247,6 @@ R/deps/LeanSearchClient:R/deps/plausible:R/deps/mathlib:R/lib:T/lib/lean</pre>
   <code>LFunction_eq_zero_re</code> and <code>LFunction_eq_zero_re_of_isPrimitive</code>, use the definitions
   in <code>Statements.lean</code>, which imports only Mathlib.</p>
 </section>
-
-<footer>
-  Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
-  <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
-  Additional support from research funds of the Laboratory for Social Minds and from the Survival and
-  Flourishing Fund.
-</footer>
 
 </div>
 </body>
