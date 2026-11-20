@@ -1,0 +1,250 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<!-- Build products of someone else's unreviewed code, shared with people running kernel
+     checks. Kept out of search results, like the archive pages. -->
+<meta name="robots" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<meta name="googlebot" content="noindex, nofollow, noarchive, nosnippet, noimageindex">
+<title>Compiled oleans &middot; Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Compiled oleans for the alpo.ge Lean development">
+<meta property="og:description" content="The .olean files of all 175,187 modules, for independent kernel checking.">
+<meta property="og:url" content="https://proofsandreasons.io/rh-oleans.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/rh-oleans.html">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    background-attachment:fixed;
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;padding:0 20px 80px;line-height:1.55;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  a{color:var(--sky);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:3px}
+
+  nav.site{display:flex;flex-wrap:wrap;gap:6px 20px;padding:18px 0 0;
+    font-family:var(--mono);font-size:.8rem}
+  nav.site a{color:var(--dim)}
+  nav.site a:hover{color:var(--sky)}
+
+  header.top{padding:30px 0 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
+  .sub{color:var(--dim);max-width:68ch;margin-top:11px;font-size:1.02rem}
+
+  section{margin-top:42px}
+  h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;
+    font-size:.68rem;font-weight:700;margin:26px 0 11px}
+  .lede{color:var(--dim);max-width:72ch;margin-bottom:20px}
+  p.body{color:var(--dim);max-width:74ch;margin-top:12px}
+  p.body b{color:var(--ink);font-weight:600}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+  dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:14px 22px}
+  dl.facts dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dimmer)}
+  dl.facts dd{font-family:var(--mono);font-size:.92rem;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .note{border-left:3px solid var(--amber);background:var(--panel);padding:13px 17px;
+    border-radius:0 10px 10px 0;margin-top:22px;color:var(--dim);font-size:.93rem;max-width:80ch}
+  .note b{color:var(--ink)}
+
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dimmer);font-weight:700;background:#0e1320;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  td.hash{font-family:var(--mono);font-size:.7rem;color:var(--dim);word-break:break-all;min-width:15rem}
+  td.mono{font-family:var(--mono);font-size:.8rem;word-break:break-all}
+
+  code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);
+    padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink);margin-top:14px}
+
+  footer{margin-top:52px;padding-top:18px;border-top:1px solid var(--line);
+    color:var(--dimmer);font-size:.79rem;max-width:80ch}
+  footer a{color:var(--dim)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="site" aria-label="Proofs &amp; Reasons">
+  <a href="https://proofsandreasons.io/">Proofs &amp; Reasons</a>
+  <a href="/dashboard.html">Skyline monitor</a>
+  <a href="/readings.html">CogSci reading list</a>
+  <a href="/reddit-archive.html">Reddit archive</a>
+  <a href="/lesswrong-archive.html">LessWrong archive</a>
+</nav>
+
+<header class="top">
+  <h1>Compiled oleans for the alpo.ge Lean development</h1>
+  <p class="sub">The <code>.olean</code> file of every one of the 175,187 modules in the Lean development
+  posted at <code>alpo.ge/lean.tar.gz.part01&nbsp;&hellip;&nbsp;part14</code>, which states a proof of the Riemann
+  Hypothesis, together with the Mathlib <code>.olean</code>s it was compiled against. They are here so that
+  independent kernels and checkers can be run on it without first spending about 530 CPU-hours compiling.</p>
+</header>
+
+<div class="note"><b>These are build products of someone else&rsquo;s code, which we have not reviewed.</b>
+Sharing them is not a statement about whether the proof is correct. Nothing here is an export: run
+<code>lean4export</code>, or whatever your checker reads, against these files yourself.</div>
+
+<section>
+  <div class="card">
+    <dl class="facts">
+      <div><dt>Modules</dt><dd>175,187</dd></div>
+      <div><dt>Compiled</dt><dd>175,187, 0 errors</dd></div>
+      <div><dt>Download</dt><dd>14 archives, 31.9 GiB</dd></div>
+      <div><dt>Unpacked</dt><dd>89 GiB + 6 GiB deps</dd></div>
+      <div><dt>Lean</dt><dd>v4.33.1</dd></div>
+      <div><dt>Mathlib</dt><dd>tag v4.33.1</dd></div>
+      <div><dt>Built</dt><dd>2026-11-20, x86_64 Linux</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section>
+  <h2>Download</h2>
+  <p class="lede">Extract every archive into the same directory; they all unpack under <code>alp-oleans/</code>.
+  Downloads support range requests, so a dropped transfer resumes rather than restarting. The plain-text
+  <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/README.txt">README</a> travels with the files and says the same things as this page.</p>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Archive</th><th>Contains</th><th>Size</th><th>SHA-256</th></tr></thead>
+      <tbody>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-CompanionTheory.tar.gz">alp-oleans-CompanionTheory.tar.gz</a></td><td>CompanionTheory</td><td class="num">304.1 MiB</td><td class="hash">6cd33a39b6831f7741d115b0926fb685d765751ed8249e4ddc74dd2b2e16b712</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-deps-mathlib-etc.tar.gz">alp-oleans-deps-mathlib-etc.tar.gz</a></td><td>Mathlib and the other dependencies</td><td class="num">1.83 GiB</td><td class="hash">42b22a8360d23db1e6b48d3b80b06895669ffd8e5c2c213872d66cd5412e0422</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-AbelianVarietyTheory.tar.gz">alp-oleans-Development-AbelianVarietyTheory.tar.gz</a></td><td>Development/AbelianVarietyTheory</td><td class="num">15.82 GiB</td><td class="hash">6278cb10de11727c127efe7ab23680e3523b543ef1e5ed66b46ff30a4805b365</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-AutomorphicArithmetic.tar.gz">alp-oleans-Development-AutomorphicArithmetic.tar.gz</a></td><td>Development/AutomorphicArithmetic</td><td class="num">3.75 GiB</td><td class="hash">c8ef226ff63ea71ac7ddb8ef4113611a7d4de49bbdfc97e8fbaafee5b83c842a</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-AutomorphicSpectrum.tar.gz">alp-oleans-Development-AutomorphicSpectrum.tar.gz</a></td><td>Development/AutomorphicSpectrum</td><td class="num">1.81 GiB</td><td class="hash">cae438628eb0ddb682a4c1bfeb1b9dc8cc64572be43427df98c4c9ed30130327</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-DiscreteGroups.tar.gz">alp-oleans-Development-DiscreteGroups.tar.gz</a></td><td>Development/DiscreteGroups</td><td class="num">33.9 MiB</td><td class="hash">2212be7a7de78f677aba458ede8a46468c12410ceee27d9c7d75a86ecde0155d</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-EtaleCohomology.tar.gz">alp-oleans-Development-EtaleCohomology.tar.gz</a></td><td>Development/EtaleCohomology</td><td class="num">160.2 MiB</td><td class="hash">8d93e01de9c18e3dc7a185a070fd0c907b2530f9cc9b1b7b3031fc2c740b07d8</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-ResolutionOfSingularities.tar.gz">alp-oleans-Development-ResolutionOfSingularities.tar.gz</a></td><td>Development/ResolutionOfSingularities</td><td class="num">73.7 MiB</td><td class="hash">2021ebdad4a707b30ec1c92bf35f3f76a0092c01dddbf85f843a8faefc6bc0f2</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Development-WeilBound.tar.gz">alp-oleans-Development-WeilBound.tar.gz</a></td><td>Development/WeilBound</td><td class="num">1.55 GiB</td><td class="hash">2343bd3d8e66aa149f4328423c13ca00f60310dd69a260e6c091b001645d1b33</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Formalism.tar.gz">alp-oleans-Formalism.tar.gz</a></td><td>Formalism</td><td class="num">4.48 GiB</td><td class="hash">0b0d4af38463e5569008722bb0de00db581ee7cce041a8f9468f32ff0181f63c</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-GroundTheory.tar.gz">alp-oleans-GroundTheory.tar.gz</a></td><td>GroundTheory</td><td class="num">1.30 GiB</td><td class="hash">2c57b5d03a1ee5eb2c3ca5c69392eb841d7445e5a7a986d05f9b8b977b99bdea</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-Main-and-small.tar.gz">alp-oleans-Main-and-small.tar.gz</a></td><td>Main, Statements, BuildAid, Lemmata, Supplements</td><td class="num">8.7 MiB</td><td class="hash">31ed2ace3a3d2a3daff6dc689d7848c15f5d7ce77a71eb68d481b03e72b7cabe</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-PositivityTheory.tar.gz">alp-oleans-PositivityTheory.tar.gz</a></td><td>PositivityTheory</td><td class="num">92.9 MiB</td><td class="hash">c629fdcff983224ff8bd7e7383606d9105f6207378ea0f57e5e38d258eda3f13</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-oleans-ReciprocityTheory.tar.gz">alp-oleans-ReciprocityTheory.tar.gz</a></td><td>ReciprocityTheory</td><td class="num">730.9 MiB</td><td class="hash">f146d6fb43922457aaf83058d0beb11352620e6597a3f369ecd632749681752e</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body">Checksums: <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/SHA256SUMS">SHA256SUMS</a> covers the archives, and
+  <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/SHA256SUMS-project-oleans.txt.gz">SHA256SUMS-project-oleans.txt.gz</a>
+  (8.5 MiB) gives the SHA-256 of each of the 175,187 project
+  <code>.olean</code>s, for comparing against a build of your own.</p>
+<pre>base=https://photos.proofsandreasons.io/alp-oleans-357309b5dd12
+curl -O $base/SHA256SUMS
+for f in $(awk '/tar.gz/ {print $2}' SHA256SUMS); do curl -C - -O $base/$f; done
+sha256sum -c SHA256SUMS
+for f in alp-oleans-*.tar.gz; do tar -xzf $f; done</pre>
+</section>
+
+<section>
+  <h2>Layout</h2>
+  <div class="scroller">
+    <table>
+      <tbody>
+      <tr><td class="mono">alp-oleans/lib/&lt;Module/Path&gt;.olean</td><td>The project&rsquo;s modules. The entry points are
+        <code>lib/Main.olean</code> and <code>lib/Statements.olean</code>.</td></tr>
+      <tr><td class="mono">alp-oleans/deps/&lt;package&gt;/&hellip;</td><td>The full <code>build/lib/lean</code> of mathlib,
+        batteries, aesop, Qq, proofwidgets, importGraph, plausible and LeanSearchClient.</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body"><code>LEAN_PATH</code>, in the order used for the build, where <code>R</code> is the
+  <code>alp-oleans</code> directory and <code>T</code> is the v4.33.1 toolchain:</p>
+<pre>R/deps/batteries:R/deps/Qq:R/deps/aesop:R/deps/proofwidgets:R/deps/importGraph:
+R/deps/LeanSearchClient:R/deps/plausible:R/deps/mathlib:R/lib:T/lib/lean</pre>
+  <p class="body">The project files are plain <code>.olean</code>s that do not use the module system; Mathlib&rsquo;s are
+  module-system ones (<code>.olean</code>, <code>.olean.server</code>, <code>.olean.private</code>). All of them
+  are specific to Lean v4.33.1.</p>
+</section>
+
+<section>
+  <h2>How they were built</h2>
+  <p class="body"><b>Source.</b> The fourteen parts concatenated, SHA-256
+  <code>9631b4f020199e580ba86178cb56c6e9b09f690c2369a80dc4334aa93f49c7fc</code>, with the toolchain and
+  dependencies pinned by its own <code>lean-toolchain</code> and <code>lake-manifest.json</code>.</p>
+  <p class="body"><b>Not with <code>lake build</code>.</b> Lake does not scale to this tree: for each module it
+  re-walks about 8,800 transitive imports and writes a setup file of about 6&nbsp;MB. Each module was instead
+  compiled by the pinned <code>lean</code> binary directly, one process per module, in dependency order:</p>
+<pre>lean --tstack=400000 src/&lt;Module/Path&gt;.lean -o lib/&lt;Module/Path&gt;.olean --setup &lt;json&gt;</pre>
+  <p class="body">with <code>LEAN_PATH</code> as above and this setup file:</p>
+<pre>{"name": "&lt;Module.Name&gt;", "package": "tree", "isModule": false,
+ "options": {"autoImplicit": false, "relaxedAutoImplicit": false, "maxSynthPendingDepth": 3,
+             "pp.unicode.fun": true, "maxHeartbeats": 4000000},
+ "importArts": {}, "dynlibs": [], "plugins": []}</pre>
+  <p class="body">Those are the lakefile&rsquo;s options; modules under <code>GroundTheory.LocalFields</code> and
+  <code>GroundTheory.GlobalFields</code> also get <code>"synthInstance.maxHeartbeats": 400000</code>, as the
+  lakefile specifies. This is the command line, module name, package name and options that Lake itself
+  passes, without the import table and without the <code>-c</code> and <code>-i</code> outputs. So there are
+  no <code>.ilean</code>, <code>.c</code> or <code>.ir</code> files and no Lake <code>.trace</code> or
+  <code>.hash</code> files, and Lake will not regard these as an up-to-date build.</p>
+  <p class="body"><b>Dependencies were not rebuilt.</b> The dependency <code>.olean</code>s are the ones
+  <code>lake exe cache get</code> downloads for that Mathlib commit, from Mathlib&rsquo;s official build cache.</p>
+  <p class="body"><b>Result.</b> All 175,187 modules compiled with no errors. One compiler process segfaulted
+  inside the bundled allocator and the module succeeded on retry; 64 further recompiles of that module
+  all gave a byte-identical <code>.olean</code>, identical to the one included here.</p>
+
+  <h3>Toolchain and dependencies</h3>
+  <div class="scroller">
+    <table>
+      <tbody>
+      <tr><td>Lean</td><td class="mono">leanprover/lean4:v4.33.1, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6 (official release binary)</td></tr>
+      <tr><td>mathlib</td><td class="mono">0df444a360eaa60ab8c11dca51a86af692955474 (tag v4.33.1)</td></tr>
+      <tr><td>batteries</td><td class="mono">4488d40d070b9700d4d5a6aa342f0d40c31b2a2d</td></tr>
+      <tr><td>aesop</td><td class="mono">3448c0bcc5ce01b2d1546e483ec3620e32df3d0e</td></tr>
+      <tr><td>Qq</td><td class="mono">92c15be17b7caf78c2ad767ec40f89052d908d81</td></tr>
+      <tr><td>proofwidgets</td><td class="mono">4be2e3d5087eeb272cf5a8853b8f9dd025ef5957</td></tr>
+      <tr><td>importGraph</td><td class="mono">16f02aa7642864af59f1ff0e384a015994db9118</td></tr>
+      <tr><td>plausible</td><td class="mono">b7eb3304aeae834b12dda98993a37f6a41f6f0bb</td></tr>
+      <tr><td>LeanSearchClient</td><td class="mono">5f4d51b81cbd3f6b32b156bfad9056621a040404</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>What to check</h2>
+  <p class="body"><code>Main.lean</code>, in the source tarball, states five theorems.
+  <code>riemannHypothesis : RiemannHypothesis</code> uses Mathlib&rsquo;s own definition. The other four,
+  <code>riemannZeta_eq_zero_re</code>, <code>LFunction_ne_zero_of_half_lt_re</code>,
+  <code>LFunction_eq_zero_re</code> and <code>LFunction_eq_zero_re_of_isPrimitive</code>, use the definitions
+  in <code>Statements.lean</code>, which imports only Mathlib.</p>
+</section>
+
+<footer>
+  Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
+  <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
+  Additional support from research funds of the Laboratory for Social Minds and from the Survival and
+  Flourishing Fund.
+</footer>
+
+</div>
+</body>
+</html>
