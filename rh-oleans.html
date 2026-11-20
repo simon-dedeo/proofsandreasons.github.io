@@ -25,7 +25,7 @@
   :root{
     --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
     --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
-    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --bad:#ff6f6f;
     --shadow:0 10px 34px rgba(0,0,0,.5);
     --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
     --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
@@ -134,6 +134,43 @@ Sharing them is not a statement about whether the proof is correct. Nothing here
       <div><dt>Mathlib</dt><dd>tag v4.33.1</dd></div>
       <div><dt>Built</dt><dd>2026-11-20, x86_64 Linux</dd></div>
     </dl>
+  </div>
+</section>
+
+<section id="checks">
+  <h2>Checks run on this build</h2>
+  <p class="lede">Two checks have been run here, both with Lean v4.33.1 itself. Neither involves an export or
+  a second kernel; the files below are there so that others can do that.</p>
+
+  <h3>Axioms</h3>
+  <p class="body">The output of <code>#print axioms</code> for the five theorems stated in <code>Main.lean</code>:</p>
+<pre>'riemannHypothesis' depends on axioms: [propext, Classical.choice, Quot.sound]
+'riemannZeta_eq_zero_re' depends on axioms: [propext, Classical.choice, Quot.sound]
+'LFunction_ne_zero_of_half_lt_re' depends on axioms: [propext, Classical.choice, Quot.sound]
+'LFunction_eq_zero_re' depends on axioms: [propext, Classical.choice, Quot.sound]
+'LFunction_eq_zero_re_of_isPrimitive' depends on axioms: [propext, Classical.choice, Quot.sound]</pre>
+  <p class="body">Each of the five is a theorem whose type is exactly the named statement:
+  <code>RiemannHypothesis</code> as defined in <code>Mathlib.NumberTheory.LSeries.RiemannZeta</code> for the
+  first, and the four definitions in <code>Statements</code> for the others. <code>#print axioms</code>
+  reports what the compiled environment records. On its own it would not notice a declaration that had been
+  written into an <code>.olean</code> without passing the kernel; the replay is the check for that.</p>
+
+  <h3>Kernel replay</h3>
+  <p class="body">Every constant of every project module is added again through the Lean kernel, on top of that
+  module&rsquo;s imports, one module per process. This is the logic of <code>leanchecker</code>&rsquo;s
+  <code>replayFromImports</code>. As a control, a forged <code>theorem&nbsp;:&nbsp;False</code> compiled with
+  kernel checking switched off is rejected by it. The replay covers the 175,187 project modules, not
+  Mathlib&rsquo;s own.</p>
+  <div class="card" style="margin-top:16px">
+    <dl class="facts">
+      <div><dt>State</dt><dd id="rp-state">running</dd></div>
+      <div><dt>Passed</dt><dd id="rp-passed">121,648</dd></div>
+      <div><dt>Failed</dt><dd id="rp-failed">0</dd></div>
+      <div><dt>Not yet replayed</dt><dd id="rp-left">53,539</dd></div>
+      <div><dt>As of</dt><dd id="rp-when">2026-11-20 15:34 EST</dd></div>
+    </dl>
+    <p class="body" id="rp-note" style="margin-top:14px">These figures are refreshed from the machine doing the replay.</p>
+    <ul id="rp-fail" style="margin:10px 0 0 18px;color:var(--dim);font-family:var(--mono);font-size:.78rem"></ul>
   </div>
 </section>
 
@@ -249,5 +286,42 @@ R/deps/LeanSearchClient:R/deps/plausible:R/deps/mathlib:R/lib:T/lib/lean</pre>
 </section>
 
 </div>
+<script>
+// Replay progress, written every three minutes by the machine running it.
+(function(){
+  var URL = 'https://photos.proofsandreasons.io/wright/alp-replay.json';
+  var $ = function(id){ return document.getElementById(id); };
+  var n = function(x){ return Number(x).toLocaleString('en-US'); };
+  function draw(d){
+    var bad = d.failed + d.crashed, st = $('rp-state');
+    if (d.state === 'finished' && bad === 0 && d.remaining === 0){
+      st.textContent = 'finished, all passed'; st.style.color = 'var(--good)';
+      $('rp-note').textContent = 'All ' + n(d.total_modules) + ' project modules were replayed through the Lean ' + d.lean + ' kernel with no failures.';
+    } else if (d.state === 'running'){
+      st.textContent = 'running'; st.style.color = 'var(--amber)';
+      $('rp-note').textContent = 'Still running' + (d.eta_hours != null && d.eta_hours >= 0 ? ', about ' + (d.eta_hours < 1 ? Math.round(d.eta_hours * 60) + ' minutes' : d.eta_hours.toFixed(1) + ' hours') + ' left' : '') + '. This box updates itself.';
+    } else {
+      st.textContent = d.state + (bad ? ', with failures' : ''); st.style.color = bad ? 'var(--bad)' : 'var(--amber)';
+      $('rp-note').textContent = bad ? 'Some modules did not pass; they are listed below.' : 'The replay is not running and has not covered every module.';
+    }
+    $('rp-passed').textContent = n(d.passed) + ' of ' + n(d.total_modules);
+    $('rp-failed').textContent = n(bad);
+    $('rp-failed').style.color = bad ? 'var(--bad)' : '';
+    $('rp-left').textContent = n(d.remaining);
+    $('rp-when').textContent = (d.finished && d.state === 'finished' ? d.finished : d.updated.slice(0, 16).replace('T', ' ')) + ' EST';
+    var ul = $('rp-fail'); ul.textContent = '';
+    (d.failures || []).concat(d.crashes || []).forEach(function(f){
+      var li = document.createElement('li'); li.textContent = f.module + ': ' + f.message; ul.appendChild(li);
+    });
+    return d.state === 'running';
+  }
+  function load(){
+    fetch(URL, {cache: 'no-store'}).then(function(r){ return r.json(); })
+      .then(function(d){ if (draw(d)) setTimeout(load, 60000); })
+      .catch(function(){ setTimeout(load, 120000); });
+  }
+  load();
+})();
+</script>
 </body>
 </html>
