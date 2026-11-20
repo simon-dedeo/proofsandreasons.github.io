@@ -50,6 +50,8 @@
   header.top{padding:30px 0 22px;border-bottom:1px solid var(--line)}
   h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
   .sub{color:var(--dim);max-width:68ch;margin-top:11px;font-size:1.02rem}
+  .credit{max-width:68ch;margin-top:14px;font-size:1.02rem;border-left:3px solid var(--sky);padding-left:14px}
+  .credit b{font-weight:650}
 
   section{margin-top:42px}
   h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
@@ -103,6 +105,11 @@
 
 <header class="top">
   <h1>Compiled oleans for the alpo.ge Lean development</h1>
+  <p class="credit">The mathematics and its Lean formalization are the work of <b>Levent Alp&ouml;ge</b>, working
+  with Claude. His note announcing it is <a href="https://alpo.ge/remark.pdf">alpo.ge/remark.pdf</a>, and the
+  Lean source is the fourteen parts <a href="https://alpo.ge/lean.tar.gz.part01">alpo.ge/lean.tar.gz.part01</a>
+  &hellip; <a href="https://alpo.ge/lean.tar.gz.part14">part14</a>. This page only hosts files built from that
+  source.</p>
   <p class="sub">The <code>.olean</code> file of every one of the 175,187 modules in the Lean development
   posted at <code>alpo.ge/lean.tar.gz.part01&nbsp;&hellip;&nbsp;part14</code>, which states a proof of the Riemann
   Hypothesis, together with the Mathlib <code>.olean</code>s it was compiled against. They are here so that
