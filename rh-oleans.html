@@ -116,8 +116,8 @@
 </header>
 
 <div class="note"><b>These are build products of someone else&rsquo;s code, which we have not reviewed.</b>
-Sharing them is not a statement about whether the proof is correct. Nothing here is an export: run
-<code>lean4export</code>, or whatever your checker reads, against these files yourself.</div>
+Sharing them is not a statement about whether the proof is correct. Two <code>lean4export</code> files made
+from them are <a href="#export">further down</a>; no second kernel has been run on any of it here.</div>
 
 <section>
   <div class="card">
@@ -135,8 +135,8 @@ Sharing them is not a statement about whether the proof is correct. Nothing here
 
 <section id="checks">
   <h2>Checks run on this build</h2>
-  <p class="lede">Two checks have been run here, both with Lean v4.33.1 itself. Neither involves an export or
-  a second kernel; the files below are there so that others can do that.</p>
+  <p class="lede">Two checks have been run here, both with Lean v4.33.1 itself. Neither involves a second
+  kernel; the files below are there so that others can do that.</p>
 
   <h3>Axioms</h3>
   <p class="body">The output of <code>#print axioms</code> for the five theorems stated in <code>Main.lean</code>:</p>
@@ -196,7 +196,7 @@ Sharing them is not a statement about whether the proof is correct. Nothing here
       </tbody>
     </table>
   </div>
-  <p class="body">Checksums: <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/SHA256SUMS">SHA256SUMS</a> covers the archives, and
+  <p class="body">Checksums: <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/SHA256SUMS">SHA256SUMS</a> covers the archives and the export files, and
   <a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/SHA256SUMS-project-oleans.txt.gz">SHA256SUMS-project-oleans.txt.gz</a>
   (8.5 MiB) gives the SHA-256 of each of the 175,187 project
   <code>.olean</code>s, for comparing against a build of your own.</p>
@@ -205,6 +205,37 @@ curl -O $base/SHA256SUMS
 for f in $(awk '/tar.gz/ {print $2}' SHA256SUMS); do curl -C - -O $base/$f; done
 sha256sum -c SHA256SUMS
 for f in alp-oleans-*.tar.gz; do tar -xzf $f; done</pre>
+</section>
+
+<section id="export">
+  <h2>Export files</h2>
+  <p class="lede">For checkers that read an export and not <code>.olean</code>s. Both were made from the files above
+  with <a href="https://github.com/leanprover/lean4export">lean4export</a> (tag <code>v4.33.0</code>, built with
+  the v4.33.1 toolchain), in NDJSON export format 3.1.0 with default options: no unsafe declarations, no
+  <code>mdata</code>.</p>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>File</th><th>Contains</th><th>Size</th><th>SHA-256</th></tr></thead>
+      <tbody>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-export-main-theorems.ndjson.gz">alp-export-main-theorems.ndjson.gz</a></td>
+        <td>The five theorems of <code>Main.lean</code> and everything they depend on, in Mathlib and in the
+        project: 1,246,109 theorems, 214,238 definitions, 7,969 inductive declarations, 91 opaques and 3 axioms.
+        61.6&nbsp;GB and 1,080,769,494 lines unpacked.</td>
+        <td class="num">8.72 GiB</td><td class="hash">d5fad83247dd024e1a77d283aa766ac745432b7159dfffc11bb05996c46a89fb</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/alp-oleans-357309b5dd12/alp-export-statements.ndjson.gz">alp-export-statements.ndjson.gz</a></td>
+        <td>The five statements alone and everything they depend on, which is Mathlib and core only: 40,425
+        theorems, 10,235 definitions, 969 inductive declarations, 46 opaques and 3 axioms. 351&nbsp;MB and
+        6,495,456 lines unpacked.</td>
+        <td class="num">54.4 MiB</td><td class="hash">5245dd5f4336a3bb017d5b898330a83084f520acc0dc20294856133f1e1b267a</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body">The commands were <code>lean4export Main -- riemannHypothesis riemannZeta_eq_zero_re
+  LFunction_ne_zero_of_half_lt_re LFunction_eq_zero_re LFunction_eq_zero_re_of_isPrimitive</code> and
+  <code>lean4export Statements -- RiemannHypothesis RiemannZetaZerosOnLine DirichletLNonvanishingRightOfHalf
+  DirichletLZerosOnLine PrimitiveDirichletLZerosOnLine</code>. Declarations that the five theorems do not use,
+  about a quarter of the project, are not in the main export. It took 2&nbsp;h&nbsp;03&nbsp;min on one core and
+  161&nbsp;GB of memory to write.</p>
 </section>
 
 <section>
