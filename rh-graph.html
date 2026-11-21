@@ -129,6 +129,7 @@
   svg text{font-family:var(--sans);fill:var(--chart)} svg text.nm{font-family:var(--mono);fill:var(--ink)}
   .halo{paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round}
   .msg{padding:40px 16px;text-align:center;color:var(--dimmer)}
+  img.fig{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
 </style>
 </head>
 <body>
@@ -175,6 +176,21 @@
   <div class="scroller" style="border-radius:18px"><div id="nbstage"><div class="msg">Loading&hellip;</div></div></div>
   <div class="legend" id="nblegend"></div>
   <div class="panel declpanel" id="nbpanel" aria-live="polite"><div class="msg">Loading&hellip;</div></div>
+</section>
+
+<!-- ============ WHOLE NETWORK ============ -->
+<section id="network">
+  <h2>The whole network at once</h2>
+  <p class="lede">All 1,063,440 declarations, coloured by the modules that Louvain clustering finds in the links alone,
+  with no knowledge of files or folders. It finds 7,295 modules, 48 of them with more than a thousand declarations,
+  at a modularity of 0.80. They cut across the source tree: the largest draws only a quarter of its declarations
+  from any one folder.</p>
+  <a href="https://photos.proofsandreasons.io/alp-graph/alp-proof-network.png"><img class="fig"
+    src="https://photos.proofsandreasons.io/alp-graph/alp-proof-network-web.png" width="2420" height="1760" loading="lazy"
+    alt="The declaration network drawn as twenty coloured clusters of points and links, one per large module, with riemannHypothesis marked by a star near the bottom, and a key listing each module's size, main folder and most-used declaration."></a>
+  <p class="body">Select the picture for the full-size version (6600 &times; 4800, 23&nbsp;MB). Each module is laid out
+  on its own and the modules are then arranged by how strongly they are linked; the outer ring holds declarations in
+  modules of fewer than thirty.</p>
 </section>
 
 <!-- ============ FOLDER MAP ============ -->
