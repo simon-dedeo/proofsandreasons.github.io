@@ -13,7 +13,7 @@
 <title>Dependency graph &middot; Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Dependency graph of the alpo.ge Proof of the Riemann Hypothesis">
-<meta property="og:description" content="Every declaration in the compiled Lean development and what it uses: 1,063,440 declarations, 10.9 million links, navigable one declaration at a time.">
+<meta property="og:description" content="Every declaration that the final theorem uses in the compiled Lean development, and what each one uses: 806,982 declarations, 8.2 million links, navigable one declaration at a time.">
 <meta property="og:url" content="https://proofsandreasons.io/rh-graph.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/rh-graph.html">
@@ -158,11 +158,11 @@
   with Claude. His note announcing it is <a href="https://alpo.ge/remark.pdf">alpo.ge/remark.pdf</a>. This page is
   drawn from the files on the <a href="/rh-oleans.html">compiled oleans page</a>, which also has the checks run
   on them.</p>
-  <p class="sub" id="lede">Every declaration in the compiled Lean development and which other declarations it uses:
-  <b>1,063,440 declarations</b> joined by <b>10.9 million</b> links. <b>806,982 of them (76%)</b> are used, directly
-  or through a chain of other declarations, by the final theorem <code>riemannHypothesis</code>. Below: the
-  network as a whole, how belief would spread through it, a navigator for walking it one declaration at a time,
-  and a map by folder.</p>
+  <p class="sub" id="lede">Every declaration that the final theorem <code>riemannHypothesis</code> uses, directly or
+  through a chain of other declarations, and which of them use which: <b>806,982 declarations</b> joined by
+  <b>8.2 million</b> links. The other 256,458 declarations in the compiled Lean development, about a quarter of it,
+  are not used by the theorem and are left out of everything on this page. Below: the proof as a network, the
+  statistics of dependence and use, a navigator for walking it one declaration at a time, and a map by folder.</p>
   <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
   <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
   Additional support from research funds of the Laboratory for Social Minds and from the Survival and
@@ -172,15 +172,15 @@
 <!-- ============ THE NETWORK ============ -->
 <section id="network">
   <h2>The proof as a network</h2>
-  <p class="lede">All 1,063,440 declarations at once. The clusters are the modules that Louvain clustering finds in the
-  links alone, with no knowledge of files or folders: 7,295 of them, 48 with more than a thousand declarations, at a
-  modularity of 0.80. Hover over a cluster for its name and its most-used declarations; select it to keep them in
-  the box and follow them into the navigator.</p>
+  <p class="lede">All 806,982 declarations at once. The clusters are the modules that Louvain clustering finds in the
+  links alone, with no knowledge of files or folders: 943 of them, 44 with more than a thousand
+  declarations, at a modularity of 0.81. Hover over a cluster for its name and its most-used declarations; select
+  it to keep them in the box and follow them into the navigator.</p>
   <div class="grid2">
     <div>
       <div class="netfig" id="netfig">
-        <img src="https://photos.proofsandreasons.io/alp-graph/alp-proof-network-plain-web.png" width="2000" height="2000"
-          alt="The declaration network drawn as coloured clusters of points and links, one per module, with a faint ring of small modules around them.">
+        <img src="https://photos.proofsandreasons.io/alp-graph/rh/alp-proof-network-plain-web.png" width="2000" height="2000"
+          alt="The network of declarations that the final theorem uses, drawn as coloured clusters of points and links, one per module.">
         <svg id="netsvg" viewBox="0 0 1000 1000" role="group" aria-label="Modules of the proof network"></svg>
       </div>
       <div class="legend"><span>Colour marks the twenty largest modules; smaller ones are grey. The star is <code>riemannHypothesis</code>.</span></div>
@@ -188,35 +188,36 @@
     <aside class="panel" id="netpanel" aria-live="polite"><div class="msg">Loading&hellip;</div></aside>
   </div>
   <p class="body">Each module is laid out on its own and the modules are then arranged by how strongly they are linked;
-  the 20,858 declarations in modules of fewer than thirty are left out of this view. The modules cut across the source tree: the
-  largest draws only a quarter of its declarations from any one folder. <b>The module names are a reader&rsquo;s
+  the 8,343 declarations in modules of fewer than thirty are left out of this view. The modules cut across the source
+  tree: the largest draws only 37% of its declarations from any one folder. <b>The module names are a reader&rsquo;s
   labels</b>, written for the thirty largest from their most-used declarations, namespaces and distinctive
   name-words; smaller modules are labelled by three of those words. The proof itself does not name them.
-  <a href="https://photos.proofsandreasons.io/alp-graph/alp-proof-network.png">The picture with a key of the twenty largest modules</a> is a
-  7200&nbsp;&times;&nbsp;4800 PNG (23&nbsp;MB).</p>
+  <a href="https://photos.proofsandreasons.io/alp-graph/rh/alp-proof-network.png">The picture with a key of the twenty largest modules</a> is a
+  7200&nbsp;&times;&nbsp;4800 PNG (21&nbsp;MB).</p>
 </section>
 
-<!-- ============ BELIEF DYNAMICS ============ -->
+<!-- ============ DEPENDENCE AND USE ============ -->
 <section id="belief">
-  <h2>How belief would spread through it</h2>
+  <h2>Dependence and use</h2>
   <p class="lede">Viteri &amp; DeDeo, <a href="https://doi.org/10.1016/j.cognition.2022.105120">&ldquo;Epistemic phase
-  transitions in mathematical proofs&rdquo;</a> (<i>Cognition</i>, 2022), model a reader who goes over a proof step
-  by step, revising belief in each claim to agree with the claims it depends on (deduction) and the claims that
-  depend on it (abduction), with some chance of error at every inference. Above a critical reliability, belief
-  jumps to near-certainty across the whole network. Here the same analyses are run on this proof, on two networks:
-  <b>the top of the proof</b>, the 18,000 declarations within ten steps of <code>riemannHypothesis</code> (the
-  paper&rsquo;s convention of stopping at the first depth past 10,000 claims), and <b>the whole proof</b>, all 806,982
-  declarations the theorem uses.</p>
-
-  <h3>Dependence and use</h3>
+  transitions in mathematical proofs&rdquo;</a> (<i>Cognition</i>, 2022), count two things for every claim in 48
+  machine-checked proofs written in Coq: how many claims it depends on, and how many claims use it. Here the same
+  counts are made on two networks: <b>the top of the proof</b>, the 18,000 declarations within ten steps of
+  <code>riemannHypothesis</code> (the paper&rsquo;s convention of stopping at the first depth past 10,000 claims), and
+  <b>the whole proof</b>, all 806,982 declarations the theorem uses.</p>
   <img class="fig" src="rh-graph/ept/fig1_degrees_dark.png" width="2040" height="816" loading="lazy"
     alt="Two panels on logarithmic axes. Left: the share of declarations that depend on at least a given number of others. It falls off far more slowly than a Poisson distribution of the same mean; fitted power-law tails have exponent 2.82 for the top of the proof and 2.99 for the whole proof, and a power law with an exponential cutoff follows the points more closely. Right: the share of declarations used at least a given number of times, with fitted power-law tails of exponent 2.06 for the top of the proof and 1.89 for the whole proof.">
-  <p class="body">In the paper&rsquo;s machine proofs, written in Coq, the number of claims a claim depends on is
-  Poisson-like, mostly about three, and the number of claims that use it has a power-law tail with exponent
-  2.15&nbsp;&plusmn;&nbsp;0.13. Here <b>the use tail matches</b>: the exponent is 2.06&nbsp;&plusmn;&nbsp;0.02 for
-  the top of the proof (tail from 12 users, fitted by the method of Clauset, Shalizi and Newman). Over the whole
-  proof the fit gives 1.89, but there a log-normal describes the data better than a power law, so that number
-  should be read loosely.</p>
+  <p class="body">In the paper&rsquo;s Coq proofs the number of claims a claim depends on is Poisson-like, mostly about
+  three, and the number of claims that use it has a power-law tail with exponent 2.15&nbsp;&plusmn;&nbsp;0.13.
+  Here <b>the use tail matches</b>: the exponent is 2.06&nbsp;&plusmn;&nbsp;0.02 for the top of the proof (tail from 12
+  users, fitted by the method of Clauset, Shalizi and Newman). Over the whole proof the fit gives 1.89, but there a
+  log-normal describes the data better than a power law, so that number should be read loosely. The paper reads an
+  exponent near two as the mark of construction by &ldquo;tinkering and reuse&rdquo;
+  (<a href="https://arxiv.org/abs/1907.05528">Sol&eacute; &amp; Valverde, 2019</a>; the copying model of
+  <a href="https://doi.org/10.1103/PhysRevE.71.036118">Krapivsky &amp; Redner, 2005</a>), in which a new claim draws
+  not only on an earlier claim but on some of that claim&rsquo;s own precursors, put to new purposes; the same
+  exponent here is consistent with this Lean proof having been assembled in the way the paper&rsquo;s Coq proofs
+  were.</p>
   <p class="body"><b>Dependence is heavy-tailed too, which the Coq proofs were not.</b> A declaration depends on
   9.5 others on average with a variance of 190, where a Poisson would have a variance of 9.5; some depend on
   several hundred. A power law fitted to the tail has exponent 2.82&nbsp;&plusmn;&nbsp;0.03 for the top of the
@@ -228,43 +229,16 @@
   a few others. A Lean declaration is a whole lemma or definition, and a long one can draw on dozens or hundreds of
   earlier ones, so the number of things one declaration draws on varies far more.</p>
 
-  <h3>The transition</h3>
-  <img class="fig" src="rh-graph/ept/fig2_belief_vs_error_dark.png" width="2040" height="833" loading="lazy"
-    alt="Two panels, top of the proof and whole proof. Average belief over all steps rises steeply as the error rate falls just below one half and passes 0.9 near an error rate of 0.4. Belief in the theorem itself rises slowly and reaches about 0.9 at an error rate of 0.01.">
-  <p class="body"><b>The body of the proof becomes believed at very high error rates.</b> Average belief over all
-  steps passes 0.9 once the error rate of a single inference falls to about 0.42 (0.40 for the whole proof); the
-  paper puts the rough transition point for its examples near 0.1. Each declaration here has about twenty
-  neighbours, and a few are used by tens of thousands of others, so agreement spreads easily.
-  <b>The theorem itself is another matter.</b> At an error rate of 0.01 the degree of belief in
-  <code>riemannHypothesis</code> is 0.906&nbsp;&plusmn;&nbsp;0.003 for the top of the proof and
-  0.895&nbsp;&plusmn;&nbsp;0.011 for the whole proof. That is lower than all 48 machine proofs in the paper&rsquo;s
-  table (the lowest is 0.932) and its five hand-coded ones (lowest 0.941). Heat-bath updates, which the paper notes
-  as an equivalent rule, give the same value.</p>
-  <img class="fig" src="rh-graph/ept/fig4_belief_by_depth_dark.png" width="2040" height="782" loading="lazy" style="margin-top:16px"
-    alt="Average belief by distance below the theorem. It is about 0.91 at the theorem, 0.92 one step below, 0.96 and 0.97 at two and three steps, and essentially 1 from four steps down.">
-  <p class="body">The reason is where the theorem sits. The first four levels of the proof hold one, one, two and
-  three declarations, a thin chain hanging off a densely linked body. If that chain starts out disbelieved it can
-  stay that way for the ten passes the model allows, which the paper calls frustrated freeze-in: belief is 0.91,
-  0.92, 0.96 and 0.97 at those levels and essentially 1 from four steps down.</p>
-
-  <h3>Modules</h3>
-  <div class="scroller"><table>
-    <thead><tr><th>Network</th><th>Declarations</th><th>Modules</th><th>Modularity</th><th>&Delta;L<sub>1</sub> per declaration</th></tr></thead>
-    <tbody>
-      <tr><td>Whole development, used or not</td><td>1,063,440</td><td>7,295</td><td>0.80</td><td>not computed</td></tr>
-      <tr><td>Whole proof</td><td>806,982</td><td>886</td><td>0.81</td><td>+17.0 (quartiles 16.8 to 18.0)</td></tr>
-      <tr><td>Top of the proof</td><td>18,000</td><td>27</td><td>0.77</td><td>+11.2 (quartiles 9.5 to 14.9)</td></tr>
-    </tbody></table></div>
-  <p class="body">The paper measures how much more easily a whole module changes its mind than the same number of
-  claims scattered across the network: &Delta;L<sub>1</sub>, the difference in log-likelihood per claim flipped, which
-  runs from +9 to +19 over its machine proofs. <b>This proof falls in that range.</b> Two differences from the
-  paper: modules here are found by Louvain clustering, because Girvan&ndash;Newman does not scale to networks this
-  large, and &Delta;L<sub>1</sub> is reconstructed from the paper&rsquo;s description, since the appendix with its exact
-  formula was not to hand.</p>
-
-  <details><summary>Deduction against abduction, and the effect of the prior</summary>
+  <details><summary>The paper&rsquo;s model of belief, run on this proof: deduction against abduction, and the effect of the prior</summary>
+    <p class="body">The paper models a reader who goes over a proof step by step, revising belief in each claim to
+    agree with the claims it depends on (deduction) and the claims that depend on it (abduction), with some chance
+    of error at every inference.</p>
     <img class="fig" src="rh-graph/ept/fig5_deductive_abductive_dark.png" width="1955" height="1632" loading="lazy" style="margin-top:14px"
       alt="Four grids of belief against deductive confidence and abductive confidence, for the theorem and for all steps, on both networks.">
+    <p class="body">The paper reports an abductive paradox: at fixed deductive confidence, more abductive confidence can
+    lower belief. It shows up here for the theorem. At a deductive confidence of 0.85, belief in it is 0.79 when
+    abductive confidence is 0.6 and about 0.6 when abductive confidence is 0.98 or 0.99. Average belief over all
+    steps shows no such turn.</p>
     <p class="body">The paper reports an abductive paradox: at fixed deductive confidence, more abductive confidence can
     lower belief. It shows up here for the theorem. At a deductive confidence of 0.85, belief in it is 0.79 when
     abductive confidence is 0.6 and about 0.6 when abductive confidence is 0.98 or 0.99. Average belief over all
@@ -272,13 +246,14 @@
     <img class="fig" src="rh-graph/ept/fig3_prior_dark.png" width="2040" height="782" loading="lazy" style="margin-top:14px"
       alt="Belief after examining the proof against prior belief, at an error rate of 0.01. Average belief over all steps is above 0.9 for any prior of 0.55 or more; belief in the theorem rises more slowly with the prior.">
     <p class="body">At an error rate of 0.01, a prior of 0.55 in each step is enough to bring average belief above 0.9.
-    Belief in the theorem follows the prior more closely, for the same reason as above.</p>
+    Belief in the theorem follows the prior more closely, because the theorem sits at the end of a thin chain: the
+    first four levels of the proof hold one, one, two and three declarations.</p>
+    <p class="body">Settings, as in the paper unless noted: each step starts true with probability 0.75 where the prior
+    is not varied; the update rule is applied ten times per declaration; belief is the time-average of a
+    declaration&rsquo;s state, here over the second half of a run, averaged over 128 runs per point in the grids for
+    the top of the proof and 32 for the whole proof (320 and 96 for the prior). This is a model of how belief
+    forms. It says nothing about whether the proof is correct.</p>
   </details>
-  <p class="body">Settings, as in the paper unless noted: each step starts true with probability 0.75; deduction and
-  abduction are equally reliable; the update rule is applied ten times per declaration; belief is the time-average
-  of a declaration&rsquo;s state, here over the second half of a run, averaged over 640 runs per point for the top of the
-  proof (6,400 for the value at 0.01) and 128 for the whole proof (640 at 0.01). This is a model of how belief
-  forms. It says nothing about whether the proof is correct.</p>
 </section>
 
 <!-- ============ DECLARATION NAVIGATOR ============ -->
@@ -310,7 +285,6 @@
   <div class="controls"><div class="crumbs" id="crumbs" aria-label="Current folder"></div></div>
   <div class="controls">
     <label for="colorMode">Colour by <select id="colorMode">
-      <option value="share">share used by the final theorem</option>
       <option value="surprise">surprise (bits per token)</option>
       <option value="lib">top-level library</option></select></label>
     <label for="linkMode">Arrows shown <select id="linkMode">
@@ -323,7 +297,7 @@
     </div>
     <aside class="panel" id="panel" aria-live="polite"></aside>
   </div>
-  <div class="scroller tablebox"><table id="maptable"><thead><tr><th>Folder</th><th>Declarations</th><th>Used by final theorem</th><th>Steps below it</th><th>Bits / token</th><th>Uses</th><th>Used by</th><th></th></tr></thead><tbody></tbody></table></div>
+  <div class="scroller tablebox"><table id="maptable"><thead><tr><th>Folder</th><th>Declarations</th><th>Mean steps below the theorem</th><th>Bits / token</th><th>Uses</th><th>Used by</th><th></th></tr></thead><tbody></tbody></table></div>
 </section>
 
 <!-- ============ TOP OF THE PROOF ============ -->
@@ -350,28 +324,33 @@
 
 <!-- ============ DOWNLOAD ============ -->
 <section id="download">
-  <h2>The whole graph as one file</h2>
-  <p class="lede"><a href="https://photos.proofsandreasons.io/alp-graph/alp-declaration-graph.json.gz">alp-declaration-graph.json.gz</a>
-  (71&nbsp;MB; 567&nbsp;MB unpacked) holds all 1,063,440 declarations and 10,944,946 links, with each declaration&rsquo;s
-  surprise. It is one JSON object with
+  <h2>The graph as one file</h2>
+  <p class="lede"><a href="https://photos.proofsandreasons.io/alp-graph/rh/alp-declaration-graph-used-by-rh.json.gz">alp-declaration-graph-used-by-rh.json.gz</a>
+  (57&nbsp;MB; 450&nbsp;MB unpacked) holds the 806,982 declarations that <code>riemannHypothesis</code> uses and the
+  8,197,610 links among them, with each declaration&rsquo;s surprise. It is one JSON object with
   a <code>meta</code> block that documents the fields and a <code>nodes</code> array with one declaration per line:</p>
-<pre>{"id":36593,"name":"GlobalTheory.Mem.Top.Bl.anyGeometry","kind":"def",
+<pre>{"id":19033,"id_in_full_graph":36593,"name":"GlobalTheory.Mem.Top.Bl.anyGeometry","kind":"def",
  "file":"Development/AbelianVarietyTheory/Definitions/AutomorphicMembership/OverIx.lean","line":19,
  "steps_below_riemannHypothesis":8,"tokens":13,"tokens_signature":7,"tokens_alone":13,
  "surprise_bits":54.0,"surprise_bits_signature":38.1,"surprise_bits_body":15.9,"surprise_bits_alone":127.7,
- "uses_in_signature":[36591],"uses_in_body":[760064,761091,804521]}</pre>
-  <p class="body">SHA-256 <code style="word-break:break-all">e36b1a4774c55d042706f5f3bacdefc411d5baa9b7c2d32c51855bcfcfca4c96</code>.
+ "uses_in_signature":[19032],"uses_in_body":[596330,597089,623129]}</pre>
+  <p class="body">SHA-256 <code style="word-break:break-all">82c88d25d909a1399c754b87ce298e1939ab0908aeb4766fdac8a57387c71dc5</code>.
   The numbers in the two <code>uses</code> lists are <code>id</code>s of other entries.
-  <code>steps_below_riemannHypothesis</code> is <code>null</code> for a declaration the final theorem does not use.
   The surprise fields are totals in bits: <code>surprise_bits</code> sums over the declaration&rsquo;s tokens, each
   scored given the file so far, and <code>surprise_bits_alone</code> is the same declaration scored with no
-  context. Divide by the matching token count for bits per token.</p>
+  context. Divide by the matching token count for bits per token. <code>id_in_full_graph</code> is the
+  declaration&rsquo;s <code>id</code> in
+  <a href="https://photos.proofsandreasons.io/alp-graph/alp-declaration-graph.json.gz">alp-declaration-graph.json.gz</a>
+  (71&nbsp;MB), the graph of the whole development, which also holds the 256,458 declarations the theorem does not
+  use.</p>
 </section>
 
 <div class="note"><b>How this was built, and what it does not show.</b> The graph is read from the compiled
 <code>.olean</code> files of all 175,187 modules, so the links are the ones the Lean compiler recorded, including uses
 introduced by tactics, instances and notation. A node is a source declaration; compiler-generated helpers, structure
 fields and constructors are folded into the declaration that owns them. Uses of Mathlib and core Lean are not drawn.
+Only declarations that <code>riemannHypothesis</code> uses are shown, and a count of how many declarations use a
+given one counts only those.
 Surprise is the mean number of bits per token that a small language model (Kimina-Prover-Distill-0.6B) needs to
 predict a declaration&rsquo;s text given the file so far. A link says that one declaration mentions another. It does not
 say the mention carries mathematical weight, and nothing on this page checks the proof.</div>
@@ -383,10 +362,10 @@ say the mention carries mathematical weight, and nothing on this page checks the
 <script>
 (function(){
 'use strict';
-var DATA = 'https://photos.proofsandreasons.io/alp-graph/', LOCAL = 'rh-graph/', BLOCK = 500, RH = 1022210;
+var DATA = 'https://photos.proofsandreasons.io/alp-graph/rh/', LOCAL = 'rh-graph/rh/', BLOCK = 500, RH = 773206, NDECL = 806982;
 var KINDS = ['theorem','lemma','def','abbrev','structure','instance','inductive','class','notation','generated','other'];
 var fmt = d3.format(','), T = [], kidsOf = new Map(), leaves = [], E = [], TOP = [], PROF = null;
-var state = {focus:-1, sel:null, hover:null, color:'share', links:'60'}, cut = null;
+var state = {focus:-1, sel:null, hover:null, color:'surprise', links:'60'}, cut = null;
 var LIBS = ['Development','Formalism','GroundTheory','ReciprocityTheory','CompanionTheory','PositivityTheory','Other'];
 var LIBVAR = {Development:'--c1',Formalism:'--c2',GroundTheory:'--c3',ReciprocityTheory:'--c4',CompanionTheory:'--c5',PositivityTheory:'--c6',Other:'--c7'};
 var SHAREBINS = ['under 20%','20–40%','40–60%','60–80%','80% or more'], SURBINS = ['under 2.0','2.0–2.3','2.3–2.6','2.6–3.0','3.0 or more'];
@@ -561,11 +540,11 @@ function showDecl(){
   gather(id, nb.steps).then(function(g){ if (my !== nb.token) return; drawNeighbourhood(g); drawDeclPanel(g.center); nb.last = g; })
     .catch(function(e){ if (my !== nb.token) return; $('nbstage').textContent = ''; $('nbstage').appendChild(el('div', 'msg', 'This part of the graph could not be loaded (' + e.message + ').')); });
 }
-function goDecl(id, scroll){ nb.center = id; try { history.replaceState(null, '', '#d-' + id); } catch (e) {} showDecl(); if (scroll) $('decl').scrollIntoView({behavior: calm ? 'auto' : 'smooth', block:'start'}); }
+function goDecl(id, scroll){ nb.center = id; try { history.replaceState(null, '', '#u-' + id); } catch (e) {} showDecl(); if (scroll) $('decl').scrollIntoView({behavior: calm ? 'auto' : 'smooth', block:'start'}); }
 $('steps').addEventListener('change', function(e){ nb.steps = +e.target.value; showDecl(); });
 $('toRH').addEventListener('click', function(){ qEl.value = ''; goDecl(RH, false); });
-(function(){ var m = /^#d-(\d+)$/.exec(location.hash); if (m && +m[1] < 1063440) nb.center = +m[1]; showDecl(); })();
-window.addEventListener('hashchange', function(){ var m = /^#d-(\d+)$/.exec(location.hash); if (m && +m[1] !== nb.center && +m[1] < 1063440){ nb.center = +m[1]; showDecl(); } });
+(function(){ var m = /^#u-(\d+)$/.exec(location.hash); if (m && +m[1] < NDECL) nb.center = +m[1]; showDecl(); })();
+window.addEventListener('hashchange', function(){ var m = /^#u-(\d+)$/.exec(location.hash); if (m && +m[1] !== nb.center && +m[1] < NDECL){ nb.center = +m[1]; showDecl(); } });
 
 /* =====================================================================
    Folder map
@@ -667,7 +646,7 @@ function drawMap(){
     s.append('path').attr('class', 'ln').attr('d', g.path).attr('stroke-width', ws(l.c)).attr('stroke-linecap', 'round');
     s.append('path').attr('class', 'hd').attr('d', g.head).attr('stroke', 'none'); });
   var nsel = svg.append('g').selectAll('g').data(nodes).join('g').attr('transform', function(n){ return 'translate(' + n.x + ',' + n.y + ')'; }).attr('tabindex', 0).attr('role', 'button').style('cursor', 'pointer')
-    .attr('aria-label', function(n){ return n.name + ', ' + fmt(n.n) + ' declarations, ' + pct(n.share) + ' used by the final theorem'; });
+    .attr('aria-label', function(n){ return n.name + ', ' + fmt(n.n) + ' declarations'; });
   nsel.append('circle').attr('r', function(n){ return Math.max(n.r, 12); }).attr('fill', 'transparent');
   nsel.append('circle').attr('class', 'dot').attr('r', function(n){ return n.r; }).attr('fill', fillOf).attr('stroke', 'var(--surface)').attr('stroke-width', 2)
     .attr('stroke-dasharray', function(n){ return n.kind === 'child' ? null : '3 2.5'; });
@@ -686,7 +665,7 @@ function drawMap(){
     nsel.attr('opacity', function(n){ if (fi < 0) return 1; if (n === f) return 1; var i = nodes.indexOf(n); return links.some(function(l){ return (l.s === fi && l.t === i) || (l.t === fi && l.s === i); }) ? 1 : 0.3; });
     nsel.select('.dot').attr('stroke', function(n){ return n === state.sel ? 'var(--ink)' : 'var(--surface)'; });
   }
-  nsel.on('pointermove', function(ev, n){ state.hover = n; paint(); showTip(ev, n.name, [['Declarations', fmt(n.n)], ['Used by the final theorem', pct(n.share)], ['Mean steps below it', n.dmean == null ? '–' : n.dmean.toFixed(1)], ['Bits per token', n.bpt == null ? '–' : n.bpt.toFixed(2)], ['Uses elsewhere / used by', fmt(n.out) + ' / ' + fmt(n.inn)]]); })
+  nsel.on('pointermove', function(ev, n){ state.hover = n; paint(); showTip(ev, n.name, [['Declarations', fmt(n.n)], ['Mean steps below the theorem', n.dmean == null ? '–' : n.dmean.toFixed(1)], ['Bits per token', n.bpt == null ? '–' : n.bpt.toFixed(2)], ['Uses elsewhere / used by', fmt(n.out) + ' / ' + fmt(n.inn)]]); })
     .on('pointerleave', function(){ state.hover = null; paint(); hideTip(); })
     .on('click', function(ev, n){ ev.stopPropagation(); select(n); })
     .on('dblclick', function(ev, n){ if (canOpen(n)) openFolder(n.t.id); })
@@ -707,7 +686,7 @@ function drawPanel(){
   P.appendChild(el('h4', null, n.kind === 'child' && n.t ? pathOf(n.t.id) : n.name));
   var dl = el('dl', 'stats');
   [['Declarations', fmt(n.n)], ['Theorems and lemmas', fmt(n.thm)], ['Definitions and structures', fmt(n.defn)], ['Source files', fmt(n.mods)],
-   ['Used by the final theorem', pct(n.share)], ['Mean steps below it', n.dmean == null ? '–' : n.dmean.toFixed(1)], ['Bits per token', n.bpt == null ? '–' : n.bpt.toFixed(2)]]
+   ['Mean steps below the theorem', n.dmean == null ? '–' : n.dmean.toFixed(1)], ['Bits per token', n.bpt == null ? '–' : n.bpt.toFixed(2)]]
     .forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
   P.appendChild(dl);
   if (state.sel){
@@ -738,7 +717,7 @@ function drawTable(){
   var tb = $('maptable').tBodies[0]; tb.textContent = '';
   cut.nodes.filter(function(n){ return n.kind !== 'context'; }).forEach(function(n){
     var tr = el('tr'); tr.appendChild(el('td', null, n.name));
-    [fmt(n.n), pct(n.share), n.dmean == null ? '–' : n.dmean.toFixed(1), n.bpt == null ? '–' : n.bpt.toFixed(2), fmt(n.out), fmt(n.inn)].forEach(function(v){ tr.appendChild(el('td', null, v)); });
+    [fmt(n.n), n.dmean == null ? '–' : n.dmean.toFixed(1), n.bpt == null ? '–' : n.bpt.toFixed(2), fmt(n.out), fmt(n.inn)].forEach(function(v){ tr.appendChild(el('td', null, v)); });
     var td = el('td'), b = el('button', 'btn', canOpen(n) ? 'Open' : 'Select'); b.type = 'button'; b.addEventListener('click', function(){ if (canOpen(n)) openFolder(n.t.id); else select(n); }); td.appendChild(b); tr.appendChild(td);
     tb.appendChild(tr);
   });
@@ -826,7 +805,7 @@ function drawNetwork(){
   svg.append('text').attr('x', rh.x * 1000).attr('y', rh.y * 1000).attr('text-anchor', 'middle').attr('dy', '0.36em').attr('font-size', 22).attr('fill', '#ffffff').attr('stroke', '#0b0d12').attr('stroke-width', 2.5).attr('paint-order', 'stroke').attr('pointer-events', 'none').text('\u2605');
   function paint(){ g.select('circle').attr('stroke', function(c){ return (c === clHover || c === clSel) ? '#f0f4fb' : 'transparent'; }).attr('fill', function(c){ return (c === clHover || c === clSel) ? 'rgba(255,255,255,.06)' : 'transparent'; }); }
   drawNetwork.paint = paint;
-  g.on('pointermove', function(ev, c){ clHover = c; paint(); showTip(ev, c.name, [['Declarations', fmt(c.size)], ['Used by the final theorem', pct(c.in_proof)]].concat(c.top.slice(0, 5).map(function(t){ return [t[1], 'used by ' + fmt(t[3])]; }))); })
+  g.on('pointermove', function(ev, c){ clHover = c; paint(); showTip(ev, c.name, [['Declarations', fmt(c.size)]].concat(c.top.slice(0, 5).map(function(t){ return [t[1], 'used by ' + fmt(t[3])]; }))); })
     .on('pointerleave', function(){ clHover = null; paint(); hideTip(); })
     .on('click', function(ev, c){ selectCluster(c); })
     .on('keydown', function(ev, c){ if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); selectCluster(c); } })
@@ -850,7 +829,7 @@ function drawNetPanel(){
   P.appendChild(el('h4', null, c.name)).style.fontFamily = 'var(--sans)';
   if (!c.named_by_hand) P.appendChild(el('p', 'hint', 'Labelled by its three most distinctive name-words.'));
   var dl = el('dl', 'stats');
-  [['Declarations', fmt(c.size)], ['Used by the final theorem', pct(c.in_proof)], ['Largest share from one folder', pct(c.folder_share)]].forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+  [['Declarations', fmt(c.size)], ['Largest share from one folder', pct(c.folder_share)]].forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
   P.appendChild(dl); P.appendChild(el('p', 'hint', c.folder));
   if (c.words.length){ P.appendChild(el('h5', null, 'Distinctive words in its names')); P.appendChild(el('p', null, c.words.join(', '))).style.cssText = 'font-family:var(--mono);font-size:.8rem;color:var(--dim)'; }
   P.appendChild(el('h5', null, 'Most-used declarations')); var ul2 = el('ul', 'rank');
