@@ -163,7 +163,7 @@
   <h2>Walk the graph from any declaration</h2>
   <p class="lede">Type a declaration&rsquo;s name, or the end of it, and pick it from the list. The drawing shows what
   uses it on the left and what it uses on the right, as many steps out as you choose. Select any circle to move
-  there. The box beneath gives its signature, its surprise in bits, and the full lists.</p>
+  there. The box beneath gives its signature, its surprise in bits per token, and the full lists.</p>
   <div class="controls">
     <div class="find">
       <input type="text" id="q" autocomplete="off" spellcheck="false" placeholder="e.g. anyGeometry, everyCharacter, LedPart.pt" aria-label="Declaration name" role="combobox" aria-expanded="false" aria-controls="opts">
@@ -229,19 +229,20 @@
 <section id="download">
   <h2>The whole graph as one file</h2>
   <p class="lede"><a href="https://photos.proofsandreasons.io/alp-graph/alp-declaration-graph.json.gz">alp-declaration-graph.json.gz</a>
-  (64&nbsp;MB; 524&nbsp;MB unpacked) holds all 1,063,440 declarations and 10,944,946 links, with each declaration&rsquo;s
+  (71&nbsp;MB; 567&nbsp;MB unpacked) holds all 1,063,440 declarations and 10,944,946 links, with each declaration&rsquo;s
   surprise. It is one JSON object with
   a <code>meta</code> block that documents the fields and a <code>nodes</code> array with one declaration per line:</p>
 <pre>{"id":36593,"name":"GlobalTheory.Mem.Top.Bl.anyGeometry","kind":"def",
  "file":"Development/AbelianVarietyTheory/Definitions/AutomorphicMembership/OverIx.lean","line":19,
- "steps_below_riemannHypothesis":8,"tokens":13,"surprise_bits":54.0,"surprise_bits_signature":38.1,
- "surprise_bits_body":15.9,"surprise_bits_alone":127.7,
+ "steps_below_riemannHypothesis":8,"tokens":13,"tokens_signature":6,"tokens_alone":13,
+ "surprise_bits":54.0,"surprise_bits_signature":38.1,"surprise_bits_body":15.9,"surprise_bits_alone":127.7,
  "uses_in_signature":[36591],"uses_in_body":[760064,761091,804521]}</pre>
-  <p class="body">SHA-256 <code style="word-break:break-all">dd0bc509b1080b1bb8cf988a0073f278528c18d55c97a07b9e02c574cfdeaf46</code>.
+  <p class="body">SHA-256 <code style="word-break:break-all">e36b1a4774c55d042706f5f3bacdefc411d5baa9b7c2d32c51855bcfcfca4c96</code>.
   The numbers in the two <code>uses</code> lists are <code>id</code>s of other entries.
   <code>steps_below_riemannHypothesis</code> is <code>null</code> for a declaration the final theorem does not use.
-  <code>surprise_bits</code> is the total over the declaration&rsquo;s tokens, each scored given the file so far;
-  <code>surprise_bits_alone</code> is the same declaration scored with no context.</p>
+  The surprise fields are totals in bits: <code>surprise_bits</code> sums over the declaration&rsquo;s tokens, each
+  scored given the file so far, and <code>surprise_bits_alone</code> is the same declaration scored with no
+  context. Divide by the matching token count for bits per token.</p>
 </section>
 
 <div class="note"><b>How this was built, and what it does not show.</b> The graph is read from the compiled
@@ -297,7 +298,8 @@ window.ALP = { n:function(b, data){ blocks[b] = data; }, ac:function(key, rows){
 function loadScript(url){ return new Promise(function(res, rej){ var s = document.createElement('script'); s.src = url; s.async = true; s.onload = function(){ res(); }; s.onerror = function(){ rej(new Error('could not load ' + url)); }; document.head.appendChild(s); }); }
 function getBlock(b){ if (blocks[b]) return Promise.resolve(blocks[b]); if (!pendingB[b]) pendingB[b] = loadScript(DATA + 'n/' + b + '.js').then(function(){ return blocks[b]; }); return pendingB[b]; }
 function getNode(id){ return getBlock(Math.floor(id / BLOCK)).then(function(B){ var r = B.d[id % BLOCK];
-  return {id:id, name:r[0], kind:r[1], file:B.f[r[2]], line:r[3], dist:r[4], nUses:r[5], nUsers:r[6], pred:r[7], uses:r[8], users:r[9], sig:r[10], tok:r[11], bits:r[12], sbits:r[13], bbits:r[14], abits:r[15]}; }); }
+  return {id:id, name:r[0], kind:r[1], file:B.f[r[2]], line:r[3], dist:r[4], nUses:r[5], nUsers:r[6], pred:r[7], uses:r[8], users:r[9], sig:r[10], tok:r[11], bits:r[12], sbits:r[13], bbits:r[14], abits:r[15], stok:r[16], atok:r[17]}; }); }
+function bpt(bits, tok){ return (bits == null || !tok) ? '–' : (bits / tok).toFixed(2); }
 function getManifest(){ if (manifest) return Promise.resolve(manifest); if (!pendingM) pendingM = loadScript(DATA + 'ac/manifest.js').then(function(){ return manifest; }); return pendingM; }
 function hex(s){ return Array.prototype.map.call(new TextEncoder().encode(s), function(b){ return (b < 16 ? '0' : '') + b.toString(16); }).join(''); }
 function getShard(key){ if (shards[key]) return Promise.resolve(shards[key]); if (!pendingS[key]) pendingS[key] = loadScript(DATA + 'ac/' + key + '.js').then(function(){ return shards[key]; }); return pendingS[key]; }
@@ -391,7 +393,7 @@ function drawNeighbourhood(g){
       .attr('opacity', function(l){ return !hov ? 0.4 : ((l.s === hov || l.t === hov) ? 0.95 : 0.08); }).attr('stroke-width', function(l){ return hov && (l.s === hov || l.t === hov) ? 1.7 : 1; });
     nsel.attr('opacity', function(x){ return !hov || x === hov || g.links.some(function(l){ return (l.s === hov && l.t === x) || (l.t === hov && l.s === x); }) ? 1 : 0.3; }); }
   nsel.on('pointermove', function(ev, x){ hov = x; paint(); var r = x.rec, rows = [['Kind', KINDS[x.kind]]];
-      if (r){ rows.push(['Steps below riemannHypothesis', r.dist < 0 ? 'not used by it' : String(r.dist)], ['Uses', fmt(r.nUses)], ['Used by', fmt(r.nUsers)]); if (r.bits != null) rows.push(['Surprise', r.bits.toFixed(1) + ' bits']); }
+      if (r){ rows.push(['Steps below riemannHypothesis', r.dist < 0 ? 'not used by it' : String(r.dist)], ['Uses', fmt(r.nUses)], ['Used by', fmt(r.nUsers)]); if (r.bits != null) rows.push(['Surprise', bpt(r.bits, r.tok) + ' bits/token']); }
       var more = g.hidden[(x.col < 0 ? -1 : 1) + ':' + x.id]; if (more && x.col !== 0) rows.push([x.col < 0 ? 'More that use it, not drawn' : 'More that it uses, not drawn', fmt(more)]);
       showTip(ev, r ? r.name : x.label, rows); })
     .on('pointerleave', function(){ hov = null; paint(); hideTip(); }).on('focus', function(ev, x){ hov = x; paint(); }).on('blur', function(){ hov = null; paint(); })
@@ -416,8 +418,8 @@ function drawDeclPanel(c){
   P.appendChild(el('div', 'kind', KINDS[c.kind])); P.appendChild(el('h4', null, c.name));
   var dl = el('dl', 'stats');
   [['File', c.file.split('/').pop() + (c.line > 0 ? ', line ' + c.line : '')], ['Steps below riemannHypothesis', c.dist < 0 ? 'not used by it' : String(c.dist)], ['Declarations it uses', fmt(c.nUses)], ['Declarations that use it', fmt(c.nUsers)]]
-    .concat(c.bits == null ? [['Surprise', 'no source text']] : [['Surprise, in context', c.bits.toFixed(1) + ' bits'], ['Tokens', fmt(c.tok) + ' (' + (c.bits / Math.max(1, c.tok)).toFixed(2) + ' bits each)'],
-      ['Signature / body', c.sbits.toFixed(1) + ' / ' + c.bbits.toFixed(1) + ' bits'], ['Surprise, scored alone', c.abits == null ? '–' : c.abits.toFixed(1) + ' bits']])
+    .concat(c.bits == null ? [['Surprise', 'no source text']] : [['Surprise, in context', bpt(c.bits, c.tok) + ' bits/token'],
+      ['Signature / body', bpt(c.sbits, c.stok) + ' / ' + bpt(c.bbits, c.tok - c.stok) + ' bits/token'], ['Surprise, scored alone', bpt(c.abits, c.atok) + ' bits/token'], ['Tokens', fmt(c.tok)]])
     .forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
   P.appendChild(dl);
   P.appendChild(el('p', 'hint', c.file));
