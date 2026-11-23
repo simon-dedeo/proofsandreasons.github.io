@@ -211,43 +211,26 @@
   all 4,544 declarations the theorem uses.</p>
   <img class="fig" src="vp-vnp-graph/ept/fig1_degrees_dark.png" width="2040" height="816" loading="lazy"
     alt="Two panels on logarithmic axes showing the complementary cumulative distributions of dependencies and users for both the top 1,123 declarations and the full 4,544-declaration VP ≠ VNP proof.">
-  <p class="body">In the paper&rsquo;s Coq proofs the number of claims a claim depends on is Poisson-like, mostly about
-  three, and the number of claims that use it has a power-law tail with exponent 2.15&nbsp;&plusmn;&nbsp;0.13.
-  Here <b>the use tail matches closely</b>: over the whole proof the fitted exponent is 2.12&nbsp;&plusmn;&nbsp;0.04
-  (tail from 9 users, 786 declarations, fitted by the method of Clauset, Shalizi and Newman), and 2.36&nbsp;&plusmn;&nbsp;0.09
-  for the top of the proof (from 6 users). As in the paper and in our <a href="/rh-graph.html">Riemann Hypothesis analysis</a>,
-  an exponent near two is consistent with construction by &ldquo;tinkering and reuse&rdquo;
-  (<a href="https://arxiv.org/abs/1907.05528">Sol&eacute; &amp; Valverde, 2019</a>; the copying model of
+  <p class="body">In the paper&rsquo;s Coq proofs, dependencies are Poisson-like (mean around three) while reuse has a
+  power-law tail with exponent 2.15&nbsp;&plusmn;&nbsp;0.13. Here <b>the use tail matches</b>: 2.12&nbsp;&plusmn;&nbsp;0.04
+  over the whole proof (from 9 users) and 2.36&nbsp;&plusmn;&nbsp;0.09 at the top (from 6 users), consistent with
+  construction by &ldquo;tinkering and reuse&rdquo;
+  (<a href="https://arxiv.org/abs/1907.05528">Sol&eacute; &amp; Valverde, 2019</a>;
   <a href="https://doi.org/10.1103/PhysRevE.71.036118">Krapivsky &amp; Redner, 2005</a>).</p>
-  <p class="body"><b>Dependence is also heavy-tailed, as in Lean generally.</b> Across the whole proof a declaration depends
-  on 7.72 others on average with a variance of 92.2 (where a Poisson of the same mean would have variance 7.72), up to a
-  maximum of 99 dependencies. A pure power law fitted to the tail has exponent 2.36&nbsp;&plusmn;&nbsp;0.03 for the whole
-  proof (from 7 dependencies, top 41%) and 2.46&nbsp;&plusmn;&nbsp;0.08 for the top of the proof (from 5, top 37%),
-  while a power law with an exponential cutoff (exponent 1.07, cutoff near 19 for the whole proof; 1.73 and 24 for the top)
-  or a log-normal fits significantly better, reflecting the fact that a single Lean declaration can invoke dozens of earlier lemmas.</p>
-  <p class="body"><b>Comparison with the Riemann Hypothesis proof and human Lean proofs (matched cutoffs).</b>
-  At the declaration level, automatic Clauset&ndash;Shalizi&ndash;Newman fits on the
-  <a href="/rh-graph.html">alpo.ge RH graph</a> give steeper dependence exponents (2.99&nbsp;&plusmn;&nbsp;0.01 whole
-  from <i>x</i><sub>min</sub>&nbsp;=&nbsp;22; 2.82&nbsp;&plusmn;&nbsp;0.03 top from <i>x</i><sub>min</sub>&nbsp;=&nbsp;16)
-  and flatter use exponents (1.89 whole; 2.06&nbsp;&plusmn;&nbsp;0.02 top from <i>x</i><sub>min</sub>&nbsp;=&nbsp;12).
-  Using exact unbounded discrete Hurwitz&ndash;zeta MLEs at matched cutoffs (avoiding the default &alpha;&nbsp;&le;&nbsp;3.0
-  ceiling in Python&rsquo;s <code>powerlaw</code> package) and comparing against size-matched human theorem closures in
-  Mathlib v4.33.1 (20 distinct areas at 3k&ndash;7k declarations; 13 areas at 14k&ndash;35k) separates real differences
-  from cutoff artifacts:
-  for <b>dependencies</b>, the apparent RH vs. VP&nbsp;&ne;&nbsp;VNP gap disappears once cutoffs are matched&mdash;and
-  both track size-matched human Mathlib closely (at <i>x</i><sub>min</sub>&nbsp;=&nbsp;10: VP&nbsp;&ne;&nbsp;VNP whole
-  2.59&nbsp;&plusmn;&nbsp;0.05 vs. 3k&ndash;7k human Mathlib median 2.63, IQR 2.56&ndash;2.67; RH top 2.41&nbsp;&plusmn;&nbsp;0.02
-  vs. 14k&ndash;35k human Mathlib median 2.27, IQR 2.25&ndash;2.32; climbing at <i>x</i><sub>min</sub>&nbsp;=&nbsp;20 to
-  3.36 vs. 3.49 and 3.00 vs. 2.86 because the dependence tail curves downward).
-  For <b>use</b> at the declaration level, both AI developments have steeper tails than human Mathlib closures of the
-  same size (at <i>x</i><sub>min</sub>&nbsp;=&nbsp;10: 2.14&nbsp;&plusmn;&nbsp;0.04 for VP&nbsp;&ne;&nbsp;VNP vs.
-  1.83 [1.82&ndash;1.90] for 3k&ndash;7k Mathlib; 2.05&nbsp;&plusmn;&nbsp;0.02 for RH top and 1.92 for RH whole vs.
-  1.77 [1.76&ndash;1.78] for Mathlib), largely because Mathlib closures include core library super-hubs that are stripped
-  out as external dependencies in standalone developments. On the same-toolchain <b>term-level</b> subterm-DAG
-  representation of <a href="https://github.com/simon-dedeo/ai-math-ept">DeDeo (2026)</a>
-  (<code>ExtractNetwork.lean</code>, Lean v4.33.1, <i>x</i><sub>min</sub>&nbsp;=&nbsp;10), RH (2.41&nbsp;&plusmn;&nbsp;0.06)
-  and VP&nbsp;&ne;&nbsp;VNP (2.47&ndash;2.63) fall squarely inside the human Mathlib v4.33.1 range (median 2.43 across
-  eight flagship theorems, range 2.25&ndash;2.68).</p>
+  <p class="body"><b>Dependence is heavy-tailed too, with a downward bend</b> (mean 7.72, variance 92.2, max 99).
+  A pure power law gives 2.36&nbsp;&plusmn;&nbsp;0.03 whole (from 7 dependencies) and 2.46&nbsp;&plusmn;&nbsp;0.08 at
+  the top (from 5), though a power law with an exponential cutoff or a log-normal fits better&mdash;as expected when a
+  single Lean declaration can invoke dozens of earlier lemmas.</p>
+  <p class="body"><b>Compared with the <a href="/rh-graph.html">Riemann Hypothesis proof</a> and human Lean proofs,
+  no real tension remains once cutoffs and graph boundaries are matched.</b> On automatic fits, RH looks steeper in
+  dependencies (2.99 vs. 2.36) and flatter in use (1.89 vs. 2.12), largely because automatic fitting picks a higher
+  cutoff on the 175&times; larger RH graph. At a common cutoff (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10, unbounded discrete
+  MLE), both proofs track size-matched human Mathlib v4.33.1 theorem closures closely in dependencies (2.59 vs. human
+  median 2.63 at 3k&ndash;7k nodes; RH top 2.41 vs. 2.27 at 14k&ndash;35k). In reuse at <i>x</i><sub>min</sub>&nbsp;=&nbsp;10,
+  VP&nbsp;&ne;&nbsp;VNP (2.14) and RH (1.92&ndash;2.05) are steeper than internal Mathlib closures (1.77&ndash;1.83)
+  mainly because Mathlib retains core library hubs that standalone projects exclude; on the same-toolchain term-level
+  graphs of <a href="https://github.com/simon-dedeo/ai-math-ept">DeDeo (2026)</a>, RH (2.41) and VP&nbsp;&ne;&nbsp;VNP
+  (2.47&ndash;2.63) sit squarely inside the human Mathlib range (median 2.43, range 2.25&ndash;2.68).</p>
 
   <details><summary>The paper&rsquo;s model of belief, run on this proof: deduction against abduction, and the effect of the prior</summary>
     <p class="body">The paper models a reader who goes over a proof step by step, revising belief in each claim to
