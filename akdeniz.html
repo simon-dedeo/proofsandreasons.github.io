@@ -330,11 +330,12 @@
 (function(){
   "use strict";
   var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
-  // Our queue and allocation on NCSA DeltaAI, written by akdeniz-jobs.timer
+  // Our queues on NCSA DeltaAI and ORCHARD, written by akdeniz-jobs.timer
   // every five minutes rather than by the 30s telemetry collector. Separate
-  // file, separate cadence, separate failure: the poll rides a logged-in ssh
-  // connection held on wright, and when that lapses this card goes stale
-  // while the rest of the page carries on.
+  // file, separate cadence, separate failures: NCSA is asked over a logged-in
+  // ssh connection held on wright, ORCHARD through a Google login on akdeniz,
+  // and either can lapse while the other (and the rest of the page) carries
+  // on, so ages are tracked per cluster.
   var JOBS_SRC = "https://photos.proofsandreasons.io/akdeniz/jobs.json";
   var JOBS_STALE_S = 1200;   // four missed polls
   var last = null;
@@ -381,12 +382,18 @@
       tbl.innerHTML=""; notes.textContent="No cluster data yet.";
       txt("jobsmeta",""); return;
     }
-    var now=Date.now()/1000, newest=0, since=null, rows="", note=[];
+    var now=Date.now()/1000, newest=0, rows="", note=[];
+    // The hours column counts from a date that can differ by cluster (NCSA
+    // from the month its allocation opened, ORCHARD from the start of the
+    // year). One shared date goes in the column heading; otherwise each
+    // cluster's line below the table says its own.
+    var sinces=cls.map(function(c){ return (c.hours||{}).since||""; }).filter(Boolean);
+    var shared=sinces.length && sinces.every(function(x){ return x===sinces[0]; }) ? sinces[0] : null;
     cls.forEach(function(c){
       var w=(c.jobs||{}).waiting||{}, r=(c.jobs||{}).running||{}, hrs=c.hours||{};
       var age=c.ts?Math.max(0,Math.round(now-c.ts)):null, stale=(age===null)||(age>JOBS_STALE_S);
+      var who=cls.length>1 ? "<b style='color:var(--ink)'>"+esc(c.name)+"</b> &mdash; " : "";
       if(c.ts&&c.ts>newest) newest=c.ts;
-      if(hrs.since) since=hrs.since;
       // One line per kind of job we have ever had there. A job that holds GPUs
       // is a GPU job and its hours are GPU-hours; the cores that come with it
       // are not counted as CPU use. DeltaAI is all GPU, so its CPU line would
@@ -420,7 +427,8 @@
         if(why.length) bits.push("<b>waiting on</b> "+esc(why.join(", ").toLowerCase()));
         if(c.fairshare!==null&&c.fairshare!==undefined) bits.push("<b>fair-share</b> "+c.fairshare.toFixed(2));
       }
-      if(bits.length) note.push("<div>"+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
+      if(!shared && hrs.since) bits.push("hours since "+esc(monthDay(hrs.since)));
+      if(bits.length) note.push("<div"+(note.length?" style='margin-top:5px'":"")+">"+who+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
 
       // The allocation: what has been charged and what is left of the grant.
       var al=c.alloc;
@@ -433,21 +441,24 @@
           "<div class='track' style='margin:5px 0 3px'><div class='fill' style='width:"+Math.max(0,Math.min(100,pct)).toFixed(1)+
           "%;background:"+(pct<10?"var(--bad)":pct<25?"var(--warn)":"var(--s3)")+"'></div></div>");
       }
-      // A failed poll: the raw ssh text stays in jobs.json (c.err), but the
-      // one case a person has to act on is named. NCSA takes no ssh keys, so
-      // the poll rides a logged-in connection held on wright; when that
-      // lapses, nothing recovers until someone logs in again with Duo.
+      // A failed poll: the raw text stays in jobs.json (c.err), but the two
+      // cases a person has to act on are named. NCSA takes no ssh keys, so its
+      // poll rides a logged-in connection held on wright; ORCHARD's goes
+      // through a Google login on akdeniz that Google expires now and then.
+      // Neither recovers until someone logs in again.
       if(c.ok===false){
-        note.push("<div style='color:var(--warn)'>"+(c.err_kind==="session"
-          ? "NCSA login on wright has lapsed &mdash; run <b>ncsa-login --on wright</b> and approve the Duo push"
-          : c.err_kind==="jump"||c.err_kind==="timeout" ? "wright did not answer, so NCSA could not be asked"
+        note.push("<div style='color:var(--warn)'>"+esc(c.name)+": "+(c.err_kind==="session"
+          ? "the login on wright has lapsed &mdash; run <b>ncsa-login --on wright</b> and approve the Duo push"
+          : c.err_kind==="auth"
+          ? "the Google login on akdeniz has lapsed &mdash; run <b>gcloud auth login</b> there"
+          : c.err_kind==="jump"||c.err_kind==="timeout" ? "the login node could not be reached; showing the previous numbers"
           : "last poll failed; showing the previous numbers")+"</div>");
       }
     });
 
     tbl.innerHTML="<thead><tr><th class='l'>Cluster</th><th class='l'></th>"+
       "<th class='l'>Waiting</th><th class='l'>Running</th>"+
-      "<th>Total hours"+(since?"<small>since "+esc(monthDay(since))+"</small>":"")+"</th>"+
+      "<th>Total hours"+(shared?"<small>since "+esc(monthDay(shared))+"</small>":"")+"</th>"+
       "</tr></thead><tbody>"+rows+"</tbody>";
     notes.innerHTML=note.join("");
     // "our" is the part worth keeping -- these are our jobs, not the cluster's
