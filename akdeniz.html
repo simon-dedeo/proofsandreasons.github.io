@@ -434,8 +434,9 @@
       var al=c.alloc;
       if(al&&al.deposited){
         var pct=100*al.balance/al.deposited;
-        note.push("<div title='Charged hours, from the centre&#39;s own accounting. The interactive partition is "+
-          "charged at twice the rate, so this can run ahead of the GPU-hours in the table.'>"+
+        note.push("<div title='Charged hours, from the centre&#39;s own accounting. It will not match the GPU-hours "+
+          "in the table exactly: the table counts running jobs up to this minute, which the centre has not "+
+          "finished charging, and the interactive partition is charged at twice the rate.'>"+
           "<b>allocation</b> "+(al.deposited-al.balance).toLocaleString()+" charged &nbsp;&middot;&nbsp; "+
           al.balance.toLocaleString()+" of "+al.deposited.toLocaleString()+" "+esc(al.unit||"hours")+" left</div>"+
           "<div class='track' style='margin:5px 0 3px'><div class='fill' style='width:"+Math.max(0,Math.min(100,pct)).toFixed(1)+
