@@ -1,0 +1,363 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Compiled oleans (VP &ne; VNP) &middot; Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Compiled oleans for Anthropic's VP ≠ VNP Proof">
+<meta property="og:description" content="The .olean files of all 323 modules in anthropics/formal-math (vp-vnp), verified on 200 cores for independent kernel checking.">
+<meta property="og:url" content="https://proofsandreasons.io/vp-vnp-oleans.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/vp-vnp-oleans.html">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --bad:#ff6f6f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    background-attachment:fixed;
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;padding:0 20px 80px;line-height:1.55;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  a{color:var(--sky);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:3px}
+
+  nav.site{display:flex;flex-wrap:wrap;gap:6px 20px;padding:18px 0 0;
+    font-family:var(--mono);font-size:.8rem}
+  nav.site a{color:var(--dim)}
+  nav.site a:hover{color:var(--sky)}
+
+  header.top{padding:30px 0 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
+  .sub{color:var(--dim);max-width:68ch;margin-top:11px;font-size:1.02rem}
+  .credit{max-width:68ch;margin-top:14px;font-size:1.02rem;border-left:3px solid var(--sky);padding-left:14px}
+  .credit b{font-weight:650}
+  .toplink{max-width:68ch;margin-top:14px;font-size:1.02rem;color:var(--dim)}
+  .toplink a{font-weight:650}
+  .funding{color:var(--dimmer);max-width:68ch;margin-top:11px;font-size:1.02rem}
+  .funding a{color:var(--dim)}
+
+  section{margin-top:42px}
+  h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;
+    font-size:.68rem;font-weight:700;margin:26px 0 11px}
+  .lede{color:var(--dim);max-width:72ch;margin-bottom:20px}
+  p.body{color:var(--dim);max-width:74ch;margin-top:12px}
+  p.body b{color:var(--ink);font-weight:600}
+
+  .card{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);
+    border-radius:18px;padding:20px 22px;box-shadow:var(--shadow)}
+  dl.facts{display:grid;grid-template-columns:repeat(auto-fit,minmax(9rem,1fr));gap:14px 22px}
+  dl.facts dt{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;
+    text-transform:uppercase;color:var(--dimmer)}
+  dl.facts dd{font-family:var(--mono);font-size:.92rem;margin-top:4px;font-variant-numeric:tabular-nums}
+
+  .note{border-left:3px solid var(--amber);background:var(--panel);padding:13px 17px;
+    border-radius:0 10px 10px 0;margin-top:22px;color:var(--dim);font-size:.93rem;max-width:80ch}
+  .note b{color:var(--ink)}
+
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  table{border-collapse:collapse;width:100%;font-size:.86rem}
+  th,td{text-align:left;padding:9px 14px;border-bottom:1px solid var(--line);vertical-align:top}
+  th{font-family:var(--mono);font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+    color:var(--dimmer);font-weight:700;background:#0e1320;white-space:nowrap}
+  tbody tr:last-child td{border-bottom:0}
+  td.num{font-family:var(--mono);font-variant-numeric:tabular-nums;text-align:right;white-space:nowrap}
+  td.hash{font-family:var(--mono);font-size:.7rem;color:var(--dim);word-break:break-all;min-width:15rem}
+  td.mono{font-family:var(--mono);font-size:.8rem;word-break:break-all}
+
+  code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);
+    padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);
+    border-radius:12px;padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink);margin-top:14px}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="site" aria-label="Proofs &amp; Reasons">
+  <a href="https://proofsandreasons.io/">Proofs &amp; Reasons</a>
+  <a href="/rh-graph.html">RH graph</a>
+  <a href="/rh-oleans.html">RH oleans</a>
+  <a href="/dashboard.html">Skyline monitor</a>
+  <a href="/readings.html">CogSci reading list</a>
+</nav>
+
+<header class="top">
+  <h1>Compiled oleans for Anthropic&rsquo;s VP &ne; VNP Proof</h1>
+  <p class="toplink"><a href="/vp-vnp-graph.html">Explore the dependency graph of the proof &rarr;</a> Look up any of
+  the 4,576 declarations used by the five headline theorems and see what it uses and what uses it.</p>
+  <p class="credit">The mathematics and its Lean 4 formalization are a research artifact released by <b>Anthropic</b>
+  (discovered and written by an internal research Claude model; no human mathematician has checked the proof).
+  The repository is <a href="https://github.com/anthropics/formal-math/tree/main/vp-vnp">anthropics/formal-math/vp-vnp</a>
+  and the paper is <a href="https://github.com/anthropics/formal-math/blob/main/vp-vnp/paper.pdf">paper.pdf</a>.
+  This page hosts independent build products and verification checks run on that source.</p>
+  <p class="sub">The <code>.olean</code> file of every one of the 323 modules in <code>anthropics/formal-math/vp-vnp</code>
+  (322 proof modules plus <code>Challenge.lean</code>), compiled from scratch in an isolated 200-core sandbox, together
+  with the Mathlib <code>.olean</code>s it was compiled against and <code>lean4export</code> proof-term exports.</p>
+  <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
+  <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
+  Additional support from research funds of the Laboratory for Social Minds and from the Survival and
+  Flourishing Fund.</p>
+</header>
+
+<div class="note"><b>These are build products of someone else&rsquo;s code, which we have not mathematically reviewed.</b>
+Lean checks the proofs given the definitions in <code>Statement.lean</code>; verifying that <code>Statement.lean</code>
+faithfully formalizes Valiant&rsquo;s conjecture requires reading that file directly. All checks below use Lean v4.33.1&rsquo;s
+own kernel; the <code>lean4export</code> files <a href="#export">further down</a> are provided so independent kernels
+(such as <code>nanoda</code> or <code>lean4lean</code>) can check them directly.</div>
+
+<section>
+  <div class="card">
+    <dl class="facts">
+      <div><dt>Modules</dt><dd>323 (322 proof + Challenge)</dd></div>
+      <div><dt>Compiled</dt><dd>323, 0 errors (180s)</dd></div>
+      <div><dt>Download</dt><dd>6 archives, 1.92 GiB</dd></div>
+      <div><dt>Unpacked</dt><dd>272 MiB + 6 GiB deps</dd></div>
+      <div><dt>Lean</dt><dd>v4.33.1</dd></div>
+      <div><dt>Mathlib</dt><dd>tag v4.33.1</dd></div>
+      <div><dt>Built</dt><dd>2026-11-23, x86_64 Linux</dd></div>
+    </dl>
+  </div>
+</section>
+
+<section id="checks">
+  <h2>Checks run on this build</h2>
+  <p class="lede">Five checks are run in an isolated systemd sandbox (200 cores, no network, read-only toolchain and Mathlib):
+  static source audit, from-scratch compilation, axiom and statement-identity verification, per-module kernel replay, and
+  full <code>leanchecker --fresh</code> replay.</p>
+
+  <h3>Static source audit</h3>
+  <p class="body">Scanning all 324 <code>.lean</code> files (72,932 lines) before compilation found: <b>0 custom axioms</b>,
+  <b>0 environment-tampering or FFI/IO calls</b>, 0 <code>run_cmd</code>/<code>initialize</code>/<code>elab</code>/<code>implemented_by</code>
+  declarations, and <b><code>sorry</code> only in the five intentional placeholder theorems of <code>Challenge.lean</code></b>
+  (which nothing imports).</p>
+
+  <h3>Axioms &amp; statement identity</h3>
+  <p class="body">The output of <code>scripts/PrintAxioms.lean</code> (and our independent <code>Verify.lean</code> closure walk)
+  for the five headline theorems in <code>Solution.lean</code>:</p>
+<pre>'Solution.mainTheorem' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solution.mainTheoremApprox' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solution.separation' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solution.separationClosure' depends on axioms: [propext, Classical.choice, Quot.sound]
+'Solution.permanent_over_real' depends on axioms: [propext, Classical.choice, Quot.sound]</pre>
+  <p class="body">Each of the five is verified at the <code>Expr</code> level to be a theorem defined in <code>Solution</code>
+  whose universe parameters and type match the corresponding sorry&rsquo;d theorem in <code>Challenge.olean</code> identically
+  (<code>CompareChallenge.lean</code>: 5/5 <code>CHALLENGE_MATCH_OK</code>). Walking the transitive dependency closure of all
+  13 definitions in <code>Statement.lean</code> confirms that every transitive dependency comes solely from
+  <code>Statement</code> or Mathlib/core, with zero leakage from <code>Nc</code>, <code>NS1</code>, <code>Ov</code>,
+  <code>Paper</code>, or <code>Solution</code>. Walking the full closure of the five headline theorems (58,121&ndash;62,426
+  constants across 299&ndash;320 project modules) confirms only the three standard axioms and zero <code>sorryAx</code>.</p>
+
+  <h3>Kernel replay &amp; leanchecker</h3>
+  <p class="body">Every constant of every proof module (all 322 non-<code>Challenge</code> modules, 13,629 constants) is replayed
+  through the Lean v4.33.1 kernel on top of its imports, one module per process (<code>Replay.lean</code>, mirroring
+  <code>leanchecker</code>&rsquo;s <code>replayFromImports</code>). In addition, full end-to-end
+  <code>leanchecker --fresh Solution</code> and <code>leanchecker --fresh Paper</code> runs are tracked live below.</p>
+  <div class="card" style="margin-top:16px">
+    <dl class="facts">
+      <div><dt>Module replay</dt><dd id="rp-state" style="color:var(--good)">finished, all passed</dd></div>
+      <div><dt>Passed</dt><dd id="rp-passed">322 of 322</dd></div>
+      <div><dt>Constants replayed</dt><dd id="rp-consts">13,629</dd></div>
+      <div><dt>Failed</dt><dd id="rp-failed">0</dd></div>
+      <div><dt>leanchecker Solution</dt><dd id="lc-sol" style="color:var(--amber)">running</dd></div>
+      <div><dt>leanchecker Paper</dt><dd id="lc-pap">pending</dd></div>
+      <div><dt>As of</dt><dd id="rp-when">2026-11-23 17:44 EST</dd></div>
+    </dl>
+    <p class="body" id="rp-note" style="margin-top:14px">All 322 proof modules (13,629 constants) passed per-module Lean 4.33.1 kernel replay in 30.1s with 0 failures. Live status for <code>leanchecker --fresh</code> and <code>lean4export</code> refreshes automatically from the verification machine.</p>
+    <ul id="rp-fail" style="margin:10px 0 0 18px;color:var(--dim);font-family:var(--mono);font-size:.78rem"></ul>
+  </div>
+</section>
+
+<section>
+  <h2>Download</h2>
+  <p class="lede">Extract every archive into the same directory; they unpack under <code>vp-vnp-oleans/</code> (with
+  dependencies identical to the RH build under <code>alp-oleans/deps/</code>). Downloads support range requests. The plain-text
+  <a href="https://photos.proofsandreasons.io/vp-vnp-oleans/README.txt">README</a> travels with the files.</p>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>Archive</th><th>Contains</th><th>Size</th><th>SHA-256</th></tr></thead>
+      <tbody>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-Nc.tar.gz">vp-vnp-oleans-Nc.tar.gz</a></td><td>Nc (236 modules)</td><td class="num">53 MiB</td><td class="hash">e7d1203115c35cce06e5220450ef59e86bb02089762de1ea7c43628be42b81d1</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-Paper.tar.gz">vp-vnp-oleans-Paper.tar.gz</a></td><td>Paper (43 modules)</td><td class="num">30 MiB</td><td class="hash">7b4864ed65c1ece8e3d7ca4f26dfe23824af834af0bb368a5bc11090d4adac03</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-NS1.tar.gz">vp-vnp-oleans-NS1.tar.gz</a></td><td>NS1 (29 modules)</td><td class="num">8.3 MiB</td><td class="hash">e813065a2f6332d55e430c554bb3d3bb2e489dd0b28e2468f303298e4d82a44e</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-Ov.tar.gz">vp-vnp-oleans-Ov.tar.gz</a></td><td>Ov (11 modules)</td><td class="num">1.3 MiB</td><td class="hash">d59f421b004575649f2ff53a10fa0b7715195976a25ea578238d88645f8db0fb</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-Top.tar.gz">vp-vnp-oleans-Top.tar.gz</a></td><td>Statement, Solution, Paper, Challenge</td><td class="num">70 KiB</td><td class="hash">2a2a0e52045b93cd51278b13de6a30fe61e6a5215953f220ab912bda6430cf1d</td></tr>
+      <tr><td><a href="https://photos.proofsandreasons.io/vp-vnp-oleans/vp-vnp-oleans-deps-mathlib-etc.tar.gz">vp-vnp-oleans-deps-mathlib-etc.tar.gz</a></td><td>Mathlib and the other dependencies (identical to RH v4.33.1)</td><td class="num">1.83 GiB</td><td class="hash">42b22a8360d23db1e6b48d3b80b06895669ffd8e5c2c213872d66cd5412e0422</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body">Checksums: <a href="https://photos.proofsandreasons.io/vp-vnp-oleans/SHA256SUMS">SHA256SUMS</a> covers all archives
+  and export files, and <a href="https://photos.proofsandreasons.io/vp-vnp-oleans/SHA256SUMS-project-oleans.txt.gz">SHA256SUMS-project-oleans.txt.gz</a>
+  (15 KiB) gives the SHA-256 of each of the 323 project <code>.olean</code> files, for comparing against a build of your own.</p>
+<pre>base=https://photos.proofsandreasons.io/vp-vnp-oleans
+curl -O $base/SHA256SUMS
+for f in $(awk '/tar.gz/ {print $2}' SHA256SUMS); do curl -C - -O $base/$f; done
+sha256sum -c --ignore-missing SHA256SUMS
+for f in vp-vnp-oleans-*.tar.gz; do tar -xzf $f; done</pre>
+</section>
+
+<section id="export">
+  <h2>Export files</h2>
+  <p class="lede">For independent checkers that read an export rather than <code>.olean</code> files. Generated with
+  <a href="https://github.com/leanprover/lean4export">lean4export</a> (tag <code>v4.33.0</code>, built with the v4.33.1
+  toolchain) in NDJSON export format 3.1.0 with default options (no unsafe declarations, no <code>mdata</code>).
+  This table populates automatically as soon as the post-verification publisher uploads the exports.</p>
+  <div class="scroller">
+    <table>
+      <thead><tr><th>File</th><th>Contains</th><th>Size</th><th>SHA-256</th></tr></thead>
+      <tbody id="export-rows">
+      <tr><td id="exp-sol-link"><code>vp-vnp-export-solution-theorems.ndjson.gz</code></td>
+        <td id="exp-sol-desc">The five theorems of <code>Solution.lean</code> and everything they depend on (Mathlib and project).</td>
+        <td class="num" id="exp-sol-size">pending</td><td class="hash" id="exp-sol-sha">will populate automatically once leanchecker &amp; export finish</td></tr>
+      <tr><td id="exp-stmt-link"><code>vp-vnp-export-statements.ndjson.gz</code></td>
+        <td id="exp-stmt-desc">The 13 definitions of <code>Statement.lean</code> and everything they depend on (Mathlib and core only).</td>
+        <td class="num" id="exp-stmt-size">pending</td><td class="hash" id="exp-stmt-sha">will populate automatically once leanchecker &amp; export finish</td></tr>
+      </tbody>
+    </table>
+  </div>
+  <p class="body">The export commands are <code>lean4export Solution -- Solution.mainTheorem Solution.mainTheoremApprox
+  Solution.separation Solution.separationClosure Solution.permanent_over_real</code> and
+  <code>lean4export Statement -- Statement.Computes Statement.perm Statement.hc Statement.Beyond Statement.MainTheorem
+  Statement.Approximates Statement.MainTheoremApprox Statement.Family Statement.VP Statement.VPBar Statement.VNP
+  Statement.Separation Statement.SeparationClosure</code>.</p>
+</section>
+
+<section>
+  <h2>How they were built</h2>
+  <p class="body"><b>Source.</b> <a href="https://github.com/anthropics/formal-math/tree/main/vp-vnp">anthropics/formal-math/vp-vnp</a>
+  at commit <code>11b6c7e3c927df2658f513b6b68ea7f8929c62c5</code> (tree SHA <code>b076b4b081298c4e909bac3f87f0e4462d1fb2cb</code>),
+  with the toolchain and dependencies pinned by its own <code>lean-toolchain</code> and <code>lake-manifest.json</code>.</p>
+  <p class="body"><b>Direct parallel compilation (200 cores).</b> Following the same sandboxed workflow used for our
+  <a href="/rh-oleans.html">Riemann Hypothesis verification</a>, each of the 323 modules was compiled directly by the pinned
+  <code>lean</code> v4.33.1 binary in topological dependency order inside a network-isolated systemd sandbox
+  (<code>AllowedCPUs=0-199</code>, read-only toolchain and Mathlib):</p>
+<pre>lean --tstack=400000 &lt;Module/Path&gt;.lean -o lib/&lt;Module/Path&gt;.olean --setup &lt;json&gt;</pre>
+  <p class="body">with the exact setup options from <code>lakefile.toml</code>:</p>
+<pre>{"name": "&lt;Module.Name&gt;", "package": "vp-vnp", "isModule": false,
+ "options": {"autoImplicit": false},
+ "importArts": {}, "dynlibs": [], "plugins": []}</pre>
+  <p class="body"><b>Dependencies were not rebuilt.</b> Notice that <code>vp-vnp</code> pins the exact same Lean toolchain
+  (<code>v4.33.1</code>) and all nine Lake packages (including Mathlib <code>0df444a3</code>) as the alpo.ge RH development.
+  The dependency <code>.olean</code>s are the official Mathlib build cache downloads, mounted read-only during compilation.</p>
+  <p class="body"><b>Result.</b> All 323 modules compiled cleanly in 180.0 seconds wall time with 0 errors and 0 retries.
+  <code>sorry</code> warnings were emitted solely for the five intentional placeholders in <code>Challenge.lean</code>.</p>
+
+  <h3>Toolchain and dependencies</h3>
+  <div class="scroller">
+    <table>
+      <tbody>
+      <tr><td>Lean</td><td class="mono">leanprover/lean4:v4.33.1, commit 819816b2e0a3bf405af45ae5c7af2491d8f5bee6 (official release binary)</td></tr>
+      <tr><td>mathlib</td><td class="mono">0df444a360eaa60ab8c11dca51a86af692955474 (tag v4.33.1)</td></tr>
+      <tr><td>batteries</td><td class="mono">4488d40d070b9700d4d5a6aa342f0d40c31b2a2d</td></tr>
+      <tr><td>aesop</td><td class="mono">3448c0bcc5ce01b2d1546e483ec3620e32df3d0e</td></tr>
+      <tr><td>Qq</td><td class="mono">92c15be17b7caf78c2ad767ec40f89052d908d81</td></tr>
+      <tr><td>proofwidgets</td><td class="mono">4be2e3d5087eeb272cf5a8853b8f9dd025ef5957</td></tr>
+      <tr><td>importGraph</td><td class="mono">16f02aa7642864af59f1ff0e384a015994db9118</td></tr>
+      <tr><td>plausible</td><td class="mono">b7eb3304aeae834b12dda98993a37f6a41f6f0bb</td></tr>
+      <tr><td>LeanSearchClient</td><td class="mono">5f4d51b81cbd3f6b32b156bfad9056621a040404</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section>
+  <h2>What to check</h2>
+  <p class="body"><code>Solution.lean</code> proves five headline theorems against the definitions in <code>Statement.lean</code>
+  (which imports only Mathlib): <code>Solution.mainTheorem</code> (superpolynomial lower bounds for <code>hc</code> over
+  every field and for <code>perm</code> outside characteristic 2), <code>Solution.mainTheoremApprox</code> (the same for
+  approximating circuits), <code>Solution.separation</code> (<code>VP F &sub; VNP F</code> over every field),
+  <code>Solution.separationClosure</code> (<code>&not; VNP F &sube; VPBar F</code> over every field), and
+  <code>Solution.permanent_over_real</code> (the real permanent special case).</p>
+</section>
+
+</div>
+<script>
+// Live status of per-module replay, leanchecker --fresh, and lean4export.
+(function(){
+  var URL = 'https://photos.proofsandreasons.io/wright/vp-vnp-replay.json';
+  var BASE = 'https://photos.proofsandreasons.io/vp-vnp-oleans/';
+  var $ = function(id){ return document.getElementById(id); };
+  var n = function(x){ return Number(x).toLocaleString('en-US'); };
+  function fmtBytes(b){
+    if (b == null) return '—';
+    if (b >= 1073741824) return (b / 1073741824).toFixed(2) + ' GiB';
+    if (b >= 1048576) return (b / 1048576).toFixed(1) + ' MiB';
+    return (b / 1024).toFixed(0) + ' KiB';
+  }
+  function paintBadge(el, val){
+    if (!el) return;
+    el.textContent = val;
+    el.style.color = val === 'passed' || val === 'finished' ? 'var(--good)' : (val === 'running' ? 'var(--amber)' : 'var(--dim)');
+  }
+  function draw(d){
+    var bad = (d.failed || 0) + (d.crashed || 0), st = $('rp-state');
+    if (d.state === 'finished' && bad === 0 && d.remaining === 0){
+      st.textContent = 'finished, all passed'; st.style.color = 'var(--good)';
+    } else if (d.state === 'running'){
+      st.textContent = 'running'; st.style.color = 'var(--amber)';
+    } else {
+      st.textContent = d.state + (bad ? ', with failures' : ''); st.style.color = bad ? 'var(--bad)' : 'var(--amber)';
+    }
+    $('rp-passed').textContent = n(d.passed) + ' of ' + n(d.total_modules);
+    if (d.replayed_constants != null) $('rp-consts').textContent = n(d.replayed_constants);
+    $('rp-failed').textContent = n(bad);
+    $('rp-failed').style.color = bad ? 'var(--bad)' : '';
+    paintBadge($('lc-sol'), d.leanchecker_solution || 'pending');
+    paintBadge($('lc-pap'), d.leanchecker_paper || 'pending');
+    $('rp-when').textContent = (d.updated || '').slice(0, 16).replace('T', ' ') + ' EST';
+
+    var notes = [];
+    if (d.passed === d.total_modules && bad === 0) notes.push('All ' + n(d.total_modules) + ' proof modules (' + n(d.replayed_constants) + ' constants) passed per-module Lean ' + d.lean + ' kernel replay.');
+    if (d.leanchecker_solution === 'passed' && d.leanchecker_paper === 'passed') notes.push('Full leanchecker --fresh passed on both Solution and Paper.');
+    else if (d.service_state === 'active') notes.push('leanchecker --fresh / lean4export is still running on wright; this page updates automatically.');
+    $('rp-note').textContent = notes.join(' ');
+
+    var ul = $('rp-fail'); ul.textContent = '';
+    (d.failures || []).concat(d.crashes || []).forEach(function(f){
+      var li = document.createElement('li'); li.textContent = f.module + ': ' + f.message; ul.appendChild(li);
+    });
+
+    if (d.exports){
+      [['solution', 'exp-sol'], ['statements', 'exp-stmt']].forEach(function(pair){
+        var ex = d.exports[pair[0]], p = pair[1];
+        if (!ex) return;
+        var td = $(p + '-link'); td.textContent = '';
+        var a = document.createElement('a'); a.href = BASE + ex.file; a.textContent = ex.file; td.appendChild(a);
+        $(p + '-size').textContent = fmtBytes(ex.size_bytes);
+        $(p + '-sha').textContent = ex.sha256;
+        if (ex.lines && ex.unpacked_bytes){
+          var desc = $(p + '-desc');
+          if (desc.dataset.orig == null) desc.dataset.orig = desc.textContent;
+          desc.textContent = desc.dataset.orig + ' ' + fmtBytes(ex.unpacked_bytes) + ' and ' + n(ex.lines) + ' lines unpacked.';
+        }
+      });
+    }
+    return d.service_state === 'active' || d.export_state !== 'finished';
+  }
+  function load(){
+    fetch(URL, {cache: 'no-store'}).then(function(r){ return r.json(); })
+      .then(function(d){ if (draw(d)) setTimeout(load, 20000); })
+      .catch(function(){ setTimeout(load, 60000); });
+  }
+  load();
+})();
+</script>
+</body>
+</html>

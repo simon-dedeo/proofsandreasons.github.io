@@ -7,5 +7,5 @@ set -e
 cd "$(dirname "$0")"
 rsync -av --no-perms --no-owner --no-group \
   index.html akdeniz.html wright.html ganesha.html monitor.css monitor.js \
-  readings.html reddit-archive.html lesswrong-archive.html dashboard.html rh-oleans.html out.gif \
+  readings.html reddit-archive.html lesswrong-archive.html dashboard.html rh-oleans.html rh-graph.html vp-vnp-oleans.html vp-vnp-graph.html out.gif \
   gr:/opt/local/www/proofsandreasons/

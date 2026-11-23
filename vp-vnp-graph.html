@@ -1,0 +1,839 @@
+<!doctype html>
+<html lang="en">
+<head>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-0P6L7FVSGG"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date()); gtag('config', 'G-0P6L7FVSGG');
+</script>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Dependency graph (VP &ne; VNP) &middot; Proofs &amp; Reasons</title>
+<meta property="og:type" content="website">
+<meta property="og:title" content="Dependency graph of Anthropic's VP ≠ VNP Proof">
+<meta property="og:description" content="Every declaration used by the five headline theorems in anthropics/formal-math (vp-vnp): 4,576 declarations, 35,354 links, navigable one declaration at a time.">
+<meta property="og:url" content="https://proofsandreasons.io/vp-vnp-graph.html">
+<meta name="theme-color" content="#0b0d12">
+<link rel="canonical" href="https://proofsandreasons.io/vp-vnp-graph.html">
+<style>
+  :root{
+    --bg:#0b0d12; --grad:#141d31; --panel:#111622; --panel2:#161c2a; --line:#232b3d;
+    --ink:#f0f4fb; --dim:#8a97b0; --dimmer:#5b6577;
+    --amber:#ffb64a; --sky:#66cdff; --good:#63d68f; --bad:#ff6f6f;
+    --shadow:0 10px 34px rgba(0,0,0,.5);
+    --mono:"SF Mono",ui-monospace,"JetBrains Mono",Menlo,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"SF Pro Display","Segoe UI","Helvetica Neue",Arial,sans-serif;
+    /* chart roles */
+    --surface:#111622; --chart:#b6c0d2; --link:#7f8aa3; --none:#3a4250; --uses:#66cdff; --usedby:#ffb64a;
+    --q1:#184f95; --q2:#256abf; --q3:#3987e5; --q4:#86b6ef; --q5:#cde2fb;
+    --c1:#3987e5; --c2:#d95926; --c3:#199e70; --c4:#c98500; --c5:#d55181; --c6:#0ca30c; --c7:#9085e9;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  body{
+    background:radial-gradient(1300px 820px at 72% -12%, var(--grad) 0%, var(--bg) 58%);
+    background-attachment:fixed;
+    color:var(--ink);font-family:var(--sans);-webkit-font-smoothing:antialiased;
+    min-height:100vh;padding:0 20px 80px;line-height:1.55;
+  }
+  .wrap{max-width:1060px;margin:0 auto}
+  a{color:var(--sky);text-decoration:none}
+  a:hover{text-decoration:underline}
+  a:focus-visible,button:focus-visible,select:focus-visible,input:focus-visible,[tabindex]:focus-visible{outline:2px solid var(--sky);outline-offset:3px;border-radius:3px}
+  [hidden]{display:none!important}
+
+  nav.site{display:flex;flex-wrap:wrap;gap:6px 20px;padding:18px 0 0;font-family:var(--mono);font-size:.8rem}
+  nav.site a{color:var(--dim)}
+  nav.site a:hover{color:var(--sky)}
+
+  header.top{padding:30px 0 22px;border-bottom:1px solid var(--line)}
+  h1{font-size:clamp(1.9rem,4.2vw,2.9rem);font-weight:700;letter-spacing:-.025em;line-height:1.05;text-wrap:balance}
+  .sub{color:var(--dim);max-width:68ch;margin-top:11px;font-size:1.02rem}
+  .sub b{color:var(--ink);font-weight:600}
+  .credit{max-width:68ch;margin-top:14px;font-size:1.02rem;border-left:3px solid var(--sky);padding-left:14px}
+  .credit b{font-weight:650}
+  .funding{color:var(--dimmer);max-width:68ch;margin-top:11px;font-size:1.02rem}
+  .funding a{color:var(--dim)}
+
+  section{margin-top:42px}
+  h2{font-size:1.32rem;font-weight:650;letter-spacing:-.01em;margin-bottom:6px}
+  h3{font-family:var(--mono);color:var(--dimmer);text-transform:uppercase;letter-spacing:.18em;font-size:.68rem;font-weight:700;margin:18px 0 9px}
+  .lede{color:var(--dim);max-width:72ch;margin-bottom:16px}
+  p.body{color:var(--dim);max-width:74ch;margin-top:12px}
+  p.body b,.lede b{color:var(--ink);font-weight:600}
+
+  .card,.stage,.panel{background:linear-gradient(180deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+  .stage{position:relative;min-width:0;overflow:hidden}
+  .stage svg{display:block;width:100%}
+  .panel{padding:18px 20px;min-width:0;display:flex;flex-direction:column;gap:11px}
+  .panel .kind{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer)}
+  .panel h4{font-family:var(--mono);font-size:.92rem;font-weight:600;overflow-wrap:anywhere}
+  .panel h5{font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);margin-top:6px;font-weight:700}
+  dl.stats{display:grid;grid-template-columns:1fr auto;gap:5px 12px;font-size:.86rem}
+  dl.stats dt{color:var(--dim)} dl.stats dd{text-align:right;font-family:var(--mono);font-size:.84rem;font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+  ul.rank{list-style:none;display:flex;flex-direction:column;gap:3px;font-size:.84rem}
+  ul.rank li{display:flex;justify-content:space-between;gap:10px;min-width:0;align-items:baseline}
+  ul.rank li > :first-child{font-family:var(--mono);font-size:.79rem;overflow-wrap:anywhere;min-width:0;text-align:left}
+  ul.rank li > :last-child{font-variant-numeric:tabular-nums;color:var(--dim);white-space:nowrap;font-size:.78rem}
+  button.lk{background:none;border:0;color:var(--sky);cursor:pointer;font:inherit;padding:0;text-align:left}
+  button.lk:hover{text-decoration:underline}
+  .hint{color:var(--dimmer);font-size:.82rem;overflow-wrap:anywhere}
+  .declpanel{display:grid;grid-template-columns:repeat(auto-fit,minmax(250px,1fr));gap:18px 30px;margin-top:16px;align-items:start}
+  .pcol{display:flex;flex-direction:column;gap:10px;min-width:0}
+  .pcol ul.rank{max-height:19rem;overflow:auto;padding-right:6px}
+  .pcol h5{margin-top:0}
+  .sigbox{grid-column:1 / -1;min-width:0}
+  .sigbox pre{margin-top:6px;white-space:pre-wrap;overflow-wrap:anywhere;max-height:16rem;overflow:auto}
+
+  .controls{display:flex;flex-wrap:wrap;gap:10px 14px;align-items:center;margin-bottom:12px}
+  .controls label{font-size:.8rem;color:var(--dim);display:flex;gap:8px;align-items:center}
+  select,button.btn,input[type=text]{font:inherit;color:var(--ink);background:#0a0f18;border:1px solid var(--line);border-radius:9px;padding:6px 11px}
+  button.btn{cursor:pointer;font-size:.82rem} button.btn:hover{border-color:var(--sky)}
+  .crumbs{display:flex;flex-wrap:wrap;gap:4px;align-items:center;font-family:var(--mono);font-size:.82rem;min-width:0}
+  .crumbs button{border:0;background:none;color:var(--sky);padding:2px 4px;cursor:pointer;font:inherit}
+  .crumbs .sep{color:var(--dimmer)} .crumbs .here{color:var(--ink);padding:2px 4px;overflow-wrap:anywhere}
+
+  .find{position:relative;flex:1 1 20rem;max-width:36rem;min-width:0}
+  .find input{width:100%;font-family:var(--mono);font-size:.9rem;padding:9px 12px}
+  .opts{position:absolute;z-index:15;left:0;right:0;top:calc(100% + 4px);background:#0d1220;border:1px solid var(--line);border-radius:12px;box-shadow:var(--shadow);max-height:22rem;overflow:auto;padding:4px}
+  .opt{display:flex;justify-content:space-between;gap:12px;padding:6px 9px;border-radius:8px;cursor:pointer;font-size:.8rem}
+  .opt span:first-child{font-family:var(--mono);overflow-wrap:anywhere;min-width:0}
+  .opt span:last-child{color:var(--dimmer);white-space:nowrap}
+  .opt.on,.opt:hover{background:#17223a}
+  .opts .more{padding:6px 9px;color:var(--dimmer);font-size:.76rem}
+
+  .grid2{display:grid;grid-template-columns:minmax(0,1fr) 320px;gap:16px;align-items:start}
+  @media (max-width:900px){ .grid2{grid-template-columns:minmax(0,1fr)} }
+  .legend{display:flex;flex-wrap:wrap;gap:6px 14px;font-size:.78rem;color:var(--dim);align-items:center;margin-top:10px}
+  .legend i{display:inline-block;width:11px;height:11px;border-radius:50%;margin-right:5px;vertical-align:-1px}
+  .legend i.sq{border-radius:3px} .legend i.key{width:14px;height:3px;border-radius:2px;vertical-align:middle}
+
+  .scroller{overflow-x:auto;border:1px solid var(--line);border-radius:14px;background:var(--panel)}
+  .tablebox{max-height:340px;overflow:auto;margin-top:14px}
+  table{border-collapse:collapse;width:100%;font-size:.84rem}
+  th,td{text-align:right;padding:8px 13px;border-bottom:1px solid var(--line);white-space:nowrap;font-variant-numeric:tabular-nums}
+  th:first-child,td:first-child{text-align:left;font-family:var(--mono);font-size:.8rem;white-space:normal;overflow-wrap:anywhere;min-width:11rem}
+  th{position:sticky;top:0;font-family:var(--mono);font-size:.62rem;letter-spacing:.14em;text-transform:uppercase;color:var(--dimmer);font-weight:700;background:#0e1320}
+  tbody tr:last-child td{border-bottom:0}
+  td .btn{padding:2px 9px;font-size:.78rem}
+  details{margin-top:12px} summary{cursor:pointer;color:var(--sky);font-size:.86rem}
+
+  code{font-family:var(--mono);font-size:.86em;background:#0a0f18;border:1px solid var(--line);padding:1px 5px;border-radius:5px;color:var(--ink)}
+  pre{font-family:var(--mono);font-size:.79rem;background:#0a0f18;border:1px solid var(--line);border-radius:12px;padding:14px 16px;overflow-x:auto;line-height:1.65;color:var(--ink);margin-top:14px}
+  .note{border-left:3px solid var(--amber);background:var(--panel);padding:13px 17px;border-radius:0 10px 10px 0;margin-top:22px;color:var(--dim);font-size:.93rem;max-width:80ch}
+  .note b{color:var(--ink)}
+  #tip{position:fixed;z-index:30;pointer-events:none;background:#0d1220;color:var(--ink);border:1px solid var(--line);border-radius:10px;padding:9px 11px;font-size:.8rem;max-width:320px;box-shadow:var(--shadow)}
+  #tip .t{font-family:var(--mono);font-size:.78rem;overflow-wrap:anywhere;margin-bottom:5px}
+  #tip .r{display:flex;justify-content:space-between;gap:14px;color:var(--dim)} #tip .r b{color:var(--ink);font-weight:600;font-variant-numeric:tabular-nums}
+  svg text{font-family:var(--sans);fill:var(--chart)} svg text.nm{font-family:var(--mono);fill:var(--ink)}
+  .halo{paint-order:stroke;stroke:var(--surface);stroke-width:3.5px;stroke-linejoin:round}
+  .msg{padding:40px 16px;text-align:center;color:var(--dimmer)}
+  img.fig{display:block;width:100%;height:auto;border:1px solid var(--line);border-radius:18px;box-shadow:var(--shadow)}
+  .netfig{position:relative;border:1px solid var(--line);border-radius:18px;overflow:hidden;box-shadow:var(--shadow);background:#0b0d12}
+  .netfig img{display:block;width:100%;height:auto}
+  .netfig svg{position:absolute;inset:0;width:100%;height:100%}
+  .modlist{list-style:none;display:flex;flex-direction:column;gap:2px;max-height:46rem;overflow:auto}
+  .modlist button{display:grid;grid-template-columns:1.5rem minmax(0,1fr);gap:8px;align-items:start;width:100%;text-align:left;background:none;border:0;color:var(--ink);font:inherit;font-size:.82rem;padding:5px 4px;border-radius:8px;cursor:pointer}
+  .modlist button:hover,.modlist button.on{background:#17223a}
+  .modlist .sw{display:inline-block;width:1.35rem;height:1.35rem;border-radius:50%;font-size:.66rem;font-weight:700;color:#0b0d12;text-align:center;line-height:1.35rem;font-variant-numeric:tabular-nums}
+  .modlist small{display:block;color:var(--dimmer);font-size:.74rem}
+  table sub{font-size:.7em}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<nav class="site" aria-label="Proofs &amp; Reasons">
+  <a href="https://proofsandreasons.io/">Proofs &amp; Reasons</a>
+  <a href="/rh-graph.html">RH graph</a>
+  <a href="/rh-oleans.html">RH oleans</a>
+  <a href="/dashboard.html">Skyline monitor</a>
+  <a href="/readings.html">CogSci reading list</a>
+</nav>
+
+<header class="top">
+  <h1>Dependency graph of Anthropic&rsquo;s VP &ne; VNP Proof</h1>
+  <p class="credit">The mathematics and its Lean 4 formalization are a research artifact released by <b>Anthropic</b>
+  (<a href="https://github.com/anthropics/formal-math/tree/main/vp-vnp">anthropics/formal-math/vp-vnp</a>;
+  <a href="https://github.com/anthropics/formal-math/blob/main/vp-vnp/paper.pdf">paper.pdf</a>). This page is drawn
+  from the files on the <a href="/vp-vnp-oleans.html">compiled oleans page</a>, which also has the verification checks
+  run on them.</p>
+  <p class="sub" id="lede">Every declaration used by the five headline theorems of <code>Solution.lean</code>
+  (<code>mainTheorem</code>, <code>mainTheoremApprox</code>, <code>separation</code>, <code>separationClosure</code>,
+  and <code>permanent_over_real</code>), directly or through a chain of other declarations, and which of them use which:
+  <b>4,576 declarations</b> joined by <b>35,354 links</b> across 320 proof modules. Only 76 declarations in the
+  compiled development (1.6%) are unused by any of the five theorems and are left out of everything on this page. Below:
+  the proof as a network, the statistics of dependence and use, a navigator for walking it one declaration at a time, and
+  a map by folder.</p>
+  <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
+  <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
+  Additional support from research funds of the Laboratory for Social Minds and from the Survival and
+  Flourishing Fund.</p>
+</header>
+
+<!-- ============ THE NETWORK ============ -->
+<section id="network">
+  <h2>The proof as a network</h2>
+  <p class="lede">All 4,576 declarations at once. The clusters are the modules that Louvain clustering finds in the
+  links alone, with no knowledge of files or folders: 16 of them (12 with more than a hundred declarations), at a
+  modularity of 0.78. Hover over a cluster for its name and its most-used declarations; select it to keep them in the
+  box and follow them into the navigator.</p>
+  <div class="grid2">
+    <div>
+      <div class="netfig" id="netfig">
+        <img src="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network-plain-web.png" width="2000" height="2000"
+          alt="The network of declarations used by the five VP ≠ VNP theorems, drawn as coloured clusters of points and links, one per Louvain module.">
+        <svg id="netsvg" viewBox="0 0 1000 1000" role="group" aria-label="Modules of the proof network"></svg>
+      </div>
+      <div class="legend"><span>Colour marks all 16 Louvain modules. The star marks <code>Solution.separationClosure</code> (with the other four headline theorems immediately adjacent).</span></div>
+    </div>
+    <aside class="panel" id="netpanel" aria-live="polite"><div class="msg">Loading&hellip;</div></aside>
+  </div>
+  <p class="body">Each module is laid out on its own and the modules are then arranged by how strongly they are linked;
+  all 4,576 declarations appear in the 16 clusters (none are relegated to an outer ring). Several modules cut across
+  folders (the largest draws 56% of its declarations from <code>NS1</code> and the rest from <code>Nc</code> and
+  <code>Paper</code>), while others align tightly with a single subsystem (such as <code>Nc/Tower</code> at 99% and
+  <code>Nc/Hc</code> at 98%). <b>The module names are a reader&rsquo;s labels</b>, written from each cluster&rsquo;s
+  most-used declarations, namespaces and distinctive name-words. The proof itself does not name them.
+  <a href="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network.png">The picture with a key of all 16 modules</a>
+  is a 6000&nbsp;&times;&nbsp;4000 PNG (6.2&nbsp;MB).</p>
+</section>
+
+<!-- ============ DEPENDENCE AND USE ============ -->
+<section id="belief">
+  <h2>Dependence and use</h2>
+  <p class="lede">Viteri &amp; DeDeo, <a href="https://doi.org/10.1016/j.cognition.2022.105120">&ldquo;Epistemic phase
+  transitions in mathematical proofs&rdquo;</a> (<i>Cognition</i>, 2022), count two things for every claim in 48
+  machine-checked proofs written in Coq: how many claims it depends on, and how many claims use it. Here the same
+  counts are made on two networks rooted at <code>Solution.separationClosure</code>: <b>the top of the proof</b>,
+  the 1,123 declarations within 9 steps of the theorem (first depth past 1,000 claims), and <b>the whole proof</b>,
+  all 4,544 declarations the theorem uses.</p>
+  <img class="fig" src="vp-vnp-graph/ept/fig1_degrees_dark.png" width="2040" height="816" loading="lazy"
+    alt="Two panels on logarithmic axes showing the complementary cumulative distributions of dependencies and users for both the top 1,123 declarations and the full 4,544-declaration VP ≠ VNP proof.">
+  <p class="body">In the paper&rsquo;s Coq proofs the number of claims a claim depends on is Poisson-like, mostly about
+  three, and the number of claims that use it has a power-law tail with exponent 2.15&nbsp;&plusmn;&nbsp;0.13.
+  Here <b>the use tail matches closely</b>: over the whole proof the fitted exponent is 2.12&nbsp;&plusmn;&nbsp;0.04
+  (tail from 9 users, 786 declarations, fitted by the method of Clauset, Shalizi and Newman), and 2.36&nbsp;&plusmn;&nbsp;0.09
+  for the top of the proof (from 6 users). As in the paper and in our <a href="/rh-graph.html">Riemann Hypothesis analysis</a>,
+  an exponent near two is consistent with construction by &ldquo;tinkering and reuse&rdquo;
+  (<a href="https://arxiv.org/abs/1907.05528">Sol&eacute; &amp; Valverde, 2019</a>; the copying model of
+  <a href="https://doi.org/10.1103/PhysRevE.71.036118">Krapivsky &amp; Redner, 2005</a>).</p>
+  <p class="body"><b>Dependence is also heavy-tailed, as in Lean generally.</b> Across the whole proof a declaration depends
+  on 7.72 others on average with a variance of 92.2 (where a Poisson of the same mean would have variance 7.72), up to a
+  maximum of 99 dependencies. A pure power law fitted to the tail has exponent 2.36&nbsp;&plusmn;&nbsp;0.03 for the whole
+  proof (from 7 dependencies, top 41%) and 2.46&nbsp;&plusmn;&nbsp;0.08 for the top of the proof (from 5, top 37%),
+  while a power law with an exponential cutoff (exponent 1.07, cutoff near 19 for the whole proof; 1.73 and 24 for the top)
+  or a log-normal fits significantly better, reflecting the fact that a single Lean declaration can invoke dozens of earlier lemmas.</p>
+
+  <details><summary>The paper&rsquo;s model of belief, run on this proof: deduction against abduction, and the effect of the prior</summary>
+    <p class="body">The paper models a reader who goes over a proof step by step, revising belief in each claim to
+    agree with the claims it depends on (deduction) and the claims that depend on it (abduction), with some chance
+    of error at every inference.</p>
+    <img class="fig" src="vp-vnp-graph/ept/fig5_deductive_abductive_dark.png" width="1955" height="1632" loading="lazy" style="margin-top:14px"
+      alt="Four grids of belief against deductive confidence and abductive confidence, for Solution.separationClosure and for all steps, on both networks.">
+    <p class="body">Unlike the Riemann Hypothesis graph&mdash;where the final theorem sits at the tip of a thin 1-1-2-3
+    chain and shows a sharp abductive drop&mdash;<code>Solution.separationClosure</code> rests on a much wider immediate
+    foundation (1, 12, 17, 32, 65 declarations in the first five levels). At a deductive confidence of 0.85, belief in the
+    theorem on the whole proof remains near 1.00 across high abductive confidences, with only a mild dip on the truncated
+    network (peaking at 0.998 at abductive confidence 0.85 and edging down to 0.984 at 0.99).</p>
+    <img class="fig" src="vp-vnp-graph/ept/fig3_prior_dark.png" width="2040" height="782" loading="lazy" style="margin-top:14px"
+      alt="Belief after examining the proof against prior belief, at an error rate of 0.01.">
+    <p class="body">At an error rate of 0.01, a prior of 0.60 in each step already brings belief in the whole proof to
+    0.97 across all steps and 0.94 for the theorem itself (rising to 0.997 and 0.976 at prior 0.75). Settings follow
+    Viteri &amp; DeDeo (prior 0.75 where not varied; 10 sweeps per declaration; belief averaged over the second half of
+    each run). This is a model of how belief forms; it says nothing about whether the proof is correct.</p>
+  </details>
+</section>
+
+<!-- ============ DECLARATION NAVIGATOR ============ -->
+<section id="decl">
+  <h2>Walk the graph from any declaration</h2>
+  <p class="lede">Type a declaration&rsquo;s name, or the end of it, and pick it from the list. The drawing shows what
+  uses it on the left and what it uses on the right, as many steps out as you choose. Select any circle to move
+  there. The box beneath gives its signature as written in source and the full lists.</p>
+  <div class="controls">
+    <div class="find">
+      <input type="text" id="q" autocomplete="off" spellcheck="false" placeholder="e.g. mainTheorem, thm_approx, Tower, IsPrice" aria-label="Declaration name" role="combobox" aria-expanded="false" aria-controls="opts">
+      <div class="opts" id="opts" role="listbox" hidden></div>
+    </div>
+    <label for="steps">Steps each way <select id="steps"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></label>
+  </div>
+  <div class="controls">
+    <button class="btn hlbtn" data-id="4561" type="button">separationClosure</button>
+    <button class="btn hlbtn" data-id="4560" type="button">mainTheoremApprox</button>
+    <button class="btn hlbtn" data-id="4558" type="button">mainTheorem</button>
+    <button class="btn hlbtn" data-id="4559" type="button">separation</button>
+    <button class="btn hlbtn" data-id="4562" type="button">permanent_over_real</button>
+  </div>
+  <div class="scroller" style="border-radius:18px"><div id="nbstage"><div class="msg">Loading&hellip;</div></div></div>
+  <div class="legend" id="nblegend"></div>
+  <div class="panel declpanel" id="nbpanel" aria-live="polite"><div class="msg">Loading&hellip;</div></div>
+</section>
+
+<!-- ============ FOLDER MAP ============ -->
+<section id="map">
+  <h2>Map of the proof, by folder</h2>
+  <p class="lede">Each circle is a folder of the source tree, sized by how many declarations it holds. An arrow from
+  A to B means declarations in A use declarations in B, and its width shows how many such uses there are. Folders
+  nearer the top sit closer to the headline theorems. Select a circle to read its numbers; open it to see the folders
+  inside.</p>
+  <div class="controls"><div class="crumbs" id="crumbs" aria-label="Current folder"></div></div>
+  <div class="controls">
+    <label for="colorMode">Colour by <select id="colorMode">
+      <option value="lib" selected>top-level library</option>
+      <option value="depth">mean steps below headline theorems</option></select></label>
+    <label for="linkMode">Arrows shown <select id="linkMode">
+      <option value="60">60 strongest</option><option value="200">200 strongest</option><option value="all">all</option></select></label>
+  </div>
+  <div class="grid2">
+    <div>
+      <div class="stage" id="mapstage"><div class="msg">Loading&hellip;</div></div>
+      <div class="legend" id="maplegend"></div>
+    </div>
+    <aside class="panel" id="panel" aria-live="polite"></aside>
+  </div>
+  <div class="scroller tablebox"><table id="maptable"><thead><tr><th>Folder</th><th>Declarations</th><th>Mean steps below</th><th>Theorems</th><th>Uses</th><th>Used by</th><th></th></tr></thead><tbody></tbody></table></div>
+</section>
+
+<!-- ============ TOP OF THE PROOF ============ -->
+<section id="top">
+  <h2>The top of the proof, declaration by declaration</h2>
+  <p class="lede" id="toplede">The declarations within a few steps of the five headline theorems, left to right by how many steps away they are.</p>
+  <div class="scroller" style="border-radius:18px"><div id="topstage" style="min-width:1040px"><div class="msg">Loading&hellip;</div></div></div>
+  <div class="legend" id="toplegend"></div>
+  <details><summary>Show the first levels as a table</summary>
+    <div class="scroller tablebox"><table id="toptable"><thead><tr><th>Declaration</th><th>Steps below</th><th>Kind</th><th>Declarations beneath</th><th>Direct uses</th></tr></thead><tbody></tbody></table></div>
+  </details>
+</section>
+
+<!-- ============ DEPTH ============ -->
+<section id="shape">
+  <h2>How deep the proof goes</h2>
+  <p class="lede" id="shapelede">The number of declarations at each distance below the five headline theorems, counted along the shortest chain of uses, split by top-level library.</p>
+  <div class="stage" id="shapestage"><div class="msg">Loading&hellip;</div></div>
+  <div class="legend" id="shapelegend"></div>
+  <details><summary>Show as a table</summary>
+    <div class="scroller tablebox"><table id="shapetable"><thead></thead><tbody></tbody></table></div>
+  </details>
+</section>
+
+<!-- ============ DOWNLOAD ============ -->
+<section id="download">
+  <h2>The graph as one file</h2>
+  <p class="lede"><a href="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-declaration-graph-used.json.gz">vp-vnp-declaration-graph-used.json.gz</a>
+  (139&nbsp;KB) holds the 4,576 declarations used by the five headline theorems of <code>Solution.lean</code> and the
+  35,354 links among them. It is one JSON object with a <code>meta</code> block and a <code>nodes</code> array with one
+  declaration per line:</p>
+<pre>{"id":4561,"name":"Solution.separationClosure","kind":"theorem","file":"Solution.lean","line":47,
+ "steps_below_headline":0,"uses_in_signature":[4575],"uses_in_body":[4563,4541,4572,4574],
+ "id_in_full_graph":4637}</pre>
+  <p class="body">SHA-256 <code style="word-break:break-all">b9a3ab6a1fc8851e72f7b6948dd8fc9823047eb0d119de6b7247c538e908683a</code>.
+  The numbers in the two <code>uses</code> lists are <code>id</code>s of other entries.
+  <code>id_in_full_graph</code> is the declaration&rsquo;s <code>id</code> in
+  <a href="https://photos.proofsandreasons.io/vp-vnp-graph/vp-vnp-declaration-graph.json.gz">vp-vnp-declaration-graph.json.gz</a>
+  (124&nbsp;KB, SHA-256 <code style="word-break:break-all">dda41928755d097246b49379a68f9654fad261a3ce65ce8ae0e32eb12f6ccbef</code>),
+  the graph of all 322 proof modules, which also includes the 76 unused declarations.</p>
+</section>
+
+<div class="note"><b>How this was built, and what it does not show.</b> The graph is read from the compiled
+<code>.olean</code> files of all 322 proof modules (excluding <code>Challenge.lean</code>), so the links are the ones
+the Lean compiler recorded, including uses introduced by tactics, instances and notation. A node is a source declaration;
+compiler-generated helpers, structure fields and constructors are folded into the declaration that owns them. Uses of
+Mathlib and core Lean (312,122 uses of 5,236 external constants) are not drawn. A link says that one declaration mentions
+another; it does not say the mention carries mathematical weight, and verification results live on the
+<a href="/vp-vnp-oleans.html">compiled oleans page</a>.</div>
+
+</div>
+<div id="tip" hidden></div>
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/d3/7.9.0/d3.min.js"></script>
+<script>
+(function(){
+'use strict';
+var DATA = 'https://photos.proofsandreasons.io/vp-vnp-graph/used/', LOCAL = 'vp-vnp-graph/vpvnp/', BLOCK = 500, ROOT = 4561, NDECL = 4576;
+var KINDS = ['theorem','lemma','def','abbrev','structure','instance','inductive','class','notation','generated','other'];
+var fmt = d3.format(','), T = [], kidsOf = new Map(), leaves = [], E = [], TOP = [], PROF = null;
+var state = {focus:-1, sel:null, hover:null, color:'lib', links:'60'}, cut = null;
+var LIBS = ['Nc','Paper','NS1','Ov','Statement and Solution'];
+var LIBVAR = {'Nc':'--c1','Paper':'--c2','NS1':'--c3','Ov':'--c4','Statement and Solution':'--c5'};
+var DEPTHBINS = ['0–4 steps','4–8 steps','8–11 steps','11–14 steps','14+ steps'];
+var $ = function(id){ return document.getElementById(id); };
+function el(tag, cls, text){ var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+function pct(v){ return v == null ? '–' : (v >= 0.9995 ? '100%' : (v * 100).toFixed(v < 0.1 ? 1 : 0) + '%'); }
+function libName(name){ return LIBVAR[name] ? name : 'Statement and Solution'; }
+function topOf(id){ while (T[id].parent !== -1) id = T[id].parent; return id; }
+function pathOf(id){ var p = []; while (id !== -1){ p.unshift(T[id].name); id = T[id].parent; } return p.join('/'); }
+var calm = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+
+/* ---------- tooltip ---------- */
+var tip = $('tip');
+function showTip(ev, title, rows){
+  tip.textContent = ''; tip.appendChild(el('div','t',title));
+  rows.forEach(function(r){ var d = el('div','r'); d.appendChild(el('span',null,r[0])); d.appendChild(el('b',null,r[1])); tip.appendChild(d); });
+  tip.hidden = false;
+  var x = ev.clientX + 14, y = ev.clientY + 14, w = tip.offsetWidth, h = tip.offsetHeight;
+  if (x + w > window.innerWidth - 8) x = Math.max(8, ev.clientX - w - 14);
+  if (y + h > window.innerHeight - 8) y = Math.max(8, ev.clientY - h - 14);
+  tip.style.left = x + 'px'; tip.style.top = y + 'px';
+}
+function hideTip(){ tip.hidden = true; }
+
+/* =====================================================================
+   Declaration navigator
+   ===================================================================== */
+var blocks = {}, pendingB = {}, shards = {}, pendingS = {}, manifest = null, pendingM = null;
+window.ALP = { n:function(b, data){ blocks[b] = data; }, ac:function(key, rows){ shards[key] = rows; }, acm:function(m){ manifest = m; } };
+function loadScript(url){ return new Promise(function(res, rej){ var s = document.createElement('script'); s.src = url; s.async = true; s.onload = function(){ res(); }; s.onerror = function(){ rej(new Error('could not load ' + url)); }; document.head.appendChild(s); }); }
+function getBlock(b){ if (blocks[b]) return Promise.resolve(blocks[b]); if (!pendingB[b]) pendingB[b] = loadScript(DATA + 'n/' + b + '.js').then(function(){ return blocks[b]; }); return pendingB[b]; }
+function getNode(id){ return getBlock(Math.floor(id / BLOCK)).then(function(B){ var r = B.d[id % BLOCK];
+  return {id:id, name:r[0], kind:r[1], file:B.f[r[2]], line:r[3], dist:r[4], nUses:r[5], nUsers:r[6], pred:r[7], uses:r[8], users:r[9], sig:r[10]}; }); }
+function getManifest(){ if (manifest) return Promise.resolve(manifest); if (!pendingM) pendingM = loadScript(DATA + 'ac/manifest.js').then(function(){ return manifest; }); return pendingM; }
+function hex(s){ return Array.prototype.map.call(new TextEncoder().encode(s), function(b){ return (b < 16 ? '0' : '') + b.toString(16); }).join(''); }
+function getShard(key){ if (shards[key]) return Promise.resolve(shards[key]); if (!pendingS[key]) pendingS[key] = loadScript(DATA + 'ac/' + key + '.js').then(function(){ return shards[key]; }); return pendingS[key]; }
+function shortOf(name){ return name.slice(name.lastIndexOf('.') + 1); }
+function labelOf(name){ var p = name.split('.'); return p.length > 1 ? p.slice(-2).join('.') : name; }
+function kgroup(k){ return (k === 0 || k === 1) ? 0 : (k === 4 || k === 6 || k === 7) ? 2 : (k === 9 || k === 10) ? 3 : 1; }
+var KG = [['theorem or lemma','--c1'],['definition, instance or notation','--c2'],['structure, inductive type or class','--c3'],['other','--none']];
+function kfill(k){ return 'var(' + KG[kgroup(k)][1] + ')'; }
+
+/* ----- name lookup ----- */
+function lookup(q){
+  var typed = q.trim(), lower = typed.toLowerCase(), short = lower.slice(lower.lastIndexOf('.') + 1), chars = Array.from(short);
+  if (!chars.length) return Promise.resolve({rows:[], note:''});
+  return getManifest().then(function(M){
+    var p = '', node = M[''], i = 0;
+    while (node && node[1] === 0 && i < chars.length){ var nx = M[p + chars[i]]; if (!nx) return {rows:[], note:'No declaration name ends in a part that starts with “' + short + '”.'}; p += chars[i]; node = nx; i++; }
+    function fits(row){ var nm = row[1].toLowerCase(); return shortOf(nm).indexOf(short) === 0 && (lower.indexOf('.') < 0 || nm.slice(-lower.length) === lower || nm.indexOf(lower.slice(0, lower.lastIndexOf('.') + 1)) >= 0); }
+    function rank(rows){ return rows.filter(fits).sort(function(a, b){ var ea = shortOf(a[1]).toLowerCase() === short ? 0 : 1, eb = shortOf(b[1]).toLowerCase() === short ? 0 : 1; return ea - eb || b[2] - a[2]; }); }
+    if (node[1] === 1) return getShard(hex(p)).then(function(rows){ var r = rank(rows); return {rows:r.slice(0, 14), note:r.length > 14 ? fmt(r.length) + ' names match; keep typing to narrow them.' : (r.length ? '' : 'No declaration matches.')}; });
+    var tops = node[3].map(function(t){ return [t[0], t[1], null, null]; }), note = fmt(node[0]) + ' names start this way; the most-used are shown. Keep typing to narrow them.';
+    if (node[2] > 0) return getShard(hex(p) + '_x').then(function(rows){ var r = rank(rows); var seen = new Set(r.slice(0, 10).map(function(x){ return x[0]; })); return {rows:r.slice(0, 10).concat(tops.filter(function(t){ return !seen.has(t[0]); })), note:note}; });
+    return {rows:tops, note:note};
+  });
+}
+var qEl = $('q'), optsEl = $('opts'), optRows = [], optOn = -1, seq = 0;
+function drawOpts(res){
+  optsEl.textContent = ''; optRows = res.rows; optOn = res.rows.length ? 0 : -1;
+  res.rows.forEach(function(r, i){ var o = el('div', 'opt' + (i === 0 ? ' on' : '')); o.setAttribute('role', 'option'); o.id = 'opt' + i;
+    o.appendChild(el('span', null, r[1])); o.appendChild(el('span', null, r[2] == null ? '' : (r[3] != null ? KINDS[r[3]] + ' · ' : '') + 'used by ' + fmt(r[2])));
+    o.addEventListener('mousedown', function(ev){ ev.preventDefault(); pick(i); }); optsEl.appendChild(o); });
+  if (res.note) optsEl.appendChild(el('div', 'more', res.note));
+  var open = res.rows.length > 0 || !!res.note; optsEl.hidden = !open; qEl.setAttribute('aria-expanded', open ? 'true' : 'false');
+}
+function pick(i){ var r = optRows[i]; if (!r) return; optsEl.hidden = true; qEl.setAttribute('aria-expanded', 'false'); qEl.value = r[1]; goDecl(r[0], false); }
+function moveOpt(d){ if (!optRows.length) return; var kids = optsEl.querySelectorAll('.opt'); kids[optOn] && kids[optOn].classList.remove('on'); optOn = (optOn + d + optRows.length) % optRows.length; kids[optOn].classList.add('on'); kids[optOn].scrollIntoView({block:'nearest'}); qEl.setAttribute('aria-activedescendant', 'opt' + optOn); }
+var qTimer = null;
+qEl.addEventListener('input', function(){ clearTimeout(qTimer); var my = ++seq, v = qEl.value; qTimer = setTimeout(function(){ lookup(v).then(function(res){ if (my === seq) drawOpts(res); }).catch(function(e){ if (my === seq) drawOpts({rows:[], note:'The name index could not be loaded (' + e.message + ').'}); }); }, 110); });
+qEl.addEventListener('keydown', function(ev){ if (ev.key === 'ArrowDown'){ ev.preventDefault(); moveOpt(1); } else if (ev.key === 'ArrowUp'){ ev.preventDefault(); moveOpt(-1); } else if (ev.key === 'Enter'){ ev.preventDefault(); if (optOn >= 0 && !optsEl.hidden) pick(optOn); } else if (ev.key === 'Escape'){ optsEl.hidden = true; } });
+qEl.addEventListener('blur', function(){ setTimeout(function(){ optsEl.hidden = true; qEl.setAttribute('aria-expanded', 'false'); }, 120); });
+qEl.addEventListener('focus', function(){ getManifest().catch(function(){}); if (optRows.length && qEl.value) optsEl.hidden = false; });
+
+/* ----- neighbourhood ----- */
+var nb = {center:ROOT, steps:2, token:0};
+function fanout(n){ return n === 1 ? [16] : n === 2 ? [8, 3] : [5, 3, 2]; }
+function gather(id, n){
+  return getNode(id).then(function(c){
+    var K = fanout(n), nodes = [{id:id, col:0, label:labelOf(c.name), kind:c.kind, rec:c}], links = [], hidden = {};
+    function side(sign, key, total){
+      var seen = new Set([id]), frontier = [nodes[0]], chain = Promise.resolve();
+      for (var lvl = 1; lvl <= n; lvl++){ (function(lvl){ chain = chain.then(function(){
+        return Promise.all(frontier.map(function(f){ return f.rec ? f.rec : getNode(f.id).then(function(r){ f.rec = r; return r; }); })).then(function(){
+          var next = [];
+          frontier.forEach(function(f){ var list = f.rec[key], more = f.rec[total] - Math.min(list.length, K[lvl - 1]); if (more > 0) hidden[sign + ':' + f.id] = more;
+            list.slice(0, K[lvl - 1]).forEach(function(x){ var tgt = null;
+              if (!seen.has(x[0])){ seen.add(x[0]); tgt = {id:x[0], col:sign * lvl, label:x[1], kind:x[2], rec:null, parent:f}; nodes.push(tgt); next.push(tgt); }
+              else tgt = nodes.filter(function(m){ return m.id === x[0] && m.col * sign > 0; })[0];
+              if (tgt) links.push(sign > 0 ? {s:f, t:tgt} : {s:tgt, t:f}); }); });
+          frontier = next; }); }); })(lvl); }
+      return chain;
+    }
+    return side(-1, 'users', 'nUsers').then(function(){ return side(1, 'uses', 'nUses'); }).then(function(){ return {center:c, nodes:nodes, links:links, hidden:hidden, n:n}; });
+  });
+}
+function drawNeighbourhood(g){
+  var stage = $('nbstage'); stage.textContent = '';
+  var n = g.n, cols = d3.range(-n, n + 1).map(function(k){ return g.nodes.filter(function(x){ return x.col === k; }); });
+  var biggest = d3.max(cols, function(c){ return c.length; }), W = Math.max(stage.parentNode.clientWidth, 150 * (2 * n + 1)), padT = 52, padB = 22;
+  stage.style.minWidth = W + 'px';
+  var H = Math.max(380, Math.min(760, biggest * 19 + padT + padB)), colW = (W - 40) / (2 * n + 1);
+  cols.forEach(function(c, i){ var step = Math.min(34, (H - padT - padB) / Math.max(1, c.length)), y0 = padT + (H - padT - padB - step * (c.length - 1)) / 2;
+    c.forEach(function(x, j){ x.x = 20 + i * colW + (x.col === 0 ? colW * 0.12 : 12); x.y = y0 + j * step; x.dense = step < 13; }); });
+  var svg = d3.select(stage).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', 'Neighbourhood of ' + g.center.name);
+  cols.forEach(function(c, i){ var k = i - n, head = k === 0 ? 'this declaration' : (k < 0 ? (k === -1 ? 'uses it directly' : 'uses it in ' + (-k) + ' steps') : (k === 1 ? 'it uses directly' : 'it uses in ' + k + ' steps'));
+    svg.append('text').attr('x', 20 + i * colW + 8).attr('y', 20).attr('font-size', 11).text(head);
+    var sub = k === 0 ? '' : (c.length ? c.length + ' shown' : 'none');
+    if (k === -1 && g.center.nUsers > c.length) sub = c.length + ' shown of ' + fmt(g.center.nUsers);
+    if (k === 1 && g.center.nUses > c.length) sub = c.length + ' shown of ' + fmt(g.center.nUses);
+    svg.append('text').attr('x', 20 + i * colW + 8).attr('y', 34).attr('font-size', 10.5).attr('fill', 'var(--dimmer)').text(sub); });
+  var lsel = svg.append('g').attr('fill', 'none').selectAll('path').data(g.links).join('path')
+    .attr('d', function(l){ var dx = Math.max(24, (l.t.x - l.s.x) * 0.45); return 'M' + l.s.x + ',' + l.s.y + 'C' + (l.s.x + dx) + ',' + l.s.y + ' ' + (l.t.x - dx) + ',' + l.t.y + ' ' + l.t.x + ',' + l.t.y; });
+  var maxChars = Math.max(10, Math.floor((colW - 34) / 6.5));
+  var nsel = svg.append('g').selectAll('g').data(g.nodes).join('g').attr('transform', function(x){ return 'translate(' + x.x + ',' + x.y + ')'; }).attr('tabindex', 0).attr('role', 'button').style('cursor', 'pointer')
+    .attr('aria-label', function(x){ return (x.rec ? x.rec.name : x.label) + (x.col === 0 ? ', the selected declaration' : (x.col < 0 ? ', uses it' : ', used by it')); });
+  nsel.append('circle').attr('r', 11).attr('fill', 'transparent');
+  nsel.append('circle').attr('class', 'dot').attr('r', function(x){ return x.col === 0 ? 8 : (x.dense ? 3.2 : 4.6); }).attr('fill', function(x){ return kfill(x.kind); })
+    .attr('stroke', function(x){ return x.col === 0 ? 'var(--ink)' : 'var(--surface)'; }).attr('stroke-width', function(x){ return x.col === 0 ? 2 : 1.5; });
+  nsel.filter(function(x){ return !x.dense || x.col === 0; }).append('text').attr('class', 'nm halo').attr('font-size', function(x){ return x.col === 0 ? 12 : 10.5; }).attr('font-weight', function(x){ return x.col === 0 ? 600 : 400; })
+    .attr('x', function(x){ return x.col === 0 ? 13 : 9; }).attr('dy', '0.32em').text(function(x){ var s = x.col === 0 ? labelOf(x.rec.name) : x.label; return s.length > maxChars ? s.slice(0, maxChars - 1) + '…' : s; });
+  var hov = null;
+  function paint(){ lsel.attr('stroke', function(l){ return !hov ? 'var(--link)' : (l.s === hov ? 'var(--uses)' : (l.t === hov ? 'var(--usedby)' : 'var(--link)')); })
+      .attr('opacity', function(l){ return !hov ? 0.4 : ((l.s === hov || l.t === hov) ? 0.95 : 0.08); }).attr('stroke-width', function(l){ return hov && (l.s === hov || l.t === hov) ? 1.7 : 1; });
+    nsel.attr('opacity', function(x){ return !hov || x === hov || g.links.some(function(l){ return (l.s === hov && l.t === x) || (l.t === hov && l.s === x); }) ? 1 : 0.3; }); }
+  nsel.on('pointermove', function(ev, x){ hov = x; paint(); var r = x.rec, rows = [['Kind', KINDS[x.kind]]];
+      if (r){ rows.push(['Steps below headline theorems', r.dist < 0 ? 'not used' : String(r.dist)], ['Uses', fmt(r.nUses)], ['Used by', fmt(r.nUsers)]); }
+      var more = g.hidden[(x.col < 0 ? -1 : 1) + ':' + x.id]; if (more && x.col !== 0) rows.push([x.col < 0 ? 'More that use it, not drawn' : 'More that it uses, not drawn', fmt(more)]);
+      showTip(ev, r ? r.name : x.label, rows); })
+    .on('pointerleave', function(){ hov = null; paint(); hideTip(); }).on('focus', function(ev, x){ hov = x; paint(); }).on('blur', function(){ hov = null; paint(); })
+    .on('click', function(ev, x){ if (x.col !== 0) goDecl(x.id, false); })
+    .on('keydown', function(ev, x){ if ((ev.key === 'Enter' || ev.key === ' ') && x.col !== 0){ ev.preventDefault(); goDecl(x.id, false); } });
+  paint();
+  var L = $('nblegend'); L.textContent = '';
+  KG.forEach(function(k){ var s = el('span'), i = el('i'); i.style.background = 'var(' + k[1] + ')'; s.appendChild(i); s.appendChild(document.createTextNode(k[0])); L.appendChild(s); });
+  L.appendChild(el('span', null, 'Every line runs left to right from a declaration to one it uses.'));
+}
+function nameList(P, title, list, total, how){
+  P.appendChild(el('h5', null, title + ' (' + fmt(total) + ')'));
+  if (!list.length){ P.appendChild(el('p', 'hint', 'None in this development.')); return; }
+  var ul = el('ul', 'rank'); list.forEach(function(x){ var li = el('li'), b = el('button', 'lk', x[1]); b.type = 'button'; b.addEventListener('click', function(){ goDecl(x[0], false); }); li.appendChild(b); li.appendChild(el('span', null, KINDS[x[2]])); ul.appendChild(li); });
+  P.appendChild(ul);
+  if (total > list.length) P.appendChild(el('p', 'hint', 'Showing ' + list.length + ' of ' + fmt(total) + ', ' + how + '.'));
+}
+function drawDeclPanel(c){
+  var P0 = $('nbpanel'); P0.textContent = '';
+  if (c.sig){ var SB = el('div', 'sigbox'); SB.appendChild(el('div', 'kind', 'Signature, as written in the source')); SB.appendChild(el('pre', null, c.sig)); P0.appendChild(SB); }
+  var P = el('div', 'pcol'), PU = el('div', 'pcol'), PB = el('div', 'pcol'); P0.appendChild(P); P0.appendChild(PU); P0.appendChild(PB);
+  P.appendChild(el('div', 'kind', KINDS[c.kind])); P.appendChild(el('h4', null, c.name));
+  var dl = el('dl', 'stats');
+  [['File', c.file.split('/').pop() + (c.line > 0 ? ', line ' + c.line : '')],
+   ['Steps below headline theorems', c.dist < 0 ? 'not used' : String(c.dist)],
+   ['Declarations it uses', fmt(c.nUses)],
+   ['Declarations that use it', fmt(c.nUsers)]]
+    .forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+  P.appendChild(dl);
+  var srcLink = el('p', 'hint');
+  var a = document.createElement('a');
+  a.href = 'https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/' + c.file + (c.line > 0 ? '#L' + c.line : '');
+  a.target = '_blank'; a.rel = 'noopener'; a.textContent = c.file + (c.line > 0 ? ':' + c.line : '') + ' ↗';
+  srcLink.appendChild(a); P.appendChild(srcLink);
+  if (c.dist > 0){ var b = el('button', 'btn', 'Show a shortest chain up to a headline theorem'); b.type = 'button'; var box = el('div');
+    b.addEventListener('click', function(){ b.disabled = true; b.textContent = 'Following the chain…'; var chain = [], step = function(id){ return getNode(id).then(function(r){ chain.push(r); return r.pred >= 0 ? step(r.pred) : null; }); };
+      step(c.pred).then(function(){ b.hidden = true; box.appendChild(el('h5', null, 'One shortest chain of uses, from the theorem down')); var ul = el('ul', 'rank');
+        chain.reverse().forEach(function(r){ var li = el('li'), k = el('button', 'lk', labelOf(r.name)); k.type = 'button'; k.addEventListener('click', function(){ goDecl(r.id, false); }); li.appendChild(k); li.appendChild(el('span', null, 'step ' + r.dist)); ul.appendChild(li); });
+        var me = el('li'); me.appendChild(el('span', null, labelOf(c.name))); me.appendChild(el('span', null, 'step ' + c.dist)); ul.appendChild(me); box.appendChild(ul); })
+      .catch(function(e){ b.disabled = false; b.textContent = 'Could not load the chain (' + e.message + '). Try again'; }); });
+    P.appendChild(b); P.appendChild(box); }
+  nameList(PU, 'Uses', c.uses, c.nUses, 'least widely used first');
+  nameList(PB, 'Used by', c.users, c.nUsers, 'closest to the headline theorems first');
+}
+function showDecl(){
+  var my = ++nb.token, id = nb.center;
+  gather(id, nb.steps).then(function(g){ if (my !== nb.token) return; drawNeighbourhood(g); drawDeclPanel(g.center); nb.last = g; })
+    .catch(function(e){ if (my !== nb.token) return; $('nbstage').textContent = ''; $('nbstage').appendChild(el('div', 'msg', 'This part of the graph could not be loaded (' + e.message + ').')); });
+}
+function goDecl(id, scroll){ nb.center = id; try { history.replaceState(null, '', '#u-' + id); } catch (e) {} showDecl(); if (scroll) $('decl').scrollIntoView({behavior: calm ? 'auto' : 'smooth', block:'start'}); }
+$('steps').addEventListener('change', function(e){ nb.steps = +e.target.value; showDecl(); });
+document.querySelectorAll('.hlbtn').forEach(function(btn){ btn.addEventListener('click', function(){ qEl.value = ''; goDecl(+btn.dataset.id, false); }); });
+(function(){ var m = /^#u-(\d+)$/.exec(location.hash); if (m && +m[1] < NDECL) nb.center = +m[1]; showDecl(); })();
+window.addEventListener('hashchange', function(){ var m = /^#u-(\d+)$/.exec(location.hash); if (m && +m[1] !== nb.center && +m[1] < NDECL){ nb.center = +m[1]; showDecl(); } });
+
+/* =====================================================================
+   Folder map
+   ===================================================================== */
+function statsOf(t){ return {n:t.n, mods:t.mods, rh:t.rh, dsum:(t.dmean || 0) * t.rh, thm:t.thm, defn:t.defn, intra:t.intra}; }
+function addStats(a, b, sign){ ['n','mods','rh','dsum','thm','defn','intra'].forEach(function(k){ a[k] += sign * b[k]; }); return a; }
+function buildCut(F){
+  var kids = (F < 0 ? T.filter(function(n){ return n.parent === -1; }) : (kidsOf.get(F) || [])).slice().sort(function(a,b){ return b.n - a.n; });
+  var nodes = kids.map(function(t){ return Object.assign({key:'n'+t.id, t:t, kind:'child', name:t.name, lib:libName(T[topOf(t.id)].name)}, statsOf(t)); });
+  var top = F < 0 ? -1 : topOf(F);
+  if (F >= 0){
+    T.forEach(function(t){ if (t.parent === -1 && t.id !== top) nodes.push(Object.assign({key:'n'+t.id, t:t, kind:'context', name:t.name, lib:libName(t.name)}, statsOf(t))); });
+    if (top !== F) nodes.push(Object.assign({key:'rest', kind:'context', name:'rest of ' + T[top].name, lib:libName(T[top].name)}, addStats(statsOf(T[top]), statsOf(T[F]), -1)));
+  }
+  var idx = new Map(nodes.map(function(n,i){ return [n.key, i]; }));
+  var rep = new Int32Array(T.length).fill(-1);
+  leaves.forEach(function(leaf){
+    var x = leaf, r;
+    for (;;){
+      var p = T[x].parent;
+      if (p === F){ r = idx.get('n'+x); break; }
+      if (p === -1){ r = (x === top) ? idx.get('rest') : idx.get('n'+x); break; }
+      x = p;
+    }
+    rep[leaf] = (r === undefined ? -1 : r);
+  });
+  var m = new Map(), K = 4096;
+  for (var i = 0; i < E.length; i++){
+    var a = rep[E[i][0]], b = rep[E[i][1]];
+    if (a < 0 || b < 0) continue;
+    if (a === b){ nodes[a].intra += E[i][2]; continue; }
+    var k = a * K + b; m.set(k, (m.get(k) || 0) + E[i][2]);
+  }
+  var links = []; m.forEach(function(c, k){ links.push({s:Math.floor(k / K), t:k % K, c:c}); });
+  links.sort(function(a,b){ return b.c - a.c; });
+  nodes.forEach(function(n){ n.out = 0; n.inn = 0; n.dmean = n.rh ? n.dsum / n.rh : null; });
+  links.forEach(function(l){ nodes[l.s].out += l.c; nodes[l.t].inn += l.c; });
+  return {F:F, nodes:nodes, links:links};
+}
+function binOf(n){
+  if (n.dmean == null) return -1; var v = n.dmean; return v < 4 ? 4 : v < 8 ? 3 : v < 11 ? 2 : v < 14 ? 1 : 0;
+}
+function fillOf(n){ if (state.color === 'lib') return 'var(' + LIBVAR[n.lib] + ')'; var b = binOf(n); return b < 0 ? 'var(--none)' : 'var(--q' + (b + 1) + ')'; }
+function drawLegend(){
+  var L = $('maplegend'); L.textContent = '';
+  function sw(css, label, cls){ var s = el('span'); var i = el('i', cls || null); i.style.background = css; s.appendChild(i); s.appendChild(document.createTextNode(label)); L.appendChild(s); }
+  if (state.color === 'lib'){ var used = new Set(cut.nodes.map(function(n){ return n.lib; })); LIBS.forEach(function(l){ if (used.has(l)) sw('var(' + LIBVAR[l] + ')', l); }); }
+  else { L.appendChild(el('span', null, 'Mean steps below headline theorems:'));
+    DEPTHBINS.forEach(function(b, i){ sw('var(--q' + (5 - i) + ')', b); }); }
+  sw('var(--uses)', 'selected folder uses', 'key'); sw('var(--usedby)', 'uses the selected folder', 'key');
+}
+function drawMap(){
+  var stage = $('mapstage'); stage.textContent = '';
+  var W = Math.max(300, stage.clientWidth), H = W < 560 ? 440 : 540, padT = 34, padB = 30;
+  var nodes = cut.nodes, links = cut.links, hasCtx = nodes.some(function(n){ return n.kind === 'context'; });
+  var maxN = d3.max(nodes, function(n){ return n.kind === 'context' ? 0 : n.n; }) || 1;
+  var rmax = Math.max(16, Math.min(44, W / 20)), rs = d3.scaleSqrt().domain([0, maxN]).range([4, rmax]);
+  var ranked = nodes.filter(function(n){ return n.dmean != null; }).sort(function(a,b){ return a.dmean - b.dmean; });
+  var ext = d3.extent(ranked, function(n){ return n.dmean; }), lin = d3.scaleLinear().domain(ext[0] === ext[1] ? [ext[0] - 1, ext[1] + 1] : ext).range([padT + 20, H - padB - 40]);
+  ranked.forEach(function(n, i){ var byRank = padT + 20 + (ranked.length > 1 ? i / (ranked.length - 1) : 0.5) * (H - padB - 60 - padT); n.ty = 0.5 * byRank + 0.5 * lin(n.dmean); });
+  var ctxX = W - Math.min(110, W * 0.2), mainW = hasCtx ? ctxX - Math.min(90, W * 0.14) : W;
+  nodes.forEach(function(n, i){
+    n.r = n.kind === 'context' ? Math.min(rs(n.n), 16) : rs(n.n);
+    if (n.dmean == null) n.ty = H - padB - 8;
+    n.tx = n.kind === 'context' ? ctxX : mainW / 2;
+    n.x = n.tx + ((i * 97) % 200 - 100) * (mainW / 400); n.y = n.ty;
+  });
+  var sim = d3.forceSimulation(nodes).force('x', d3.forceX(function(n){ return n.tx; }).strength(function(n){ return n.kind === 'context' ? 0.5 : 0.012; }))
+    .force('m', d3.forceManyBody().strength(function(n){ return n.kind === 'context' ? 0 : -(40 + n.r * n.r * 0.6) * (nodes.length < 30 ? 4 : 1); }).distanceMax(mainW))
+    .force('y', d3.forceY(function(n){ return n.ty; }).strength(0.5)).force('c', d3.forceCollide(function(n){ return n.r + 5; }).iterations(3)).stop();
+  for (var i = 0; i < 260; i++){ sim.tick(); nodes.forEach(function(n){ var lo = n.r + 6, hi = (n.kind === 'context' ? W : mainW) - n.r - 6; n.x = Math.max(n.kind === 'context' ? mainW + n.r : lo, Math.min(hi, n.x)); n.y = Math.max(padT + n.r, Math.min(H - padB - n.r + 14, n.y)); }); }
+  var svg = d3.select(stage).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('height', H).attr('role', 'group').attr('aria-label', 'Folder dependency map');
+  svg.append('rect').attr('width', W).attr('height', H).attr('fill', 'transparent').on('click', function(){ select(null); });
+  svg.append('text').attr('x', 14).attr('y', 22).attr('font-size', 11).text('↑ closer to the headline theorems');
+  svg.append('text').attr('x', 14).attr('y', H - 12).attr('font-size', 11).text('↓ further from them');
+  if (hasCtx){
+    svg.append('line').attr('x1', mainW).attr('x2', mainW).attr('y1', padT).attr('y2', H - padB).attr('stroke', 'var(--line)').attr('stroke-dasharray', '3 4');
+    svg.append('text').attr('x', W - 14).attr('y', 22).attr('text-anchor', 'end').attr('font-size', 11).text('outside this folder');
+  }
+  var shown = state.links === 'all' ? links : links.slice(0, +state.links);
+  var wmax = links.length ? links[0].c : 1, ws = d3.scaleSqrt().domain([0, wmax]).range([0.6, 7]);
+  function geom(l){
+    var a = nodes[l.s], b = nodes[l.t], dx = b.x - a.x, dy = b.y - a.y, d = Math.sqrt(dx*dx + dy*dy) || 1, ux = dx / d, uy = dy / d;
+    var sx = a.x + ux * a.r, sy = a.y + uy * a.r, ex = b.x - ux * (b.r + 5), ey = b.y - uy * (b.r + 5);
+    var mx = (sx + ex) / 2 - uy * d * 0.13, my = (sy + ey) / 2 + ux * d * 0.13;
+    var ax = ex - mx, ay = ey - my, al = Math.sqrt(ax*ax + ay*ay) || 1; ax /= al; ay /= al;
+    var hw = Math.max(2.4, ws(l.c) * 1.25), hl = hw * 1.9, bx = ex - ax * hl, by = ey - ay * hl;
+    return {path:'M' + sx + ',' + sy + 'Q' + mx + ',' + my + ' ' + bx + ',' + by, head:'M' + (ex + ax * 5) + ',' + (ey + ay * 5) + 'L' + (bx - ay * hw) + ',' + (by + ax * hw) + 'L' + (bx + ay * hw) + ',' + (by - ax * hw) + 'Z'};
+  }
+  var lsel = svg.append('g').attr('fill', 'none').selectAll('g').data(links).join('g').each(function(l){ var g = geom(l), s = d3.select(this);
+    s.append('path').attr('class', 'ln').attr('d', g.path).attr('stroke-width', ws(l.c)).attr('stroke-linecap', 'round');
+    s.append('path').attr('class', 'hd').attr('d', g.head).attr('stroke', 'none'); });
+  var nsel = svg.append('g').selectAll('g').data(nodes).join('g').attr('transform', function(n){ return 'translate(' + n.x + ',' + n.y + ')'; }).attr('tabindex', 0).attr('role', 'button').style('cursor', 'pointer')
+    .attr('aria-label', function(n){ return n.name + ', ' + fmt(n.n) + ' declarations'; });
+  nsel.append('circle').attr('r', function(n){ return Math.max(n.r, 12); }).attr('fill', 'transparent');
+  nsel.append('circle').attr('class', 'dot').attr('r', function(n){ return n.r; }).attr('fill', fillOf).attr('stroke', 'var(--surface)').attr('stroke-width', 2)
+    .attr('stroke-dasharray', function(n){ return n.kind === 'child' ? null : '3 2.5'; });
+  var labelled = new Set(nodes.filter(function(n){ return n.kind !== 'child'; }).concat(nodes.filter(function(n){ return n.kind === 'child'; }).slice(0, W < 560 ? 10 : 18)).map(function(n){ return n.key; }));
+  nsel.filter(function(n){ return labelled.has(n.key); }).append('text').attr('class', 'nm halo').attr('font-size', 11)
+    .attr('x', function(n){ return n.kind === 'context' ? -(n.r + 6) : (n.x > mainW - 150 ? -(n.r + 5) : n.r + 5); })
+    .attr('text-anchor', function(n){ return (n.kind === 'context' || n.x > mainW - 150) ? 'end' : 'start'; }).attr('dy', '0.32em')
+    .text(function(n){ return n.name.length > 30 ? n.name.slice(0, 28) + '…' : n.name; });
+  function paint(){
+    var f = state.hover || state.sel, fi = f ? nodes.indexOf(f) : -1, topSet = new Set(shown);
+    lsel.each(function(l){
+      var on = fi >= 0 && (l.s === fi || l.t === fi), vis = fi >= 0 ? on : topSet.has(l), col = !on ? 'var(--link)' : (l.s === fi ? 'var(--uses)' : 'var(--usedby)');
+      d3.select(this).attr('display', vis ? null : 'none').attr('opacity', on ? 0.9 : 0.34).select('.ln').attr('stroke', col);
+      d3.select(this).select('.hd').attr('fill', col);
+    });
+    nsel.attr('opacity', function(n){ if (fi < 0) return 1; if (n === f) return 1; var i = nodes.indexOf(n); return links.some(function(l){ return (l.s === fi && l.t === i) || (l.t === fi && l.s === i); }) ? 1 : 0.3; });
+    nsel.select('.dot').attr('stroke', function(n){ return n === state.sel ? 'var(--ink)' : 'var(--surface)'; });
+  }
+  nsel.on('pointermove', function(ev, n){ state.hover = n; paint(); showTip(ev, n.name, [['Declarations', fmt(n.n)], ['Mean steps below', n.dmean == null ? '–' : n.dmean.toFixed(1)], ['Theorems / defs', fmt(n.thm) + ' / ' + fmt(n.defn)], ['Uses elsewhere / used by', fmt(n.out) + ' / ' + fmt(n.inn)]]); })
+    .on('pointerleave', function(){ state.hover = null; paint(); hideTip(); })
+    .on('click', function(ev, n){ ev.stopPropagation(); select(n); })
+    .on('dblclick', function(ev, n){ if (canOpen(n)) openFolder(n.t.id); })
+    .on('keydown', function(ev, n){ if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); if (state.sel === n && canOpen(n)) openFolder(n.t.id); else select(n); } })
+    .on('focus', function(ev, n){ state.hover = n; paint(); }).on('blur', function(){ state.hover = null; paint(); });
+  drawMap.paint = paint; paint();
+}
+function canOpen(n){ return n && n.kind === 'child' && n.t && !n.t.leaf; }
+function drawPanel(){
+  var P = $('panel'); P.textContent = '';
+  var n = state.sel, nodes = cut.nodes;
+  if (!n){
+    var F = cut.F, s = {n:0,rh:0,dsum:0,mods:0,thm:0,defn:0};
+    nodes.filter(function(x){ return x.kind !== 'context'; }).forEach(function(x){ ['n','rh','dsum','mods','thm','defn'].forEach(function(k){ s[k] += x[k]; }); });
+    n = {name: F < 0 ? 'The whole proof' : pathOf(F), kind:'focus', n:s.n, mods:s.mods, thm:s.thm, defn:s.defn, dmean:s.rh ? s.dsum / s.rh : null, t: F < 0 ? null : T[F]};
+    P.appendChild(el('div', 'kind', F < 0 ? 'All folders' : 'Open folder'));
+  } else P.appendChild(el('div', 'kind', n.kind === 'context' ? 'Outside the open folder' : (n.t && n.t.leaf ? 'Folder of files' : 'Folder')));
+  P.appendChild(el('h4', null, n.kind === 'child' && n.t ? pathOf(n.t.id) : n.name));
+  var dl = el('dl', 'stats');
+  [['Declarations', fmt(n.n)], ['Theorems and lemmas', fmt(n.thm)], ['Definitions and structures', fmt(n.defn)], ['Source files', fmt(n.mods)],
+   ['Mean steps below', n.dmean == null ? '–' : n.dmean.toFixed(1)]]
+    .forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+  P.appendChild(dl);
+  if (state.sel){
+    var i = nodes.indexOf(state.sel);
+    [['Uses most', function(l){ return l.s === i; }, 't'], ['Most used by', function(l){ return l.t === i; }, 's']].forEach(function(spec){
+      var ls = cut.links.filter(spec[1]).slice(0, 5); if (!ls.length) return;
+      P.appendChild(el('h5', null, spec[0])); var ul = el('ul', 'rank');
+      ls.forEach(function(l){ var li = el('li'); li.appendChild(el('span', null, nodes[l[spec[2]]].name)); li.appendChild(el('span', null, fmt(l.c) + ' uses')); ul.appendChild(li); });
+      P.appendChild(ul);
+    });
+  }
+  if (n.t && n.t.top && n.t.top.length){
+    P.appendChild(el('h5', null, 'Most-used declarations here')); var ul2 = el('ul', 'rank');
+    n.t.top.forEach(function(d){ var li = el('li'), b = el('button', 'lk', d[0]); b.type = 'button'; b.addEventListener('click', function(){ goDecl(d[3], true); }); li.appendChild(b); li.appendChild(el('span', null, 'used by ' + fmt(d[1]))); ul2.appendChild(li); });
+    P.appendChild(ul2);
+  }
+  if (state.sel && canOpen(state.sel)){ var b = el('button', 'btn', 'Open this folder'); b.type = 'button'; b.addEventListener('click', function(){ openFolder(state.sel.t.id); }); P.appendChild(b); }
+  else if (state.sel && state.sel.kind === 'child') P.appendChild(el('p', 'hint', 'This folder holds source files only, so there is nothing further to open.'));
+  else if (!state.sel) P.appendChild(el('p', 'hint', 'Select a circle or a table row for its numbers.'));
+}
+function drawCrumbs(){
+  var C = $('crumbs'); C.textContent = ''; var chain = [], id = cut.F; while (id !== -1){ chain.unshift(id); id = T[id].parent; }
+  function crumb(label, target, here){ if (here) C.appendChild(el('span', 'here', label)); else { var b = el('button', null, label); b.type = 'button'; b.addEventListener('click', function(){ openFolder(target); }); C.appendChild(b); } }
+  crumb('all folders', -1, chain.length === 0);
+  chain.forEach(function(cid, i){ C.appendChild(el('span', 'sep', '/')); crumb(T[cid].name, cid, i === chain.length - 1); });
+}
+function drawTable(){
+  var tb = $('maptable').tBodies[0]; tb.textContent = '';
+  cut.nodes.filter(function(n){ return n.kind !== 'context'; }).forEach(function(n){
+    var tr = el('tr'); tr.appendChild(el('td', null, n.name));
+    [fmt(n.n), n.dmean == null ? '–' : n.dmean.toFixed(1), fmt(n.thm), fmt(n.out), fmt(n.inn)].forEach(function(v){ tr.appendChild(el('td', null, v)); });
+    var td = el('td'), b = el('button', 'btn', canOpen(n) ? 'Open' : 'Select'); b.type = 'button'; b.addEventListener('click', function(){ if (canOpen(n)) openFolder(n.t.id); else select(n); }); td.appendChild(b); tr.appendChild(td);
+    tb.appendChild(tr);
+  });
+}
+function select(n){ state.sel = n; drawPanel(); if (drawMap.paint) drawMap.paint(); }
+function openFolder(id){ state.focus = id; state.sel = null; state.hover = null; cut = buildCut(id); renderMap(); }
+function renderMap(){ drawCrumbs(); drawMap(); drawLegend(); drawPanel(); drawTable(); }
+
+/* ---------- top of the proof ---------- */
+function drawTop(){
+  var stage = $('topstage'); stage.textContent = '';
+  var byId = new Map(TOP.map(function(d){ return [d.id, d]; })), maxd = d3.max(TOP, function(d){ return d.dist; });
+  TOP.forEach(function(d){ d.users = []; }); TOP.forEach(function(d){ d.uses.forEach(function(u){ byId.get(u).users.push(d.id); }); });
+  var cols = d3.range(maxd + 1).map(function(k){ return TOP.filter(function(d){ return d.dist === k; }); }), order = new Map();
+  cols.forEach(function(c){ c.forEach(function(d){ var us = d.users.filter(function(u){ return order.has(u); }); d.bary = us.length ? d3.mean(us, function(u){ return order.get(u); }) : 0; });
+    c.sort(function(a,b){ return a.bary - b.bary || b.below - a.below; }); c.forEach(function(d, i){ order.set(d.id, c.length > 1 ? i / (c.length - 1) : 0.5); }); });
+  var W = Math.max(1040, stage.clientWidth), H = 640, padL = 18, padT = 44, padB = 20, lastW = 140, colW = (W - padL - lastW - 30) / Math.max(1, maxd);
+  var rs = d3.scaleSqrt().domain([0, d3.max(TOP, function(d){ return d.below; })]).range([2.5, 11]);
+  cols.forEach(function(c, k){ var step = Math.min(30, (H - padT - padB) / Math.max(1, c.length)), y0 = padT + (H - padT - padB - step * (c.length - 1)) / 2;
+    c.forEach(function(d, i){ d.x = padL + 10 + k * colW + (step < 12 ? (i % 3) * 14 : 0); d.y = y0 + i * step; d.lab = step >= 12; d.r = rs(d.below); }); });
+  var svg = d3.select(stage).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('width', W).attr('height', H).attr('role', 'group').attr('aria-label', 'Top of the proof');
+  cols.forEach(function(c, k){ svg.append('text').attr('x', padL + 10 + k * colW).attr('y', 18).attr('font-size', 11).text(k === 0 ? 'headline theorems' : k + (k === 1 ? ' step' : ' steps') + ' below'); svg.append('text').attr('x', padL + 10 + k * colW).attr('y', 32).attr('font-size', 10.5).attr('fill', 'var(--dimmer)').text(c.length + (c.length === 1 ? ' declaration' : ' declarations')); });
+  var links = []; TOP.forEach(function(d){ d.uses.forEach(function(u){ links.push({s:d, t:byId.get(u)}); }); });
+  var lsel = svg.append('g').attr('fill', 'none').selectAll('path').data(links).join('path').attr('stroke-width', 0.9)
+    .attr('d', function(l){ var dx = Math.max(30, Math.abs(l.t.x - l.s.x) * 0.5); return 'M' + l.s.x + ',' + l.s.y + 'C' + (l.s.x + dx) + ',' + l.s.y + ' ' + (l.t.x - dx) + ',' + l.t.y + ' ' + l.t.x + ',' + l.t.y; });
+  var nsel = svg.append('g').selectAll('g').data(TOP).join('g').attr('transform', function(d){ return 'translate(' + d.x + ',' + d.y + ')'; }).attr('tabindex', 0).attr('role', 'button').style('cursor', 'pointer')
+    .attr('aria-label', function(d){ return d.name + ', ' + d.dist + ' steps below, ' + fmt(d.below) + ' declarations beneath'; });
+  nsel.append('circle').attr('r', 12).attr('fill', 'transparent');
+  nsel.append('circle').attr('class', 'dot').attr('r', function(d){ return d.r; }).attr('fill', function(d){ return 'var(' + LIBVAR[libName(d.lib)] + ')'; }).attr('stroke', 'var(--surface)').attr('stroke-width', 1.5);
+  nsel.filter(function(d){ return d.lab; }).append('text').attr('class', 'nm halo').attr('font-size', 10.5).attr('x', function(d){ return d.r + 5; }).attr('dy', '0.32em')
+    .text(function(d){ var s = d.name.split('.').pop(), m = Math.max(14, Math.floor((colW - 30) / 6.4)); return s.length > m ? s.slice(0, m - 1) + '…' : s; });
+  var hov = null;
+  function paint(){ lsel.attr('stroke', function(l){ return !hov ? 'var(--link)' : (l.s === hov ? 'var(--uses)' : (l.t === hov ? 'var(--usedby)' : 'var(--link)')); })
+      .attr('opacity', function(l){ return !hov ? 0.16 : ((l.s === hov || l.t === hov) ? 0.95 : 0.04); }).attr('stroke-width', function(l){ return hov && (l.s === hov || l.t === hov) ? 1.6 : 0.9; });
+    nsel.attr('opacity', function(d){ return !hov || d === hov || hov.uses.indexOf(d.id) >= 0 || hov.users.indexOf(d.id) >= 0 ? 1 : 0.25; }); }
+  nsel.on('pointermove', function(ev, d){ hov = d; paint(); showTip(ev, d.name, [['Kind', d.kw || 'generated'], ['Steps below headline', String(d.dist)], ['Declarations beneath it', fmt(d.below)], ['Declarations it uses directly', fmt(d.uses_all)], ['File', d.file.split('/').pop()]]); })
+    .on('pointerleave', function(){ hov = null; paint(); hideTip(); }).on('focus', function(ev, d){ hov = d; paint(); }).on('blur', function(){ hov = null; paint(); })
+    .on('click', function(ev, d){ goDecl(d.id, true); }).on('keydown', function(ev, d){ if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); goDecl(d.id, true); } });
+  paint();
+  var L = $('toplegend'); L.textContent = ''; var used = new Set(TOP.map(function(d){ return libName(d.lib); }));
+  LIBS.forEach(function(l){ if (!used.has(l)) return; var s = el('span'), i = el('i'); i.style.background = 'var(' + LIBVAR[l] + ')'; s.appendChild(i); s.appendChild(document.createTextNode(l)); L.appendChild(s); });
+  var tb = $('toptable').tBodies[0]; tb.textContent = '';
+  TOP.filter(function(d){ return d.dist <= maxd; }).sort(function(a,b){ return a.dist - b.dist || b.below - a.below; }).forEach(function(d){
+    var tr = el('tr'); [d.name, d.dist, d.kw, fmt(d.below), fmt(d.uses_all)].forEach(function(v){ tr.appendChild(el('td', null, String(v))); }); tb.appendChild(tr); });
+  $('toplede').textContent = 'The ' + TOP.length + ' declarations within ' + maxd + ' steps of the five headline theorems of Solution.lean, left to right by how many steps away they are. Circle size shows how many declarations lie beneath each one. Hover to trace uses; select one to open it in the navigator above.';
+}
+
+/* ---------- depth profile ---------- */
+function drawShape(){
+  var stage = $('shapestage'); stage.textContent = '';
+  var rows = PROF.rows.map(function(r){ var o = {dist:r.dist}; LIBS.forEach(function(l){ o[l] = 0; }); PROF.libs.forEach(function(l){ o[libName(l)] += r[l] || 0; }); o.total = d3.sum(LIBS, function(l){ return o[l]; }); return o; });
+  var W = Math.max(300, stage.clientWidth), H = 300, m = {t:18, r:16, b:40, l:54};
+  var x = d3.scaleBand().domain(rows.map(function(r){ return r.dist; })).range([m.l, W - m.r]).paddingInner(Math.min(0.25, 2 / ((W - m.l - m.r) / rows.length)));
+  var y = d3.scaleLinear().domain([0, d3.max(rows, function(r){ return r.total; })]).nice().range([H - m.b, m.t]);
+  var svg = d3.select(stage).append('svg').attr('viewBox', '0 0 ' + W + ' ' + H).attr('height', H).attr('role', 'img').attr('aria-label', 'Declarations by distance below headline theorems');
+  y.ticks(5).forEach(function(t){ svg.append('line').attr('x1', m.l).attr('x2', W - m.r).attr('y1', y(t)).attr('y2', y(t)).attr('stroke', 'var(--line)'); svg.append('text').attr('x', m.l - 7).attr('y', y(t)).attr('dy', '0.32em').attr('text-anchor', 'end').attr('font-size', 10.5).text(d3.format('~s')(t)); });
+  rows.forEach(function(r){ if (r.dist % (W < 560 ? 4 : 2) === 0) svg.append('text').attr('x', x(r.dist) + x.bandwidth() / 2).attr('y', H - m.b + 15).attr('text-anchor', 'middle').attr('font-size', 10.5).text(r.dist); });
+  svg.append('text').attr('x', (m.l + W - m.r) / 2).attr('y', H - 8).attr('text-anchor', 'middle').attr('font-size', 11).text('steps below headline theorems');
+  d3.stack().keys(LIBS)(rows).forEach(function(series){ svg.append('g').attr('fill', 'var(' + LIBVAR[series.key] + ')').selectAll('rect').data(series).join('rect')
+    .attr('x', function(d){ return x(d.data.dist); }).attr('width', x.bandwidth()).attr('y', function(d){ return y(d[1]); }).attr('height', function(d){ return Math.max(0, y(d[0]) - y(d[1])); }).attr('stroke', 'var(--surface)').attr('stroke-width', 0.6); });
+  svg.append('g').selectAll('rect').data(rows).join('rect').attr('x', function(r){ return x(r.dist) - x.step() * x.paddingInner() / 2; }).attr('width', x.step()).attr('y', m.t).attr('height', H - m.b - m.t).attr('fill', 'transparent').attr('tabindex', 0)
+    .attr('aria-label', function(r){ return r.dist + ' steps below: ' + fmt(r.total) + ' declarations'; })
+    .on('pointermove', function(ev, r){ showTip(ev, r.dist + (r.dist === 1 ? ' step' : ' steps') + ' below', [['All libraries', fmt(r.total)]].concat(LIBS.filter(function(l){ return r[l]; }).map(function(l){ return [l, fmt(r[l])]; }))); })
+    .on('pointerleave', hideTip);
+  var L = $('shapelegend'); L.textContent = ''; LIBS.forEach(function(l){ var s = el('span'), i = el('i', 'sq'); i.style.background = 'var(' + LIBVAR[l] + ')'; s.appendChild(i); s.appendChild(document.createTextNode(l)); L.appendChild(s); });
+  var th = $('shapetable').tHead; th.textContent = ''; var hr = el('tr'); ['Steps below', 'All'].concat(LIBS).forEach(function(h){ hr.appendChild(el('th', null, h)); }); th.appendChild(hr);
+  var tb = $('shapetable').tBodies[0]; tb.textContent = ''; rows.forEach(function(r){ var tr = el('tr'); [r.dist, fmt(r.total)].concat(LIBS.map(function(l){ return fmt(r[l]); })).forEach(function(v){ tr.appendChild(el('td', null, String(v))); }); tb.appendChild(tr); });
+  var peak = rows.reduce(function(a, b){ return b.total > a.total ? b : a; });
+  $('shapelede').textContent = 'The number of declarations at each distance below the five headline theorems, counted along the shortest chain of uses and split by top-level library. The proof is widest ' + peak.dist + ' steps down, where ' + fmt(peak.total) + ' declarations sit, and the deepest declaration is ' + PROF.totals.max_dist + ' steps away.';
+}
+
+/* =====================================================================
+   The network picture: named modules over the rendered layout
+   ===================================================================== */
+var CL = null, clSel = null, clHover = null;
+function drawNetwork(){
+  var svg = d3.select('#netsvg'); svg.selectAll('*').remove();
+  var cs = CL.clusters.slice().sort(function(a, b){ return b.r - a.r; });
+  var g = svg.selectAll('g').data(cs).join('g').attr('tabindex', 0).attr('role', 'button').style('cursor', 'pointer')
+    .attr('aria-label', function(c){ return c.name + ', ' + fmt(c.size) + ' declarations'; });
+  g.append('circle').attr('cx', function(c){ return c.x * 1000; }).attr('cy', function(c){ return c.y * 1000; }).attr('r', function(c){ return Math.max(c.r * 1050, 8); }).attr('fill', 'transparent').attr('stroke-width', 1.6);
+  g.append('text').attr('x', function(c){ return c.x * 1000; }).attr('y', function(c){ return c.y * 1000; }).attr('text-anchor', 'middle').attr('dy', '0.35em')
+    .attr('font-size', 16).attr('font-weight', 700).attr('fill', '#f0f4fb').attr('stroke', '#0b0d12').attr('stroke-width', 3.5).attr('paint-order', 'stroke').attr('pointer-events', 'none').text(function(c){ return c.rank; });
+  var rh = CL.meta.rh;
+  svg.append('text').attr('x', rh.x * 1000).attr('y', rh.y * 1000).attr('text-anchor', 'middle').attr('dy', '0.36em').attr('font-size', 22).attr('fill', '#ffffff').attr('stroke', '#0b0d12').attr('stroke-width', 2.5).attr('paint-order', 'stroke').attr('pointer-events', 'none').text('\u2605');
+  function paint(){ g.select('circle').attr('stroke', function(c){ return (c === clHover || c === clSel) ? '#f0f4fb' : 'transparent'; }).attr('fill', function(c){ return (c === clHover || c === clSel) ? 'rgba(255,255,255,.06)' : 'transparent'; }); }
+  drawNetwork.paint = paint;
+  g.on('pointermove', function(ev, c){ clHover = c; paint(); showTip(ev, c.name, [['Declarations', fmt(c.size)]].concat(c.top.slice(0, 5).map(function(t){ return [t[1], 'used by ' + fmt(t[3])]; }))); })
+    .on('pointerleave', function(){ clHover = null; paint(); hideTip(); })
+    .on('click', function(ev, c){ selectCluster(c); })
+    .on('keydown', function(ev, c){ if (ev.key === 'Enter' || ev.key === ' '){ ev.preventDefault(); selectCluster(c); } })
+    .on('focus', function(ev, c){ clHover = c; paint(); }).on('blur', function(){ clHover = null; paint(); });
+  paint();
+}
+function selectCluster(c){ clSel = c; drawNetPanel(); if (drawNetwork.paint) drawNetwork.paint(); }
+function drawNetPanel(){
+  var P = $('netpanel'); P.textContent = '';
+  if (!clSel){
+    P.appendChild(el('div', 'kind', 'All ' + CL.clusters.length + ' Louvain modules'));
+    var ul = el('ul', 'modlist');
+    CL.clusters.forEach(function(c){ var li = el('li'), b = el('button'); b.type = 'button'; var sw = el('span', 'sw', String(c.rank)); sw.style.background = c.color; b.appendChild(sw);
+      var t = el('span', null, c.name); t.appendChild(el('small', null, fmt(c.size) + ' declarations')); b.appendChild(t);
+      b.addEventListener('click', function(){ selectCluster(c); }); b.addEventListener('pointerenter', function(){ clHover = c; drawNetwork.paint(); }); b.addEventListener('pointerleave', function(){ clHover = null; drawNetwork.paint(); });
+      li.appendChild(b); ul.appendChild(li); });
+    P.appendChild(ul); return;
+  }
+  var c = clSel;
+  P.appendChild(el('div', 'kind', 'Module ' + c.rank + ' of ' + fmt(CL.meta.modules) + ', by size'));
+  P.appendChild(el('h4', null, c.name)).style.fontFamily = 'var(--sans)';
+  var dl = el('dl', 'stats');
+  [['Declarations', fmt(c.size)], ['Largest share from one folder', pct(c.folder_share)]].forEach(function(r){ dl.appendChild(el('dt', null, r[0])); dl.appendChild(el('dd', null, r[1])); });
+  P.appendChild(dl); P.appendChild(el('p', 'hint', c.folder));
+  if (c.words.length){ P.appendChild(el('h5', null, 'Distinctive words in its names')); P.appendChild(el('p', null, c.words.join(', '))).style.cssText = 'font-family:var(--mono);font-size:.8rem;color:var(--dim)'; }
+  P.appendChild(el('h5', null, 'Most-used declarations')); var ul2 = el('ul', 'rank');
+  c.top.forEach(function(t){ var li = el('li'), b = el('button', 'lk', t[1]); b.type = 'button'; b.addEventListener('click', function(){ goDecl(t[0], true); }); li.appendChild(b); li.appendChild(el('span', null, 'used by ' + fmt(t[3]))); ul2.appendChild(li); });
+  P.appendChild(ul2);
+  var back = el('button', 'btn', 'Show the list of modules'); back.type = 'button'; back.addEventListener('click', function(){ selectCluster(null); }); P.appendChild(back);
+}
+
+/* ---------- load the folder-level data ---------- */
+function get(f){ return fetch(LOCAL + f).then(function(r){ if (!r.ok) throw new Error(f + ' ' + r.status); return r.json(); }); }
+get('clusters.json').then(function(c){ CL = c; drawNetwork(); drawNetPanel(); }).catch(function(err){ $('netpanel').textContent = ''; $('netpanel').appendChild(el('div', 'msg', 'The module data could not be loaded (' + err.message + ').')); });
+Promise.all([get('tree.json'), get('edges.json'), get('top.json'), get('profile.json')]).then(function(res){
+  T = res[0]; E = res[1]; TOP = res[2]; PROF = res[3];
+  T.forEach(function(t){ if (t.parent !== -1){ if (!kidsOf.has(t.parent)) kidsOf.set(t.parent, []); kidsOf.get(t.parent).push(t); } if (t.leaf) leaves.push(t.id); });
+  cut = buildCut(-1); renderMap(); drawTop(); drawShape();
+  $('colorMode').addEventListener('change', function(e){ state.color = e.target.value; drawMap(); drawLegend(); });
+  $('linkMode').addEventListener('change', function(e){ state.links = e.target.value; drawMap(); });
+  var timer = null, lastW = window.innerWidth; window.addEventListener('resize', function(){ if (window.innerWidth === lastW) return; lastW = window.innerWidth; clearTimeout(timer); timer = setTimeout(function(){ drawMap(); drawShape(); if (nb.last) drawNeighbourhood(nb.last); }, 200); });
+}).catch(function(err){
+  ['mapstage','topstage','shapestage'].forEach(function(id){ $(id).textContent = ''; $(id).appendChild(el('div', 'msg', 'The folder data could not be loaded (' + err.message + ').')); });
+});
+})();
+</script>
+</body>
+</html>
