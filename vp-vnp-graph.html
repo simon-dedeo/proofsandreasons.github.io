@@ -185,34 +185,12 @@
   Both graphs are extracted directly from the compiled <code>.olean</code> files on our
   <a href="/vp-vnp-oleans.html">comparative oleans &amp; verification page</a>.</p>
   <p class="sub">For a strictly apples-to-apples comparison, both graphs on this page are restricted to the transitive dependency closure of each project&rsquo;s single headline <b>VP&nbsp;&ne;&nbsp;VNP</b> theorem: <code>Solution.separation</code> for Anthropic (<b>4,404 declarations</b> and <b>33,894 internal links</b> across 307 files; excluding border-complexity/real-permanent-only additions and unused scaffolding) and <code>OAI.Computability.VPVNP.Standalone.vp_ne_vnp</code> for OpenAI #379 (<b>25,597 declarations</b> and <b>323,958 internal links</b> across 3,008 files; excluding <code>corollary12</code>-only additions, notation macros, and unused scaffolding). Below: the two proofs side by side as networks, their dependence and reuse statistics, dual independent declaration navigators, depth profiles, and browsable source maps.</p>
+  <p class="sub">Both proofs follow the same surprising hybrid strategy&mdash;combining an algebraic/geometric obstruction from crossing gadgets and spectral tensor curvature with a diagonalizing universal-machine simulation&mdash;which is why their Louvain networks align cleanly at the geometric core (<b>A#11&nbsp;&harr;&nbsp;O#12</b> crossing gadgets; <b>A#5, A#7, A#4, A#8&nbsp;&harr;&nbsp;O#10, O#14</b> spectral tensors, Grassmann/flag actions, and CAT(0) curvature; <b>A#9, A#10&nbsp;&harr;&nbsp;O#9, O#17</b> polynomial/circuit encodings), even though OpenAI&rsquo;s discrete simulation stack makes its proof nearly six times larger.</p>
   <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
   <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
   Additional support from research funds of the Laboratory for Social Minds and from the Survival and
   Flourishing Fund.</p>
 </header>
-
-<!-- ============ HEAD-TO-HEAD SUMMARY ============ -->
-<section id="summary">
-  <h2>At a glance</h2>
-  <div class="scroller">
-    <table class="cmp">
-      <thead>
-        <tr><th>Metric</th><th>Anthropic (<code>vp-vnp</code>)</th><th>OpenAI (<code>openai/math</code> #379)</th></tr>
-      </thead>
-      <tbody>
-        <tr><td>Headline VP&nbsp;&ne;&nbsp;VNP theorem</td><td><code>Solution.separation</code> (exact VP&nbsp;&sub;&nbsp;VNP over every field; repo also proves border <span style="text-decoration:overline">VP</span> bounds)</td><td><code>OAI.Computability.VPVNP.Standalone.vp_ne_vnp</code> (exact IsVP&nbsp;&ne;&nbsp;IsVNP over every field; border bound in paper only)</td></tr>
-        <tr><td>Lean &amp; dependencies</td><td>Lean v4.33.1 + Mathlib v4.33.1 only</td><td>Lean v4.34.1 + Mathlib v4.34.1 + patched <code>lemmata</code>, <code>cslib</code>, <code>complexitylib</code></td></tr>
-        <tr><td>Modules used (of compiled)</td><td><b>307</b> of 322 modules (72,932 repo lines)</td><td><b>3,008</b> of 3,189 modules (440,234 repo lines)</td></tr>
-        <tr><td>Declarations in VP&nbsp;&ne;&nbsp;VNP closure</td><td><b>4,404</b> of 4,652 compiled (94.7%)</td><td><b>25,597</b> of 38,979 compiled (65.7%)</td></tr>
-        <tr><td>Internal links (in closure)</td><td>33,894 &middot; mean 7.70 deps (max 99)</td><td>323,958 &middot; mean 12.66 deps (max 252)</td></tr>
-        <tr><td>Louvain modules &amp; modularity</td><td>18 modules (11 &ge; 100) &middot; <b>Q = 0.781</b></td><td>18 modules (13 &ge; 100) &middot; <b>Q = 0.641</b></td></tr>
-        <tr><td>Depth below VP&nbsp;&ne;&nbsp;VNP (peak / max)</td><td>Peak 553 at step 13 &middot; max 22 steps</td><td>Peak 2,432 at step 12 &middot; max 31 steps</td></tr>
-        <tr><td>Use / dep exponent (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10 MLE)</td><td>Use <b>2.13 &plusmn; 0.04</b> &middot; Dep <b>2.61 &plusmn; 0.05</b></td><td>Use <b>2.03 &plusmn; 0.01</b> &middot; Dep <b>2.23 &plusmn; 0.01</b></td></tr>
-        <tr><td>200-core build / replay time</td><td>180s build &middot; 30s replay (0 errors)</td><td>800s build &middot; 300s replay (0 errors)</td></tr>
-      </tbody>
-    </table>
-  </div>
-</section>
 
 <!-- ============ THE NETWORKS SIDE BY SIDE ============ -->
 <section id="network">
@@ -252,6 +230,29 @@
   <p class="body">Both exact VP&nbsp;&ne;&nbsp;VNP closures partition into 18 Louvain clusters with zero outer-ring nodes, yet their internal architectures differ markedly.
   Anthropic&rsquo;s 4,404-declaration proof separates cleanly (modularity 0.78, mean 7.7 dependencies), whereas OpenAI&rsquo;s 5.8&times; larger 25,597-declaration proof is denser (mean 12.7 dependencies) and more cross-coupled across clusters (modularity 0.64).
   All declarations not transitively used by each proof&rsquo;s final VP&nbsp;&ne;&nbsp;VNP theorem (248 in Anthropic, mostly border-complexity additions; 13,382 in OpenAI, including 5,116 parser <code>notation</code> macros, <code>corollary12</code>-only lemmas, and unused helpers) are excluded from every figure and navigator on this page. <b>Module names on both sides are a reader&rsquo;s labels</b> derived from each cluster&rsquo;s most-used declarations and distinctive name-words.</p>
+</section>
+
+<!-- ============ HEAD-TO-HEAD SUMMARY ============ -->
+<section id="summary">
+  <h2>At a glance</h2>
+  <div class="scroller">
+    <table class="cmp">
+      <thead>
+        <tr><th>Metric</th><th>Anthropic (<code>vp-vnp</code>)</th><th>OpenAI (<code>openai/math</code> #379)</th></tr>
+      </thead>
+      <tbody>
+        <tr><td>Headline VP&nbsp;&ne;&nbsp;VNP theorem</td><td><code>Solution.separation</code> (exact VP&nbsp;&sub;&nbsp;VNP over every field; repo also proves border <span style="text-decoration:overline">VP</span> bounds)</td><td><code>OAI.Computability.VPVNP.Standalone.vp_ne_vnp</code> (exact IsVP&nbsp;&ne;&nbsp;IsVNP over every field; border bound in paper only)</td></tr>
+        <tr><td>Lean &amp; dependencies</td><td>Lean v4.33.1 + Mathlib v4.33.1 only</td><td>Lean v4.34.1 + Mathlib v4.34.1 + patched <code>lemmata</code>, <code>cslib</code>, <code>complexitylib</code></td></tr>
+        <tr><td>Modules used (of compiled)</td><td><b>307</b> of 322 modules (72,932 repo lines)</td><td><b>3,008</b> of 3,189 modules (440,234 repo lines)</td></tr>
+        <tr><td>Declarations in VP&nbsp;&ne;&nbsp;VNP closure</td><td><b>4,404</b> of 4,652 compiled (94.7%)</td><td><b>25,597</b> of 38,979 compiled (65.7%)</td></tr>
+        <tr><td>Internal links (in closure)</td><td>33,894 &middot; mean 7.70 deps (max 99)</td><td>323,958 &middot; mean 12.66 deps (max 252)</td></tr>
+        <tr><td>Louvain modules &amp; modularity</td><td>18 modules (11 &ge; 100) &middot; <b>Q = 0.781</b></td><td>18 modules (13 &ge; 100) &middot; <b>Q = 0.641</b></td></tr>
+        <tr><td>Depth below VP&nbsp;&ne;&nbsp;VNP (peak / max)</td><td>Peak 553 at step 13 &middot; max 22 steps</td><td>Peak 2,432 at step 12 &middot; max 31 steps</td></tr>
+        <tr><td>Use / dep exponent (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10 MLE)</td><td>Use <b>2.13 &plusmn; 0.04</b> &middot; Dep <b>2.61 &plusmn; 0.05</b></td><td>Use <b>2.03 &plusmn; 0.01</b> &middot; Dep <b>2.23 &plusmn; 0.01</b></td></tr>
+        <tr><td>200-core build / replay time</td><td>180s build &middot; 30s replay (0 errors)</td><td>800s build &middot; 300s replay (0 errors)</td></tr>
+      </tbody>
+    </table>
+  </div>
 </section>
 
 <!-- ============ DEPENDENCE AND USE (EPT) ============ -->
@@ -319,6 +320,15 @@
       </div>
     </div>
   </details>
+</section>
+
+<!-- ============ PROOF STRATEGIES COMPARED ============ -->
+<section id="strategies">
+  <h2>Comparing the two proof strategies</h2>
+  <p class="body">Both proofs follow the same surprising hybrid strategy&mdash;combining an algebraic/geometric obstruction from crossing gadgets and spectral tensor curvature with a diagonalizing universal-machine simulation&mdash;which is why their Louvain networks align cleanly at the geometric core (<b>A#11&nbsp;&harr;&nbsp;O#12</b> crossing gadgets; <b>A#5, A#7, A#4, A#8&nbsp;&harr;&nbsp;O#10, O#14</b> spectral tensors, Grassmann/flag actions, and CAT(0) curvature; <b>A#9, A#10&nbsp;&harr;&nbsp;O#9, O#17</b> polynomial/circuit encodings).</p>
+  <p class="body">In <b>Anthropic&rsquo;s network</b> (4,404 declarations, <i>Q</i>&nbsp;=&nbsp;0.78), nearly a third of the graph is a cleanly modular geometric engine (<b>A#4, A#5, A#7, A#8</b>) that plays convex price functions and SL(2)/flag-variety duality against a compact tree-program, plan-system, and tower-routing compiler (<b>A#1&ndash;A#3, A#6, A#13</b>), yielding an explicit <i>m</i><sup><i>c</i>(log<sub>2</sub>&nbsp;<i>m</i>)<sup>1/3</sup></sup> lower bound that carries directly to border complexity and to Hamiltonian cycle/permanent grids (<b>A#9, A#16</b>).</p>
+  <p class="body">In <b>OpenAI&rsquo;s network</b> (25,597 declarations, <i>Q</i>&nbsp;=&nbsp;0.64), that same geometric and crossing-gadget core sits inside a nearly identical absolute footprint (<b>O#10, O#12, O#14, O#17</b>, ~5% of the graph), while <b>89%</b> of the proof (<b>O#1&ndash;O#8, O#11, O#13, O#15&ndash;O#16</b>) is devoted to a dense, cross-coupled discrete machine stack&mdash;<code>BurstRAM</code>, <code>RAMTape</code>, <code>PrimedInputRAM</code>, motif-grid block compression, and a fixed native compressed-pair compiler&mdash;that closes a diagonalization argument against an explicit VNP-complete family (<b>O#9</b>) to establish qualitative exact separation (VP&nbsp;&ne;&nbsp;VNP).</p>
+  <p class="body">In short: Anthropic spends its effort on sharper, modular geometric and scaling machinery (producing a stronger, border-robust quasipolynomial bound in a sixth as many declarations), whereas OpenAI routes the same underlying obstruction through a much heavier, low-level RAM/compression simulation architecture.</p>
 </section>
 
 <!-- ============ SIDE-BY-SIDE DECLARATION NAVIGATORS ============ -->
