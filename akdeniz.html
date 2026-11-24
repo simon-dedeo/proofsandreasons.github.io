@@ -325,19 +325,11 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261114b"></script>
+<script src="monitor.js?v=20261124"></script>
 <script>
 (function(){
   "use strict";
   var SRC = "https://photos.proofsandreasons.io/akdeniz/metrics.json";
-  // Our queues on NCSA DeltaAI and ORCHARD, written by akdeniz-jobs.timer
-  // every five minutes rather than by the 30s telemetry collector. Separate
-  // file, separate cadence, separate failures: NCSA is asked over a logged-in
-  // ssh connection held on wright, ORCHARD through a Google login on akdeniz,
-  // and either can lapse while the other (and the rest of the page) carries
-  // on, so ages are tracked per cluster.
-  var JOBS_SRC = "https://photos.proofsandreasons.io/akdeniz/jobs.json";
-  var JOBS_STALE_S = 1200;   // four missed polls
   var last = null;
   // Which history each chart shows: the last hour, day or month.
   var range = {cpu:"24h", gpu:"24h", net:"24h"};
@@ -356,116 +348,6 @@
   }
   wireRanges(range, function(){ if(last) drawCharts(last); });
   wireMemPeek();
-
-  // ---------- cluster jobs ----------
-  // "2026-01-01" -> "1 Jan". Parsed by hand rather than via Date, which would
-  // read a bare ISO date as UTC and shift it a day west of here.
-  function monthDay(iso){
-    var m=/^(\d{4})-(\d{2})-(\d{2})$/.exec(iso||"");
-    if(!m) return iso||"";
-    return (+m[3])+" "+MONTHS[(+m[2])-1];
-  }
-  // Class q carries the alignment and must be on every count cell, including
-  // the zero and missing ones -- those drop the wait/run colour class.
-  function jobCell(n, cls){
-    if(n===null||n===undefined) return "<td class='q z'>&mdash;</td>";
-    return "<td class='q "+(n?cls:"z")+"'>"+n+"</td>";
-  }
-  function hourCell(n){
-    if(n===null||n===undefined) return "<td class='hrs z'>&mdash;</td>";
-    return "<td class='hrs'>"+n.toLocaleString()+"</td>";
-  }
-  function renderJobs(j){
-    var tbl=document.getElementById("clustertable"), notes=document.getElementById("clnotes");
-    var cls=(j&&j.clusters)||[];
-    if(!cls.length){
-      tbl.innerHTML=""; notes.textContent="No cluster data yet.";
-      txt("jobsmeta",""); return;
-    }
-    var now=Date.now()/1000, newest=0, rows="", note=[];
-    // The hours column counts from a date that can differ by cluster (NCSA
-    // from the month its allocation opened, ORCHARD from the start of the
-    // year). One shared date goes in the column heading; otherwise each
-    // cluster's line below the table says its own.
-    var sinces=cls.map(function(c){ return (c.hours||{}).since||""; }).filter(Boolean);
-    var shared=sinces.length && sinces.every(function(x){ return x===sinces[0]; }) ? sinces[0] : null;
-    cls.forEach(function(c){
-      var w=(c.jobs||{}).waiting||{}, r=(c.jobs||{}).running||{}, hrs=c.hours||{};
-      var age=c.ts?Math.max(0,Math.round(now-c.ts)):null, stale=(age===null)||(age>JOBS_STALE_S);
-      var who=cls.length>1 ? "<b style='color:var(--ink)'>"+esc(c.name)+"</b> &mdash; " : "";
-      if(c.ts&&c.ts>newest) newest=c.ts;
-      // One line per kind of job we have ever had there. A job that holds GPUs
-      // is a GPU job and its hours are GPU-hours; the cores that come with it
-      // are not counted as CPU use. DeltaAI is all GPU, so its CPU line would
-      // be a row of zeros and is left out.
-      var kinds=["cpu","gpu"].filter(function(k){ return w[k]||r[k]||hrs[k]; });
-      if(!kinds.length) kinds=["gpu"];
-      kinds.forEach(function(k,i){
-        rows+="<tr class='"+(i?"":"top")+(stale?" stale":"")+"'>"+
-          (i?"":"<th class='nm' rowspan='"+kinds.length+"'>"+esc(c.name)+
-            (c.label?"<span class='ago'>"+esc(c.label)+"</span>":"")+
-            "<span class='ago"+(stale?" old":"")+"'>"+(age===null?"never":fmtAge(age)+" ago")+"</span></th>")+
-          "<th class='kind'>"+k.toUpperCase()+"</th>"+
-          jobCell(c.jobs?w[k]||0:null,"wait")+jobCell(c.jobs?r[k]||0:null,"run")+
-          hourCell(c.hours?hrs[k]||0:null)+"</tr>";
-      });
-
-      // Resources behind the job counts, and when the queued ones might start.
-      var bits=[];
-      function res(g, cores){ return (g?g+" GPU &middot; ":"")+(cores||0).toLocaleString()+" cores"; }
-      if(c.jobs&&c.cores&&c.gpus){
-        if(c.cores.running||c.gpus.running) bits.push("<b>running</b> "+res(c.gpus.running, c.cores.running));
-        if(c.cores.waiting||c.gpus.waiting) bits.push("<b>queued</b> "+res(c.gpus.waiting, c.cores.waiting));
-        if(c.jobs.other) bits.push("<b>other states</b> "+c.jobs.other);
-      }
-      (c.running||[]).slice(0,3).forEach(function(x){
-        if(x.node) bits.push("<b>"+esc(x.node)+"</b> "+(x.left_s!==null&&x.left_s!==undefined?fmtDur(x.left_s)+" left":"running"));
-      });
-      if(w.cpu||w.gpu){
-        if(c.next_start) bits.push("<b>next start</b> "+(c.next_start<=now?"due":esc(dayclock(c.next_start))+" (est.)"));
-        var why=Object.keys(c.reasons||{});
-        if(why.length) bits.push("<b>waiting on</b> "+esc(why.join(", ").toLowerCase()));
-        if(c.fairshare!==null&&c.fairshare!==undefined) bits.push("<b>fair-share</b> "+c.fairshare.toFixed(2));
-      }
-      if(!shared && hrs.since) bits.push("hours since "+esc(monthDay(hrs.since)));
-      if(bits.length) note.push("<div"+(note.length?" style='margin-top:5px'":"")+">"+who+bits.join(" &nbsp;&middot;&nbsp; ")+"</div>");
-
-      // The allocation: what has been charged and what is left of the grant.
-      var al=c.alloc;
-      if(al&&al.deposited){
-        var pct=100*al.balance/al.deposited;
-        note.push("<div title='Charged hours, from the centre&#39;s own accounting. It will not match the GPU-hours "+
-          "in the table exactly: the table counts running jobs up to this minute, which the centre has not "+
-          "finished charging, and the interactive partition is charged at twice the rate.'>"+
-          "<b>allocation</b> "+(al.deposited-al.balance).toLocaleString()+" charged &nbsp;&middot;&nbsp; "+
-          al.balance.toLocaleString()+" of "+al.deposited.toLocaleString()+" "+esc(al.unit||"hours")+" left</div>"+
-          "<div class='track' style='margin:5px 0 3px'><div class='fill' style='width:"+Math.max(0,Math.min(100,pct)).toFixed(1)+
-          "%;background:"+(pct<10?"var(--bad)":pct<25?"var(--warn)":"var(--s3)")+"'></div></div>");
-      }
-      // A failed poll: the raw text stays in jobs.json (c.err), but the two
-      // cases a person has to act on are named. NCSA takes no ssh keys, so its
-      // poll rides a logged-in connection held on wright; ORCHARD's goes
-      // through a Google login on akdeniz that Google expires now and then.
-      // Neither recovers until someone logs in again.
-      if(c.ok===false){
-        note.push("<div style='color:var(--warn)'>"+esc(c.name)+": "+(c.err_kind==="session"
-          ? "the login on wright has lapsed &mdash; run <b>ncsa-login --on wright</b> and approve the Duo push"
-          : c.err_kind==="auth"
-          ? "the Google login on akdeniz has lapsed &mdash; run <b>gcloud auth login</b> there"
-          : c.err_kind==="jump"||c.err_kind==="timeout" ? "the login node could not be reached; showing the previous numbers"
-          : "last poll failed; showing the previous numbers")+"</div>");
-      }
-    });
-
-    tbl.innerHTML="<thead><tr><th class='l'>Cluster</th><th class='l'></th>"+
-      "<th class='l'>Waiting</th><th class='l'>Running</th>"+
-      "<th>Total hours"+(shared?"<small>since "+esc(monthDay(shared))+"</small>":"")+"</th>"+
-      "</tr></thead><tbody>"+rows+"</tbody>";
-    notes.innerHTML=note.join("");
-    // "our" is the part worth keeping -- these are our jobs, not the cluster's
-    // whole queue.
-    txt("jobsmeta", "our jobs"+(newest?" · polled "+ago(newest):""));
-  }
 
   // ---------- render ----------
   function render(d){
@@ -616,22 +498,8 @@
     drawCharts(d);
   }
 
-  // ---------- polling ----------
-  // The cluster card is fetched separately from the host metrics: it comes
-  // from a different machine on a different cadence, and its absence must not
-  // disturb the rest of the page.
-  var lastJobs=null;
-  function tickJobs(){
-    fetch(JOBS_SRC,{cache:"no-store"})
-      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
-      .then(function(j){ lastJobs=j; renderJobs(j); })
-      .catch(function(){ if(!lastJobs) renderJobs(null); });
-  }
   startMonitor(SRC, render);
-  tickJobs();
-  setInterval(tickJobs, 60000);
-  // Ages in the cluster card drift between polls just like the header's does.
-  setInterval(function(){ if(lastJobs) renderJobs(lastJobs); }, 15000);
+  startClusterJobs();
   masonry();
   startVisitors();
   startCamera();

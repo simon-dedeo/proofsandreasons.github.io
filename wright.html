@@ -134,6 +134,13 @@
       </details>
     </div>
 
+    <!-- Cluster jobs -->
+    <div class="card">
+      <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
+      <table class="cx" id="clustertable"></table>
+      <div class="clnotes" id="clnotes"></div>
+    </div>
+
     <!-- GPUs -->
     <div class="card wide">
       <div class="h5"><span>Graphics</span>
@@ -320,7 +327,7 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261114b"></script>
+<script src="monitor.js?v=20261124"></script>
 <script>
 (function(){
   "use strict";
@@ -616,6 +623,7 @@
   }
 
   startMonitor(SRC, render);
+  startClusterJobs();
   masonry();
 })();
 </script>
