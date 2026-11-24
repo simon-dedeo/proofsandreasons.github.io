@@ -13,7 +13,7 @@
 <title>Dependency graphs: Anthropic vs. OpenAI VP &ne; VNP Proofs &middot; Proofs &amp; Reasons</title>
 <meta property="og:type" content="website">
 <meta property="og:title" content="Dependency graphs: Anthropic vs. OpenAI VP ≠ VNP Proofs">
-<meta property="og:description" content="Side-by-side dependency graphs, Louvain networks, epistemic phase transition statistics, and declaration navigators for Anthropic's (4,576 decls) and OpenAI's #379 (25,949 decls) Lean 4 proofs of VP ≠ VNP.">
+<meta property="og:description" content="Side-by-side dependency graphs, Louvain networks, epistemic phase transition statistics, and declaration navigators for the exact VP ≠ VNP theorem closures in Anthropic's (4,404 decls) and OpenAI's #379 (25,597 decls) Lean 4 proofs.">
 <meta property="og:url" content="https://proofsandreasons.io/vp-vnp-graph.html">
 <meta name="theme-color" content="#0b0d12">
 <link rel="canonical" href="https://proofsandreasons.io/vp-vnp-graph.html">
@@ -184,7 +184,7 @@
   <b>OpenAI</b> (<a href="https://github.com/openai/math">openai/math</a>, problem #379).
   Both graphs are extracted directly from the compiled <code>.olean</code> files on our
   <a href="/vp-vnp-oleans.html">comparative oleans &amp; verification page</a>.</p>
-  <p class="sub">Anthropic&rsquo;s development uses <b>4,576 declarations</b> and <b>35,354 internal links</b> (98.4% of its compiled declarations) to prove both exact and border (<span style="text-decoration:overline">VP</span>) separation. OpenAI&rsquo;s #379 development is roughly six times larger in used declarations&mdash;<b>25,949 declarations</b> and <b>325,896 internal links</b> (66.6% of 38,979 compiled declarations)&mdash;proving exact separation (VP&nbsp;&ne;&nbsp;VNP, Hamiltonian cycle, and permanent outside char&nbsp;2). Below: the two proofs side by side as networks, their dependence and reuse statistics, dual independent declaration navigators, depth profiles, and browsable source maps.</p>
+  <p class="sub">For a strictly apples-to-apples comparison, both graphs on this page are restricted to the transitive dependency closure of each project&rsquo;s single headline <b>VP&nbsp;&ne;&nbsp;VNP</b> theorem: <code>Solution.separation</code> for Anthropic (<b>4,404 declarations</b> and <b>33,894 internal links</b> across 307 files; excluding border-complexity/real-permanent-only additions and unused scaffolding) and <code>OAI.Computability.VPVNP.Standalone.vp_ne_vnp</code> for OpenAI #379 (<b>25,597 declarations</b> and <b>323,958 internal links</b> across 3,008 files; excluding <code>corollary12</code>-only additions, notation macros, and unused scaffolding). Below: the two proofs side by side as networks, their dependence and reuse statistics, dual independent declaration navigators, depth profiles, and browsable source maps.</p>
   <p class="funding">Made possible by the support of Grant 63750, &ldquo;Explaining Universal Truths&rdquo;, from the
   <a href="https://www.templeton.org/funding-areas/mathematical-physical-sciences">John Templeton Foundation</a>.
   Additional support from research funds of the Laboratory for Social Minds and from the Survival and
@@ -200,14 +200,14 @@
         <tr><th>Metric</th><th>Anthropic (<code>vp-vnp</code>)</th><th>OpenAI (<code>openai/math</code> #379)</th></tr>
       </thead>
       <tbody>
-        <tr><td>Formalized scope</td><td>Exact <b>and</b> border (<span style="text-decoration:overline">VP</span>) bounds <i>m</i><sup><i>c</i>(log<sub>2</sub> <i>m</i>)<sup>1/3</sup></sup> over every field (5 headline theorems)</td><td>Exact superpolynomial bounds <i>n</i><sup><i>C</i></sup> over every field: VP&nbsp;&ne;&nbsp;VNP, HC, perm char&nbsp;&ne;&nbsp;2 (4 headline theorems; border bound in paper only)</td></tr>
+        <tr><td>Headline VP&nbsp;&ne;&nbsp;VNP theorem</td><td><code>Solution.separation</code> (exact VP&nbsp;&sub;&nbsp;VNP over every field; repo also proves border <span style="text-decoration:overline">VP</span> bounds)</td><td><code>OAI.Computability.VPVNP.Standalone.vp_ne_vnp</code> (exact IsVP&nbsp;&ne;&nbsp;IsVNP over every field; border bound in paper only)</td></tr>
         <tr><td>Lean &amp; dependencies</td><td>Lean v4.33.1 + Mathlib v4.33.1 only</td><td>Lean v4.34.1 + Mathlib v4.34.1 + patched <code>lemmata</code>, <code>cslib</code>, <code>complexitylib</code></td></tr>
-        <tr><td>Proof modules / lines</td><td>322 modules &middot; 72,932 lines</td><td>3,189 modules &middot; 440,234 lines</td></tr>
-        <tr><td>Compiled / used declarations</td><td>4,652 compiled &rarr; <b>4,576 used</b> (98.4%)</td><td>38,979 compiled &rarr; <b>25,949 used</b> (66.6%)</td></tr>
-        <tr><td>Internal links (used)</td><td>35,354 &middot; mean 7.72 deps (max 99)</td><td>325,896 &middot; mean 12.66 deps (max 252)</td></tr>
-        <tr><td>Louvain modules &amp; modularity</td><td>16 modules (12 &ge; 100) &middot; <b>Q = 0.783</b></td><td>20 modules (15 &ge; 100) &middot; <b>Q = 0.632</b></td></tr>
-        <tr><td>Depth below headline (peak / max)</td><td>Peak 557 at step 12 &middot; max 21 steps</td><td>Peak 2,479 at step 10 &middot; max 29 steps</td></tr>
-        <tr><td>Use / dep exponent (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10 MLE)</td><td>Use <b>2.14 &plusmn; 0.04</b> &middot; Dep <b>2.59 &plusmn; 0.05</b></td><td>Use <b>2.03 &plusmn; 0.01</b> &middot; Dep <b>2.23 &plusmn; 0.01</b></td></tr>
+        <tr><td>Modules used (of compiled)</td><td><b>307</b> of 322 modules (72,932 repo lines)</td><td><b>3,008</b> of 3,189 modules (440,234 repo lines)</td></tr>
+        <tr><td>Declarations in VP&nbsp;&ne;&nbsp;VNP closure</td><td><b>4,404</b> of 4,652 compiled (94.7%)</td><td><b>25,597</b> of 38,979 compiled (65.7%)</td></tr>
+        <tr><td>Internal links (in closure)</td><td>33,894 &middot; mean 7.70 deps (max 99)</td><td>323,958 &middot; mean 12.66 deps (max 252)</td></tr>
+        <tr><td>Louvain modules &amp; modularity</td><td>18 modules (11 &ge; 100) &middot; <b>Q = 0.781</b></td><td>18 modules (13 &ge; 100) &middot; <b>Q = 0.641</b></td></tr>
+        <tr><td>Depth below VP&nbsp;&ne;&nbsp;VNP (peak / max)</td><td>Peak 553 at step 13 &middot; max 22 steps</td><td>Peak 2,432 at step 12 &middot; max 31 steps</td></tr>
+        <tr><td>Use / dep exponent (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10 MLE)</td><td>Use <b>2.13 &plusmn; 0.04</b> &middot; Dep <b>2.61 &plusmn; 0.05</b></td><td>Use <b>2.03 &plusmn; 0.01</b> &middot; Dep <b>2.23 &plusmn; 0.01</b></td></tr>
         <tr><td>200-core build / replay time</td><td>180s build &middot; 30s replay (0 errors)</td><td>800s build &middot; 300s replay (0 errors)</td></tr>
       </tbody>
     </table>
@@ -222,52 +222,52 @@
     <!-- Anthropic Network -->
     <div>
       <div class="colhead">
-        <span class="badge ant"><i></i>Anthropic &middot; <code>vp-vnp</code></span>
-        <span class="colmeta">4,576 decls &middot; 35,354 links &middot; 16 modules (Q&nbsp;=&nbsp;0.78)</span>
+        <span class="badge ant"><i></i>Anthropic &middot; <code>Solution.separation</code></span>
+        <span class="colmeta">4,404 decls &middot; 33,894 links &middot; 18 modules (Q&nbsp;=&nbsp;0.78)</span>
       </div>
       <div class="netfig" id="netfig-ant">
-        <img src="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network-plain-web.png" width="2000" height="2000"
-          alt="Network of 4,576 declarations used by Anthropic's five VP ≠ VNP theorems, coloured by 16 Louvain modules.">
+        <img src="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network-plain-web.png?v=2" width="2000" height="2000"
+          alt="Network of 4,404 declarations used by Anthropic's Solution.separation (VP ≠ VNP), coloured by 18 Louvain modules.">
         <svg id="netsvg-ant" viewBox="0 0 1000 1000" role="group" aria-label="Louvain modules of Anthropic's VP ≠ VNP proof"></svg>
       </div>
-      <div class="legend"><span>Star marks <code>Solution.separationClosure</code>. <a href="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network.png">Full 6000&times;4000 poster with key (6.2&nbsp;MB)</a>.</span></div>
+      <div class="legend"><span>Star marks <code>Solution.separation</code>. <a href="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-proof-network.png?v=2">Full 6000&times;4000 poster with key (4.0&nbsp;MiB)</a>.</span></div>
       <aside class="panel netpanel" id="netpanel-ant" aria-live="polite"><div class="msg">Loading&hellip;</div></aside>
     </div>
 
     <!-- OpenAI Network -->
     <div>
       <div class="colhead">
-        <span class="badge oai"><i></i>OpenAI &middot; <code>openai/math</code> #379</span>
-        <span class="colmeta">25,949 decls &middot; 325,896 links &middot; 20 modules (Q&nbsp;=&nbsp;0.63)</span>
+        <span class="badge oai"><i></i>OpenAI &middot; <code>Standalone.vp_ne_vnp</code></span>
+        <span class="colmeta">25,597 decls &middot; 323,958 links &middot; 18 modules (Q&nbsp;=&nbsp;0.64)</span>
       </div>
       <div class="netfig" id="netfig-oai">
-        <img src="https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/openai-vp-vnp-proof-network-plain-web.png" width="2000" height="2000"
-          alt="Network of 25,949 declarations used by OpenAI's four VP ≠ VNP theorems, coloured by 20 Louvain modules.">
+        <img src="https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/openai-vp-vnp-proof-network-plain-web.png?v=2" width="2000" height="2000"
+          alt="Network of 25,597 declarations used by OpenAI's Standalone.vp_ne_vnp (VP ≠ VNP), coloured by 18 Louvain modules.">
         <svg id="netsvg-oai" viewBox="0 0 1000 1000" role="group" aria-label="Louvain modules of OpenAI's VP ≠ VNP proof"></svg>
       </div>
-      <div class="legend"><span>Star marks <code>Standalone.vp_ne_vnp</code>. <a href="https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/openai-vp-vnp-proof-network.png">Full 6000&times;4000 poster with key (10.3&nbsp;MB)</a>.</span></div>
+      <div class="legend"><span>Star marks <code>Standalone.vp_ne_vnp</code>. <a href="https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/openai-vp-vnp-proof-network.png?v=2">Full 6000&times;4000 poster with key (8.3&nbsp;MiB)</a>.</span></div>
       <aside class="panel netpanel" id="netpanel-oai" aria-live="polite"><div class="msg">Loading&hellip;</div></aside>
     </div>
   </div>
-  <p class="body">Neither graph drops any declarations into an outer ring, but their internal architectures differ markedly.
-  Anthropic&rsquo;s 16 clusters separate sharply (modularity 0.78) and 98.4% of compiled declarations feed the five headline theorems.
-  OpenAI&rsquo;s 25,949-declaration proof is denser (12.7 vs. 7.7 links per declaration) and more tightly cross-coupled across its 20 clusters (modularity 0.63), with 33.4% of its compiled declarations&mdash;including 5,116 notation declarations and auxiliary scaffolding&mdash;unused by the four headline theorems. <b>Module names on both sides are a reader&rsquo;s labels</b> derived from each cluster&rsquo;s most-used declarations and distinctive name-words.</p>
+  <p class="body">Both exact VP&nbsp;&ne;&nbsp;VNP closures partition into 18 Louvain clusters with zero outer-ring nodes, yet their internal architectures differ markedly.
+  Anthropic&rsquo;s 4,404-declaration proof separates cleanly (modularity 0.78, mean 7.7 dependencies), whereas OpenAI&rsquo;s 5.8&times; larger 25,597-declaration proof is denser (mean 12.7 dependencies) and more cross-coupled across clusters (modularity 0.64).
+  All declarations not transitively used by each proof&rsquo;s final VP&nbsp;&ne;&nbsp;VNP theorem (248 in Anthropic, mostly border-complexity additions; 13,382 in OpenAI, including 5,116 parser <code>notation</code> macros, <code>corollary12</code>-only lemmas, and unused helpers) are excluded from every figure and navigator on this page. <b>Module names on both sides are a reader&rsquo;s labels</b> derived from each cluster&rsquo;s most-used declarations and distinctive name-words.</p>
 </section>
 
 <!-- ============ DEPENDENCE AND USE (EPT) ============ -->
 <section id="belief">
   <h2>Dependence and use</h2>
   <p class="lede">Following Viteri &amp; DeDeo (<a href="https://doi.org/10.1016/j.cognition.2022.105120"><i>Cognition</i>, 2022</a>),
-  we count how many earlier claims each declaration depends on and how many later claims use it, on both the full closure and a depth-truncated top network
-  (first depth past 1,000 nodes for Anthropic: 1,123 nodes at depth&nbsp;9; first depth past 10,000 nodes for OpenAI: 10,058 nodes at depth&nbsp;11).</p>
+  we count how many earlier claims each declaration depends on and how many later claims use it, on both the full single-theorem closure and a depth-truncated top network
+  (first depth past 1,000 nodes for Anthropic: 1,082 nodes at depth&nbsp;9; first depth past 10,000 nodes for OpenAI: 10,058 nodes at depth&nbsp;11).</p>
   <div class="cmp2">
     <div>
       <div class="colhead">
         <span class="badge ant"><i></i>Anthropic</span>
-        <span class="colmeta">4,544 whole / 1,123 top (<code>separationClosure</code>)</span>
+        <span class="colmeta">4,404 whole / 1,082 top (<code>Solution.separation</code>)</span>
       </div>
       <img class="fig" src="vp-vnp-graph/ept/fig1_degrees_dark.png" width="2040" height="816" loading="lazy"
-        alt="Complementary cumulative distributions of dependencies and users for Anthropic's VP ≠ VNP proof.">
+        alt="Complementary cumulative distributions of dependencies and users for Anthropic's Solution.separation proof.">
     </div>
     <div>
       <div class="colhead">
@@ -275,26 +275,25 @@
         <span class="colmeta">25,597 whole / 10,058 top (<code>Standalone.vp_ne_vnp</code>)</span>
       </div>
       <img class="fig" src="vp-vnp-graph/ept-openai/fig1_degrees_dark.png" width="2040" height="816" loading="lazy"
-        alt="Complementary cumulative distributions of dependencies and users for OpenAI's VP ≠ VNP proof.">
+        alt="Complementary cumulative distributions of dependencies and users for OpenAI's Standalone.vp_ne_vnp proof.">
     </div>
   </div>
   <p class="body"><b>Both proofs show heavy-tailed reuse close to Viteri &amp; DeDeo&rsquo;s Coq tinkering-and-reuse exponent (2.15&nbsp;&plusmn;&nbsp;0.13).</b>
-  At a common cutoff (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10, exact unbounded discrete MLE), Anthropic&rsquo;s reuse exponent is <b>2.14&nbsp;&plusmn;&nbsp;0.04</b>
+  At a common cutoff (<i>x</i><sub>min</sub>&nbsp;=&nbsp;10, exact unbounded discrete MLE), Anthropic&rsquo;s reuse exponent is <b>2.13&nbsp;&plusmn;&nbsp;0.04</b>
   and OpenAI&rsquo;s is <b>2.03&nbsp;&plusmn;&nbsp;0.01</b> (compare <a href="/rh-graph.html">RH</a> at 1.92&ndash;2.05).</p>
   <p class="body"><b>Dependence is heavy-tailed with a downward bend in both, and its slope tracks proof scale rather than an AI-vs-human divide.</b>
-  Anthropic averages 7.72 dependencies per declaration (max&nbsp;99) while OpenAI averages 12.66 (max&nbsp;252). At <i>x</i><sub>min</sub>&nbsp;=&nbsp;10,
-  Anthropic&rsquo;s dependence exponent (<b>2.59&nbsp;&plusmn;&nbsp;0.05</b>) sits right on size-matched human Mathlib v4.33.1 theorem closures (median <b>2.63</b>
-  at 3k&ndash;7k nodes), whereas the 5.7&times; larger OpenAI proof (<b>2.23&nbsp;&plusmn;&nbsp;0.01</b>; <b>2.67</b> at <i>x</i><sub>min</sub>&nbsp;=&nbsp;20)
+  Anthropic averages 7.70 dependencies per declaration (max&nbsp;99) while OpenAI averages 12.66 (max&nbsp;252). At <i>x</i><sub>min</sub>&nbsp;=&nbsp;10,
+  Anthropic&rsquo;s dependence exponent (<b>2.61&nbsp;&plusmn;&nbsp;0.05</b>) sits right on size-matched human Mathlib v4.33.1 theorem closures (median <b>2.63</b>
+  at 3k&ndash;7k nodes), whereas the 5.8&times; larger OpenAI proof (<b>2.23&nbsp;&plusmn;&nbsp;0.01</b>; <b>2.67</b> at <i>x</i><sub>min</sub>&nbsp;=&nbsp;20)
   sits right on larger human Mathlib closures (median <b>2.27</b> at 14k&ndash;35k nodes; <b>2.86</b> at <i>x</i><sub>min</sub>&nbsp;=&nbsp;20) and the RH top
   (<b>2.41</b>). Across all three AI proofs and human Mathlib, apparent exponent tensions vanish once cutoffs and graph boundaries are matched
   (<a href="https://github.com/simon-dedeo/ai-math-ept">DeDeo, 2026</a>).</p>
 
   <details><summary>Belief dynamics (deduction vs. abduction and prior sensitivity) for both proofs</summary>
     <p class="body">Unlike the Riemann Hypothesis graph&mdash;whose final theorem sits atop a thin 1-1-2-3 chain and shows a sharp abductive drop&mdash;both
-    VP&nbsp;&ne;&nbsp;VNP headline theorems sit on wide immediate foundations (Anthropic: 1, 12, 17, 32, 65 declarations in the first five levels; OpenAI:
-    1, 9, 15, 24, 74). At deductive confidence 0.85, belief in the headline theorem remains high across abductive confidences in both proofs (OpenAI edges down
-    only to 0.969 at abductive confidence 0.99; Anthropic stays near 1.00 whole / 0.984 truncated). At error rate 0.01 and prior 0.60, whole-proof belief reaches
-    0.97 all / 0.94 theorem in Anthropic and 0.989 all / 0.861 theorem in OpenAI.</p>
+    exact VP&nbsp;&ne;&nbsp;VNP theorems sit on wide immediate foundations (Anthropic: 1, 10, 9, 24, 43 declarations in the first five levels; OpenAI:
+    1, 9, 15, 24, 74). At error rate 0.01 and prior 0.60, whole-proof belief across all steps already reaches 0.962 in Anthropic (0.677 for the theorem,
+    rising to 0.996 all / 0.938 theorem at prior 0.75) and 0.989 all / 0.861 theorem in OpenAI.</p>
     <div class="cmp2" style="margin-top:14px">
       <div>
         <div class="colhead"><span class="badge ant"><i></i>Anthropic &middot; Deduction vs. abduction</span></div>
@@ -332,21 +331,21 @@
     <div class="navpane" id="nav-ant">
       <div class="colhead">
         <span class="badge ant"><i></i>Anthropic Navigator</span>
-        <span class="colmeta">4,576 declarations</span>
+        <span class="colmeta">4,404 declarations</span>
       </div>
       <div class="controls">
         <div class="find">
-          <input type="text" id="q-ant" autocomplete="off" spellcheck="false" placeholder="e.g. separationClosure, Tower, IsPrice" aria-label="Anthropic declaration name" role="combobox" aria-expanded="false" aria-controls="opts-ant">
+          <input type="text" id="q-ant" autocomplete="off" spellcheck="false" placeholder="e.g. separation, cor_allclasses, Tower, IsPrice" aria-label="Anthropic declaration name" role="combobox" aria-expanded="false" aria-controls="opts-ant">
           <div class="opts" id="opts-ant" role="listbox" hidden></div>
         </div>
         <label for="steps-ant">Steps <select id="steps-ant"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></label>
       </div>
       <div class="controls">
-        <button class="btn hl-ant" data-id="4561" type="button">separationClosure</button>
-        <button class="btn hl-ant" data-id="4560" type="button">mainTheoremApprox</button>
-        <button class="btn hl-ant" data-id="4558" type="button">mainTheorem</button>
-        <button class="btn hl-ant" data-id="4559" type="button">separation</button>
-        <button class="btn hl-ant" data-id="4562" type="button">permanent_over_real</button>
+        <button class="btn hl-ant" data-id="4398" type="button">Solution.separation</button>
+        <button class="btn hl-ant" data-id="4006" type="button">Paper.cor_allclasses</button>
+        <button class="btn hl-ant" data-id="4003" type="button">Paper.thm_allfields</button>
+        <button class="btn hl-ant" data-id="4401" type="button">Statement.VP</button>
+        <button class="btn hl-ant" data-id="4402" type="button">Statement.VNP</button>
       </div>
       <div class="scroller" style="border-radius:14px"><div id="nbstage-ant"><div class="msg">Loading&hellip;</div></div></div>
       <div class="legend" id="nblegend-ant"></div>
@@ -357,20 +356,21 @@
     <div class="navpane" id="nav-oai">
       <div class="colhead">
         <span class="badge oai"><i></i>OpenAI #379 Navigator</span>
-        <span class="colmeta">25,949 declarations</span>
+        <span class="colmeta">25,597 declarations</span>
       </div>
       <div class="controls">
         <div class="find">
-          <input type="text" id="q-oai" autocomplete="off" spellcheck="false" placeholder="e.g. vp_ne_vnp, corollary12, BurstRAM, Motif" aria-label="OpenAI declaration name" role="combobox" aria-expanded="false" aria-controls="opts-oai">
+          <input type="text" id="q-oai" autocomplete="off" spellcheck="false" placeholder="e.g. vp_ne_vnp, separation_lower_bound, BurstRAM, Motif" aria-label="OpenAI declaration name" role="combobox" aria-expanded="false" aria-controls="opts-oai">
           <div class="opts" id="opts-oai" role="listbox" hidden></div>
         </div>
         <label for="steps-oai">Steps <select id="steps-oai"><option value="1">1</option><option value="2" selected>2</option><option value="3">3</option></select></label>
       </div>
       <div class="controls">
-        <button class="btn hl-oai" data-id="455" type="button">Standalone.vp_ne_vnp</button>
-        <button class="btn hl-oai" data-id="23940" type="button">vp_ne_vnp</button>
-        <button class="btn hl-oai" data-id="23939" type="button">separation_lower_bound</button>
-        <button class="btn hl-oai" data-id="23941" type="button">corollary12</button>
+        <button class="btn hl-oai" data-id="449" type="button">Standalone.vp_ne_vnp</button>
+        <button class="btn hl-oai" data-id="23590" type="button">vp_ne_vnp</button>
+        <button class="btn hl-oai" data-id="23589" type="button">separation_lower_bound</button>
+        <button class="btn hl-oai" data-id="25178" type="button">Valiant.Project.IsVP</button>
+        <button class="btn hl-oai" data-id="25179" type="button">Valiant.Project.IsVNP</button>
       </div>
       <div class="scroller" style="border-radius:14px"><div id="nbstage-oai"><div class="msg">Loading&hellip;</div></div></div>
       <div class="legend" id="nblegend-oai"></div>
@@ -439,8 +439,8 @@
 <section id="top">
   <h2>The top of each proof, declaration by declaration</h2>
   <div class="tabs" role="tablist" aria-label="Select proof for top-of-proof view">
-    <button type="button" class="on" data-toptab="ant" role="tab" aria-selected="true">Anthropic (5 headline theorems)</button>
-    <button type="button" data-toptab="oai" role="tab" aria-selected="false">OpenAI #379 (4 headline theorems)</button>
+    <button type="button" class="on" data-toptab="ant" role="tab" aria-selected="true">Anthropic (<code>Solution.separation</code>)</button>
+    <button type="button" data-toptab="oai" role="tab" aria-selected="false">OpenAI #379 (<code>Standalone.vp_ne_vnp</code>)</button>
   </div>
   <p class="lede" id="toplede">Loading&hellip;</p>
   <div class="scroller" style="border-radius:18px"><div id="topstage" style="min-width:1040px"><div class="msg">Loading&hellip;</div></div></div>
@@ -460,27 +460,27 @@
       <tbody>
         <tr>
           <td><a href="https://photos.proofsandreasons.io/vp-vnp-graph/used/vp-vnp-declaration-graph-used.json.gz">vp-vnp-declaration-graph-used.json.gz</a></td>
-          <td style="text-align:left">Anthropic &middot; 4,576 used decls, 35,354 links</td>
-          <td>139 KB</td>
-          <td class="hash">b9a3ab6a1fc8851e72f7b6948dd8fc9823047eb0d119de6b7247c538e908683a</td>
+          <td style="text-align:left">Anthropic &middot; <code>Solution.separation</code> closure (4,404 decls, 33,894 links)</td>
+          <td>132 KiB</td>
+          <td class="hash">e5b7671e2b81b7905cd0bfd4a8198ea237eb8c90fc53aaf5b3b4b54b83900dd5</td>
         </tr>
         <tr>
           <td><a href="https://photos.proofsandreasons.io/vp-vnp-graph/vp-vnp-declaration-graph.json.gz">vp-vnp-declaration-graph.json.gz</a></td>
           <td style="text-align:left">Anthropic &middot; all 4,652 decls across 322 modules</td>
-          <td>124 KB</td>
-          <td class="hash">dda41928755d097246b49379a68f9654fad261a3ce65ce8ae0e32eb12f6ccbef</td>
+          <td>124 KiB</td>
+          <td class="hash">eee30acc14882e709f99529397971595357e4077d3f6724d506f485e1c7be5e2</td>
         </tr>
         <tr>
           <td><a href="https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/openai-vp-vnp-declaration-graph-used.json.gz">openai-vp-vnp-declaration-graph-used.json.gz</a></td>
-          <td style="text-align:left">OpenAI #379 &middot; 25,949 used decls, 325,896 links</td>
-          <td>1.05 MiB</td>
-          <td class="hash">cf1878d043433ec3bf21e1fabcc5b61fbb3cda423e8a4e4b191e4067490fa5c5</td>
+          <td style="text-align:left">OpenAI #379 &middot; <code>Standalone.vp_ne_vnp</code> closure (25,597 decls, 323,958 links)</td>
+          <td>1.04 MiB</td>
+          <td class="hash">e947b9033d019ea18dfba0ba9035618424e9ca511df1e4504eaab1427e79176d</td>
         </tr>
         <tr>
           <td><a href="https://photos.proofsandreasons.io/openai-vp-vnp-graph/openai-vp-vnp-declaration-graph.json.gz">openai-vp-vnp-declaration-graph.json.gz</a></td>
           <td style="text-align:left">OpenAI #379 &middot; all 38,979 decls across 3,189 modules</td>
           <td>1.28 MiB</td>
-          <td class="hash">f7926732964ef5e20eef650bccfff3c10271ad67ddb4a812176ed23d06a7174e</td>
+          <td class="hash">6d2e41a46e747cfbae1de56954eddffe1021cc358a672c3e062c311d07a0572c</td>
         </tr>
       </tbody>
     </table>
@@ -522,14 +522,14 @@ var CFG = {
     data: 'https://photos.proofsandreasons.io/vp-vnp-graph/used/',
     local: 'vp-vnp-graph/vpvnp/',
     globalNs: 'ALP',
-    block: 500, root: 4561, ndecl: 4576,
+    block: 500, root: 4398, ndecl: 4404,
     githubBase: 'https://github.com/anthropics/formal-math/blob/11b6c7e3c927df2658f513b6b68ea7f8929c62c5/vp-vnp/',
     libs: ['Nc','Paper','NS1','Ov','Statement and Solution'],
     libvar: {'Nc':'--c1','Paper':'--c2','NS1':'--c3','Ov':'--c4','Statement and Solution':'--c5'},
     depthBins: ['0–4 steps','4–8 steps','8–11 steps','11–14 steps','14+ steps'],
     depthCuts: [4, 8, 11, 14],
-    headlinesDesc: 'the five headline theorems of Solution.lean',
-    mapLede: 'Each circle is a folder of Anthropic\u2019s source tree, sized by declaration count. Arrows show cross-folder uses; folders nearer the top sit closer to the headline theorems. Select a circle to inspect it or open it to drill inside.'
+    headlinesDesc: 'Solution.separation (exact VP ≠ VNP)',
+    mapLede: 'Each circle is a folder of Anthropic\u2019s source tree (restricted to declarations used by Solution.separation), sized by declaration count. Arrows show cross-folder uses; folders nearer the top sit closer to Solution.separation.'
   },
   oai: {
     key: 'oai',
@@ -537,14 +537,14 @@ var CFG = {
     data: 'https://photos.proofsandreasons.io/openai-vp-vnp-graph/used/',
     local: 'vp-vnp-graph/openai/',
     globalNs: 'OAI_GRAPH',
-    block: 500, root: 455, ndecl: 25949,
+    block: 500, root: 449, ndecl: 25597,
     githubBase: 'https://github.com/openai/math/blob/f5702854040e97fa7675c21ba37a9608f5f92dd3/lean/',
     libs: ['Compressor','PairSimulation','RAM & Tape','Live & Evaluator','Rank & Spectral','Other VPVNP','Valiant & Top'],
     libvar: {'Compressor':'--c1','PairSimulation':'--c2','RAM & Tape':'--c3','Live & Evaluator':'--c4','Rank & Spectral':'--c5','Other VPVNP':'--c6','Valiant & Top':'--c7'},
     depthBins: ['0–6 steps','6–10 steps','10–14 steps','14–18 steps','18+ steps'],
     depthCuts: [6, 10, 14, 18],
-    headlinesDesc: 'the four headline theorems of openai/math #379',
-    mapLede: 'OpenAI places 3,054 proof files flat inside OAI/Computability/VPVNP/, so files are grouped here into 7 subsystem families and their filename prefixes (keeping Valiant/ and BinPacking/CookLevin/ intact). Open any circle to drill down.'
+    headlinesDesc: 'Standalone.vp_ne_vnp (exact VP ≠ VNP)',
+    mapLede: 'OpenAI places 3,004 of the 3,008 files used by Standalone.vp_ne_vnp flat inside OAI/Computability/VPVNP/, so files are grouped here into 7 subsystem families and their filename prefixes (keeping Valiant/ and BinPacking/CookLevin/ intact).'
   }
 };
 
