@@ -139,6 +139,31 @@
       <div class="h5"><span>Cluster jobs</span><span class="note" id="jobsmeta"></span></div>
       <table class="cx" id="clustertable"></table>
       <div class="clnotes" id="clnotes"></div>
+      <div id="tokwrap" style="margin-top:13px;padding-top:12px;border-top:1px solid var(--line)">
+        <div class="h5" style="margin-bottom:8px"><span>Throughput</span>
+          <span class="right">
+            <span class="note" id="tokmeta"></span>
+            <span class="seg" role="group" aria-label="Throughput chart time range" id="tokrange">
+              <button type="button" data-range="1h" aria-pressed="false">1H</button>
+              <button type="button" data-range="24h" aria-pressed="true">24H</button>
+              <button type="button" data-range="30d" aria-pressed="false">30D</button>
+            </span>
+          </span>
+        </div>
+        <div style="display:flex;align-items:baseline;justify-content:space-between;gap:10px;flex-wrap:wrap">
+          <div class="big" style="font-size:1.85rem"><span id="toknow">&mdash;</span><span class="u">tok/s</span></div>
+          <div class="clnotes" id="tokby" style="margin-top:0;text-align:right"></div>
+        </div>
+        <div class="chart" id="tokchart">
+          <svg viewBox="0 0 600 96" preserveAspectRatio="none" aria-label="Token generation throughput over time"></svg>
+          <div class="tip"></div>
+        </div>
+        <div class="legend"><span class="keys" id="tokkeys"></span><span class="stat" id="tokstat"></span></div>
+        <details class="tbl">
+          <summary id="toktblcap">Table view &mdash; throughput</summary>
+          <table id="toktable"></table>
+        </details>
+      </div>
     </div>
 
     <!-- GPUs -->
@@ -327,7 +352,7 @@
   </footer>
 </div>
 
-<script src="monitor.js?v=20261124"></script>
+<script src="monitor.js?v=20261126"></script>
 <script>
 (function(){
   "use strict";
@@ -620,10 +645,11 @@
     hxVolts(d);
 
     drawCharts(d);
+    if(clusterJobs) clusterJobs.updateTok(d);
   }
 
+  var clusterJobs = startClusterJobs({pollTok: false});
   startMonitor(SRC, render);
-  startClusterJobs();
   masonry();
 })();
 </script>

@@ -26,6 +26,10 @@ function fmtDur(s){
   return d>0 ? d+"d "+h+"h" : h>0 ? h+"h "+m+"m" : m+"m";
 }
 function fmtW(v){ return v===null||v===undefined||isNaN(v) ? "—" : v.toFixed(0)+" W"; }
+function fmtTok(v){
+  if(v===null||v===undefined||isNaN(v)) return "—";
+  return v>=1000 ? (v/1000).toFixed(v>=10000?1:2)+"k/s" : Math.round(v)+"/s";
+}
 function fmtN(v){ return v===null||v===undefined||isNaN(v) ? "—" : Math.round(v).toLocaleString(); }
 function fmtAge(s){ return s<90 ? s+"s" : fmtDur(s); }
 var DAYS=["Sun","Mon","Tue","Wed","Thu","Fri","Sat"];
@@ -735,10 +739,13 @@ function startCamera(){
 // ssh connection held on wright, ORCHARD through a Google login on akdeniz,
 // and either can lapse while the other (and the rest of the page) carries on,
 // so ages are tracked per cluster.
-function startClusterJobs(){
+function startClusterJobs(opts){
+  opts=opts||{};
   var JOBS_SRC="https://photos.proofsandreasons.io/akdeniz/jobs.json";
+  var TOK_SRC="https://photos.proofsandreasons.io/wright/metrics.json";
   var JOBS_STALE_S=1200;     // four missed polls
-  var lastJobs=null;
+  var lastJobs=null, lastTokDoc=null, tokRange="24h", tokPicked=false;
+  var TOK_NAMES={wright:"wright", deltaai:"DeltaAI", orchard:"ORCHARD", nrp:"NRP"};
   // "2026-01-01" -> "1 Jan". Parsed by hand rather than via Date, which would
   // read a bare ISO date as UTC and shift it a day west of here.
   function monthDay(iso){
@@ -839,14 +846,95 @@ function startClusterJobs(){
     // whole queue.
     txt("jobsmeta", "our jobs"+(newest?" · polled "+ago(newest):""));
   }
+  function renderTok(d){
+    var wrap=document.getElementById("tokwrap");
+    if(!wrap || !d) return;
+    lastTokDoc=d;
+    var tk=d.tok||{};
+    var hasLive=tk.total!==null&&tk.total!==undefined;
+    txt("toknow", hasLive ? Math.round(tk.total).toLocaleString() : "—");
+    txt("tokmeta", tk.servers ? tk.servers+" server"+(tk.servers===1?"":"s") : (hasLive?"idle":""));
+    var by=tk.by||{}, order=["wright","deltaai","orchard","nrp"].concat(
+      Object.keys(by).filter(function(k){ return ["wright","deltaai","orchard","nrp"].indexOf(k)<0; }));
+    var parts=order.filter(function(k){ return by[k]>0; }).map(function(k){
+      var v=by[k];
+      return "<b>"+esc(TOK_NAMES[k]||k)+"</b> "+(v>=1000?(v/1000).toFixed(v>=10000?1:1)+"k":v);
+    });
+    var byEl=document.getElementById("tokby");
+    if(byEl) byEl.innerHTML=parts.join(" &middot; ");
+
+    var wins={"1h":windowFor(d,"1h"), "24h":windowFor(d,"24h"), "30d":windowFor(d,"30d")};
+    var have={"1h":!!(wins["1h"]&&wins["1h"].tok), "24h":!!(wins["24h"]&&wins["24h"].tok), "30d":!!(wins["30d"]&&wins["30d"].tok)};
+    var active=tokRange;
+    if(!have[active]){
+      if(have["1h"]) active="1h";
+      else if(have["24h"]) active="24h";
+      else if(have["30d"]) active="30d";
+    } else if(!tokPicked && tokRange==="24h"){
+      active="24h";
+    }
+    [].forEach.call(document.querySelectorAll("#tokrange button"), function(b){
+      var ok=have[b.dataset.range];
+      b.setAttribute("aria-pressed", b.dataset.range===active ? "true" : "false");
+      b.disabled=!ok;
+      b.title=ok?"":"Not enough throughput history yet";
+      b.style.opacity=ok?"":".4";
+    });
+
+    var w=wins[active], keys="", stat="";
+    if(w && w.tok) w=trimLead(w, ["tok"]);
+    if(w && w.tok && w.tok.length>1){
+      var series=[{name:"Tokens/s",color:S3,data:w.tok,labels:w.labels}], cols=["tok"];
+      keys="<span><i style='background:var(--s3)'></i>Generation &mdash; "+spanText(w.span)+"</span>";
+      if(w.tokMax){
+        series.push({name:"Peak",color:S3,dash:true,data:w.tokMax,labels:w.labels});
+        keys+="<span><i class='dash' style='color:var(--s3)'></i>"+w.peak+"</span>";
+        cols.push("tokMax");
+      }
+      lineChart("tokchart", series, fmtTok);
+      document.querySelector("#tokchart svg").setAttribute("aria-label","Token generation throughput, "+spanText(w.span));
+      var s=stats(w.tok), pk=stats(w.tokMax||w.tok);
+      if(s) stat="avg "+fmtTok(s.avg)+" · peak "+fmtTok(pk.max);
+      document.getElementById("toktblcap").innerHTML="Table view &mdash; throughput, "+spanText(w.span);
+      document.getElementById("toktable").innerHTML=
+        "<thead><tr><th>Time</th><th>Tok/s</th>"+(w.tokMax?"<th>Peak</th>":"")+"</tr></thead><tbody>"+
+        tableRows(w, cols, fmtTok)+"</tbody>";
+    } else {
+      document.getElementById("toktable").innerHTML="<tbody><tr><td>Collecting throughput history&hellip;</td></tr></tbody>";
+      stat=hasLive?"collecting history…":"";
+    }
+    document.getElementById("tokkeys").innerHTML=keys;
+    txt("tokstat", stat);
+  }
+  var tr=document.getElementById("tokrange");
+  if(tr){
+    tr.addEventListener("click", function(ev){
+      var b=ev.target.closest("button");
+      if(!b || b.disabled) return;
+      tokRange=b.dataset.range;
+      tokPicked=true;
+      if(lastTokDoc) renderTok(lastTokDoc);
+    });
+  }
   function tickJobs(){
     fetch(JOBS_SRC,{cache:"no-store"})
       .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
       .then(function(j){ lastJobs=j; renderJobs(j); })
       .catch(function(){ if(!lastJobs) renderJobs(null); });
   }
+  function tickTok(){
+    fetch(TOK_SRC,{cache:"no-store"})
+      .then(function(r){ if(!r.ok) throw new Error("HTTP "+r.status); return r.json(); })
+      .then(function(d){ renderTok(d); })
+      .catch(function(){});
+  }
   tickJobs();
   setInterval(tickJobs, 60000);
   // Ages in the cluster card drift between polls just like the header's does.
   setInterval(function(){ if(lastJobs) renderJobs(lastJobs); }, 15000);
+  if(opts.pollTok!==false && document.getElementById("tokwrap")){
+    tickTok();
+    setInterval(tickTok, 30000);
+  }
+  return {updateTok: renderTok};
 }
